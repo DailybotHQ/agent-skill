@@ -629,6 +629,192 @@ POST /v1/agent-email/send/  →  {"agent_name": "...", "to": ["alice@company.com
 POST /v1/agent-reports/  →  {"agent_name": "...", "content": "Session complete. Summary: ..."}
 ```
 
+---
+
+## User-Scoped Commands (Bearer Token Auth)
+
+The CLI now supports commands scoped to the **logged-in human's session**
+rather than the agent identity. These require a **Bearer token** obtained
+via `dailybot login` (OTP email flow), not an API key.
+
+### Auth model distinction
+
+| Scope | Auth | Header | Used by |
+|-------|------|--------|---------|
+| **Agent** | API key | `X-API-KEY: $DAILYBOT_API_KEY` | `dailybot agent update`, `agent health`, `agent email send` |
+| **User** | Bearer token | `Authorization: Bearer <token>` | `dailybot checkin`, `form`, `kudos`, `user` |
+
+Both can coexist — the CLI stores them separately.
+
+### User-Scoped CLI Operations
+
+| Operation | CLI Command |
+|-----------|-------------|
+| List pending check-ins | `dailybot checkin list` |
+| Complete a check-in | `dailybot checkin complete <followup_uuid> -a 0="Answer" --yes` |
+| List forms | `dailybot form list` |
+| Submit a form | `dailybot form submit <form_uuid> --content '{"<q-uuid>":"Answer"}' --yes` |
+| List team members | `dailybot user list` |
+| Give kudos | `dailybot kudos give --to "Jane Doe" --message "Great work!" --yes` |
+
+All user-scoped commands support `--json` for machine-readable output.
+
+### `dailybot checkin list`
+
+Lists today's pending check-ins for the logged-in user.
+
+```bash
+dailybot checkin list
+dailybot checkin list --json
+```
+
+### `dailybot checkin complete <followup_uuid>`
+
+Completes a specific pending check-in.
+
+```bash
+# Non-interactive (0-based question index)
+dailybot checkin complete <followup_uuid> \
+  -a 0="Shipped the auth refactor" \
+  -a 1="Reviewing the migration plan" \
+  --yes
+
+# With a specific response date
+dailybot checkin complete <followup_uuid> -a 0="Done" --response-date 2026-05-20 --yes
+```
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--answer` | `-a` | `index=response` pair (0-based). Repeatable. |
+| `--response-date` | | Target date `YYYY-MM-DD`. Defaults to today. |
+| `--yes` | `-y` | Skip confirmation. |
+| `--json` | | Emit machine-readable JSON. |
+
+### `dailybot form list`
+
+Lists all forms visible to the logged-in user.
+
+```bash
+dailybot form list
+dailybot form list --json
+```
+
+### `dailybot form submit <form_uuid>`
+
+Submits a response to a form.
+
+```bash
+dailybot form submit <form_uuid> \
+  --content '{"<question-uuid>":"Great week!"}' \
+  --yes
+```
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--content` | `-c` | JSON map of `{"<question_uuid>": "<answer>"}`. |
+| `--yes` | `-y` | Skip confirmation. |
+| `--json` | | Emit machine-readable JSON. |
+
+### `dailybot kudos give`
+
+Gives kudos to a teammate. Receiver is resolved by full name or UUID.
+
+```bash
+dailybot kudos give --to "Jane Doe" --message "Great PR review!" --yes
+dailybot kudos give --to <user-uuid> --message "Thanks for the help." --yes
+```
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--to` | `-t` | Receiver full name or UUID. Required. |
+| `--message` | `-m` | Kudos message (team-visible). Required. |
+| `--value` | | Optional company value UUID. |
+| `--yes` | `-y` | Skip confirmation. |
+| `--json` | | Emit machine-readable JSON. |
+
+**Safety:** Self-kudos returns exit code `4`. Ambiguous names return exit code `2` with matches listed.
+
+### `dailybot user list`
+
+Lists all organization members (name and UUID only — emails are intentionally
+omitted for privacy).
+
+```bash
+dailybot user list
+dailybot user list --json
+```
+
+### User-Scoped Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `2` | Invalid input (bad format, ambiguous receiver) |
+| `3` | Not logged in or session expired |
+| `4` | Permission denied, self-kudos, or daily kudos limit |
+| `5` | Quota exhausted (form response limit) |
+| `6` | Rate limited (60 req/min) |
+| `7` | User aborted confirmation |
+
+### User-Scoped HTTP API (When CLI Is Unavailable)
+
+All user-scoped endpoints require a Bearer token:
+
+```bash
+AUTH="Authorization: Bearer $DAILYBOT_BEARER_TOKEN"
+
+# List pending check-ins
+curl -s -H "$AUTH" https://api.dailybot.com/v1/cli/status/
+
+# Complete a check-in
+curl -s -X POST -H "$AUTH" -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/checkins/<followup_uuid>/responses/ \
+  -d '{"responses":[{"uuid":"<q-uuid>","index":0,"response":"Done"}],"last_question_index":0}'
+
+# List forms (with questions)
+curl -s -H "$AUTH" "https://api.dailybot.com/v1/forms/?include=questions"
+
+# Submit a form
+curl -s -X POST -H "$AUTH" -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/forms/<form_uuid>/responses/ \
+  -d '{"content":{"<question_uuid>":"My answer"}}'
+
+# List users (paginated)
+curl -s -H "$AUTH" https://api.dailybot.com/v1/users/
+
+# Give kudos
+curl -s -X POST -H "$AUTH" -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/kudos/ \
+  -d '{"receivers":["<user-uuid>"],"content":"Great work!"}'
+```
+
+**How to obtain a Bearer token programmatically:**
+
+```bash
+# Step 1 — request OTP
+curl -s -X POST https://api.dailybot.com/v1/cli/request-code/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com"}'
+
+# Step 2 — verify OTP
+curl -s -X POST https://api.dailybot.com/v1/cli/verify-code/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","code":"123456"}'
+# → {"token":"<bearer-token>","organization":"Org Name"}
+```
+
+### Environment Variable: `DAILYBOT_CONFIG_DIR`
+
+Overrides where all credential and config files are stored (default:
+`~/.config/dailybot/`). Useful for dev sandboxes, CI isolation, and testing.
+
+```bash
+export DAILYBOT_CONFIG_DIR=/tmp/my-sandbox-config
+dailybot login --email me@example.com
+```
+
+---
+
 ## Advanced: Full Dailybot API
 
 Beyond agent-specific endpoints, your API key gives you access to the full Dailybot v1 API. Use these when you need to interact with Dailybot features directly:

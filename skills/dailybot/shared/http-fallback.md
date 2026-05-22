@@ -56,6 +56,118 @@ All HTTP calls should be non-blocking. If a call fails, warn the developer and m
 
 ---
 
+---
+
+## User-Scoped Endpoints (Bearer Token Auth)
+
+The user-scoped commands (`checkin`, `form`, `kudos`, `user`) use a **Bearer
+token** instead of an API key. All other patterns (error handling,
+non-blocking behavior) remain the same.
+
+**Auth header:** `Authorization: Bearer $DAILYBOT_BEARER_TOKEN`
+
+The Bearer token is obtained via the OTP login flow (see
+[`auth.md`](auth.md) Section 4).
+
+### Obtaining a Bearer token programmatically
+
+```bash
+# Step 1 — request OTP
+curl -s -X POST https://api.dailybot.com/v1/cli/request-code/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com"}'
+
+# Step 2 — verify OTP (returns token)
+curl -s -X POST https://api.dailybot.com/v1/cli/verify-code/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","code":"123456"}'
+# → {"token":"<bearer-token>","organization":"Org Name"}
+```
+
+### User-Scoped Endpoint Reference
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `GET` | `/v1/cli/status/` | List pending check-ins for the logged-in user |
+| `POST` | `/v1/checkins/<followup_uuid>/responses/` | Complete a check-in |
+| `GET` | `/v1/forms/?include=questions` | List forms with question definitions |
+| `POST` | `/v1/forms/<form_uuid>/responses/` | Submit a form response |
+| `GET` | `/v1/users/` | List organization members (paginated) |
+| `POST` | `/v1/kudos/` | Give kudos to a teammate |
+
+### Example requests
+
+#### List pending check-ins
+
+```bash
+curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  https://api.dailybot.com/v1/cli/status/
+```
+
+#### Complete a check-in
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/checkins/<followup_uuid>/responses/ \
+  -d '{
+    "responses": [
+      {"uuid": "<question-uuid>", "index": 0, "response": "Done"}
+    ],
+    "last_question_index": 0
+  }'
+```
+
+#### List forms (with questions)
+
+```bash
+curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  "https://api.dailybot.com/v1/forms/?include=questions"
+```
+
+#### Submit a form response
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/forms/<form_uuid>/responses/ \
+  -d '{"content": {"<question_uuid>": "My answer"}}'
+```
+
+#### List organization members
+
+```bash
+curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  https://api.dailybot.com/v1/users/
+```
+
+Paginated — follow `next` URL until null (max 50 pages).
+
+#### Give kudos
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/kudos/ \
+  -d '{"receivers": ["<user-uuid>"], "content": "Great work!"}'
+```
+
+### User-Scoped Error Handling
+
+Same HTTP status codes as agent endpoints, plus:
+
+| Code | Exit | Meaning |
+|------|------|---------|
+| `402` | `5` | Quota exhausted (form response limit) |
+| `403` | `4` | Permission denied, self-kudos, or daily kudos limit |
+| `406` | `4` | Daily kudos limit reached |
+| `429` | `6` | Rate limited — 60 req/min |
+
+---
+
 ## API Reference
 
 Full API documentation: `https://api.dailybot.com/api/swagger/`
