@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, and announce agent status. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos, and submit forms. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "1.2.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -21,7 +21,7 @@ This is the canonical, first-party integration. Source of truth:
 
 ## What it does
 
-Four coordinated capabilities, with smart routing between them:
+Seven coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
@@ -29,6 +29,9 @@ Four coordinated capabilities, with smart routing between them:
 | **Message polling** | `dailybot-messages` | Session start, idle moments, or when the developer asks "what should I work on?" |
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
+| **Check-ins** | `dailybot-checkin` | Developer asks to complete a standup or fill in a pending check-in |
+| **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate's contribution |
+| **Forms** | `dailybot-forms` | Developer wants to list or submit a form response (surveys, retros, pulse checks) |
 
 ## Install
 
@@ -82,7 +85,10 @@ the full step-by-step workflow.
 | "report this to Dailybot", "send a Dailybot update", "let my team know what we built" | **Report** → read [`report/SKILL.md`](report/SKILL.md) |
 | "check messages", "do I have messages?", "what should I work on?", "any instructions?" | **Messages** → read [`messages/SKILL.md`](messages/SKILL.md) |
 | "email this to Alice", "send an email", "send a summary to the team" | **Email** → read [`email/SKILL.md`](email/SKILL.md) |
-| "go online", "announce status", "health check", "check in with the team" | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
+| "go online", "announce status", "health check" | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
+| "complete my check-in", "fill in my standup", "answer my dailybot", "any pending check-ins?" | **Checkin** → read [`checkin/SKILL.md`](checkin/SKILL.md) |
+| "give kudos to Jane", "recognize Alice for the PR review", "thank Bob for the help" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
+| "list my forms", "fill out the feedback survey", "submit the retro form", "what forms do I have?" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
 
 ### Auto-activation (no explicit request)
 
@@ -90,6 +96,10 @@ the full step-by-step workflow.
 |-----------|----------|
 | You completed a task/subtask, or edited 3+ files | **Report** → read [`report/SKILL.md`](report/SKILL.md) |
 | Starting a long work session or idle for 15+ minutes | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
+
+**Disambiguation:** "check in with the team" → **Health**; "complete my
+check-in" or "fill in standup" → **Checkin**. The word "check-in" alone
+with no verb defaults to **Checkin** (the structured questionnaire).
 
 If the intent is ambiguous, default to **Report** — it's the most
 common use case.

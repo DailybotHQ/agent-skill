@@ -300,3 +300,55 @@ Once authenticated via CLI login, the CLI handles credentials automatically.
 No `DAILYBOT_API_KEY` is needed for CLI commands. HTTP fallback calls still
 require an API key — ask the user to generate one at
 Dailybot → Settings → API Keys.
+
+---
+
+## 4. User-Scoped Commands (Bearer Token Auth)
+
+Some Dailybot features — **check-ins**, **forms**, **kudos**, and **user
+directory** — are scoped to the logged-in human's session, not to an agent
+identity. These commands use a **Bearer token** stored at
+`~/.config/dailybot/credentials.json` after `dailybot login`.
+
+### Auth model distinction
+
+| Scope | Auth method | How to set up | Used by |
+|-------|-------------|---------------|---------|
+| **Agent endpoints** | API key (`X-API-KEY` header) | `dailybot config key=...` or `DAILYBOT_API_KEY` env | `dailybot agent update`, `dailybot agent health`, `dailybot agent email send` |
+| **User endpoints** | Bearer token (`Authorization: Bearer <token>`) | `dailybot login` (OTP email flow) | `dailybot checkin`, `dailybot form`, `dailybot kudos`, `dailybot user` |
+
+Both auth paths can coexist — the CLI stores them separately. A developer
+can have both an API key (for agent operations) and a Bearer session (for
+user-scoped operations) active at the same time.
+
+### Checking user session status
+
+```bash
+dailybot status --auth 2>&1
+```
+
+The output shows both the agent API key status and the Bearer session status.
+If the user session is missing or expired, guide through `dailybot login`
+using the OTP flow in Section 2 above.
+
+### Config directory override
+
+The `DAILYBOT_CONFIG_DIR` environment variable overrides where all credential
+and config files are stored (default: `~/.config/dailybot/`):
+
+```bash
+export DAILYBOT_CONFIG_DIR=/tmp/my-sandbox-config
+dailybot login --email me@example.com
+```
+
+This is useful for development sandboxes, CI environments, or testing
+scenarios with isolated config directories. The directory is created
+automatically if it does not exist.
+
+### User-scoped commands fail without a Bearer session
+
+If a developer tries to use `dailybot checkin`, `dailybot form`,
+`dailybot kudos`, or `dailybot user` with only an API key and no login
+session, the CLI exits with code `3` (not authenticated). Guide them
+through `dailybot login` — these commands require the human's own
+session, not an agent key.

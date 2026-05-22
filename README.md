@@ -3,9 +3,9 @@
 > The official Dailybot agent skill pack, maintained by [Dailybot](https://www.dailybot.com).
 
 Give your AI coding agent the ability to report progress, check for messages,
-send emails, and announce status — all through Dailybot. Your team sees what
-the agent accomplished, sends instructions, and stays coordinated across
-humans and agents.
+send emails, announce status, complete check-ins, give kudos, and submit
+forms — all through Dailybot. Your team sees what the agent accomplished,
+sends instructions, and stays coordinated across humans and agents.
 
 - **License:** [MIT](LICENSE)
 - **Security policy:** [SECURITY.md](SECURITY.md)
@@ -21,6 +21,9 @@ humans and agents.
 | **dailybot-messages** | Check for pending messages and instructions from the team. The "what should I work on next?" skill. |
 | **dailybot-email** | Send emails via Dailybot. Per-recipient first-use approval, mandatory pre-send confirmation, and a credential-pattern scan run before every send. |
 | **dailybot-health** | Announce agent online/offline status. For long-running or scheduled agents to stay visible and pick up instructions. |
+| **dailybot-checkin** | List and complete pending check-ins (daily standups, weekly surveys). Requires user login session. |
+| **dailybot-kudos** | Give kudos to a teammate to recognize their contributions. Team-visible recognition through Dailybot. |
+| **dailybot-forms** | List and submit form responses (feedback surveys, retros, pulse checks). Requires user login session. |
 
 A root **dailybot** meta-skill acts as a router — it describes all
 capabilities and routes to the right sub-skill based on the developer's
@@ -77,8 +80,9 @@ cd ~/dailybot-skill
 ```
 
 `setup.sh` symlinks each sub-skill (`dailybot-report`, `dailybot-messages`,
-`dailybot-email`, `dailybot-health`) into the agent's skills directory so
-they're discoverable as independent slash commands.
+`dailybot-email`, `dailybot-health`, `dailybot-checkin`, `dailybot-kudos`,
+`dailybot-forms`) into the agent's skills directory so they're discoverable
+as independent slash commands.
 
 ### Option 3 — OpenClaw native registry
 
@@ -98,6 +102,9 @@ right sub-skill:
 - "Report this to Dailybot" → **dailybot-report**
 - "Do I have messages?" → **dailybot-messages**
 - "Email this to Alice" → **dailybot-email**
+- "Complete my check-in" → **dailybot-checkin**
+- "Give kudos to Jane" → **dailybot-kudos**
+- "Fill out the feedback form" → **dailybot-forms**
 
 Or invoke directly: `/dailybot_report`. The messages, email, and health
 skills are agent-only — the agent uses them autonomously without a slash
@@ -198,6 +205,12 @@ All outbound calls go to `api.dailybot.com` over HTTPS:
 | `POST /v1/agent-health/` | `dailybot-health` skill | `agent_name`, `ok`, `message` |
 | `GET /v1/agent-messages/` | `dailybot-messages` skill | `agent_name` query param |
 | `POST /v1/agent-email/send/` | `dailybot-email` skill (after confirmation + secret scan) | `agent_name`, `to`, `subject`, `body_html`, `metadata` |
+| `GET /v1/cli/status/` | `dailybot-checkin` skill | Bearer token (user session) |
+| `POST /v1/checkins/<uuid>/responses/` | `dailybot-checkin` skill | Bearer token, responses array |
+| `GET /v1/forms/` | `dailybot-forms` skill | Bearer token (user session) |
+| `POST /v1/forms/<uuid>/responses/` | `dailybot-forms` skill | Bearer token, content map |
+| `GET /v1/users/` | `dailybot-kudos` skill (recipient resolution) | Bearer token (user session) |
+| `POST /v1/kudos/` | `dailybot-kudos` skill | Bearer token, receivers, content |
 | `https://cli.dailybot.com/install.sh{,.sha256}` | CLI install on first session, with consent | None (download only) |
 
 ### Per-repo opt-out
@@ -277,7 +290,10 @@ agent-skill/
         │   └── examples.md        — good vs bad examples
         ├── messages/SKILL.md      — message polling
         ├── email/SKILL.md         — email sending with safety checks
-        └── health/SKILL.md        — health check / status
+        ├── health/SKILL.md        — health check / status
+        ├── checkin/SKILL.md       — check-in completion (user-scoped)
+        ├── kudos/SKILL.md         — team recognition (user-scoped)
+        └── forms/SKILL.md         — form submission (user-scoped)
 ```
 
 ## Execution Paths
@@ -313,7 +329,10 @@ rm -f ~/.claude/skills/dailybot \
       ~/.claude/skills/dailybot-report \
       ~/.claude/skills/dailybot-messages \
       ~/.claude/skills/dailybot-email \
-      ~/.claude/skills/dailybot-health
+      ~/.claude/skills/dailybot-health \
+      ~/.claude/skills/dailybot-checkin \
+      ~/.claude/skills/dailybot-kudos \
+      ~/.claude/skills/dailybot-forms
 
 # Remove auto-activation block (if you opted in)
 #   Edit the file from the table above and delete the block between
