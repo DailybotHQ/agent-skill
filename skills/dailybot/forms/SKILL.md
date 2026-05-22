@@ -1,7 +1,7 @@
 ---
 name: dailybot-forms
 description: List and submit form responses via Dailybot. Use when the developer wants to see available forms, fill out a survey, or submit a form response. Do not use for daily check-ins — those go through dailybot-checkin.
-version: "1.2.0"
+version: "1.3.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"📋","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}

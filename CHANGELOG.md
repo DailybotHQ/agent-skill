@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] — 2026-05-22
+
+### Changes
+
+- Merge pull request #7 from DailybotHQ/feat/user-scoped-skills
+- feat(skill): add checkin, kudos, and forms sub-skills for user-scoped CLI commands
+
+
 ## [1.2.0] — 2026-05-05
 
 ### Changes
