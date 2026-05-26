@@ -4,6 +4,15 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] — 2026-05-26
+
+### Changes
+
+- Merge pull request #8 from DailybotHQ/feat/forms-lifecycle-teams-kudos
+- docs(skill): document dailybot-cli >=1.10.0 requirement
+- feat(skill): forms lifecycle, teams skill, team-aware kudos
+
+
 ## [1.3.0] — 2026-05-22
 
 ### Changes
