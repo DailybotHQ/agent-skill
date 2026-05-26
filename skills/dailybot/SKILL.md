@@ -44,6 +44,71 @@ Six install methods are supported (skills.sh CLI, OpenClaw native, git
 clone + `setup.sh`, conversational, manual per-agent, and HTTP-only
 fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/agent-skill/blob/main/docs/INSTALLATION.md).
 
+## Required Dailybot CLI version
+
+> **Minimum:** `dailybot-cli >= 1.10.0` (released **2026-05-26**, MIT-licensed,
+> [pypi.org/project/dailybot-cli/1.10.0/](https://pypi.org/project/dailybot-cli/1.10.0/)).
+>
+> Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
+
+### Why this minimum
+
+The `dailybot-forms`, `dailybot-teams`, and `dailybot-kudos` sub-skills depend on
+CLI surface that **first ships in 1.10.0**:
+
+- `dailybot form get` / `form responses` / `form response get` — inspect forms and prior responses.
+- `dailybot form update` / `form transition` / `form delete` — drive a response through its workflow.
+- `dailybot team list` / `team get [--with-members]` — role-scoped team reads.
+- `dailybot kudos give --team "<name>"` — team-targeted kudos (caller excluded from the expansion).
+- Standardized user-scoped exit codes (`0` / `2` / `3` / `4` / `5` / `6` / `7`).
+- `--json` 4xx errors include the structured `code` field (`form_response_change_state_forbidden`, `final_state_locked`, `no_valid_team`, …) so agents can pattern-match without parsing prose.
+
+CLI versions below 1.10.0 only expose `form list` + `form submit` and user-only
+kudos; the sub-skills detect the gap and fail cleanly (exit-code messaging will
+ask the developer to upgrade).
+
+### Checking the installed version
+
+```bash
+# Single-line, scriptable
+dailybot --version
+# → dailybot 1.10.0 (Python 3.12.4)
+
+# Multi-line panel: version, Python runtime, install path, release notes link
+dailybot version
+
+# Same panel + queries PyPI to tell you whether a newer version exists
+dailybot version --check
+```
+
+### Upgrading a stale install
+
+```bash
+dailybot upgrade
+```
+
+The CLI auto-detects how it was installed (`pipx` / `uv tool` / `pip` /
+Homebrew / Linux binary / editable dev) and either runs the right command in a
+subprocess or prints the exact command for installs the CLI shouldn't drive.
+`dailybot upgrade --dry-run` previews without executing.
+
+If the developer is below 1.10.0, ask them to run `dailybot upgrade` once,
+then resume. Do not retry CLI commands in a loop while the upgrade is pending.
+
+### Direct install commands
+
+| Channel | Command |
+|---------|---------|
+| pip      | `pip install 'dailybot-cli>=1.10.0'` |
+| Homebrew | `brew install dailybothq/tap/dailybot` |
+| Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -sSL https://cli.dailybot.com/install.sh \| bash` |
+| Windows PowerShell (when WSL2 / Git Bash unavailable) | `irm https://cli.dailybot.com/install.ps1 \| iex` |
+
+The universal installer auto-detects the OS and routes to Homebrew on macOS,
+the prebuilt binary on Linux x86_64, or pipx / uv tool / pip --user elsewhere.
+Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
+[`shared/auth.md`](shared/auth.md).
+
 ## Why use the official skill
 
 - **First-party.** Built by the Dailybot team and kept in sync with the

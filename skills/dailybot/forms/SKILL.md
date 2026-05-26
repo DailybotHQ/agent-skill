@@ -10,6 +10,8 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Forms
 
+> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26). The lifecycle commands (`form get`, `form responses`, `form response get`, `form update`, `form transition`, `form delete`) and the structured `--json` 4xx error shape ship in CLI 1.10.0 — earlier versions only expose `form list` and `form submit`. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for the full rationale, install commands, and version-check tooling.
+
 You help developers work with the full Dailybot forms lifecycle: list, inspect, submit, update, transition between workflow states, and read prior responses. Forms are custom questionnaires created by team leads — feedback surveys, retrospectives, release checklists, approval flows, or any structured data collection. Some forms are simple "fill once and done"; others have **workflow states** (e.g. `draft → review → released`) with audience-scoped permissions on who can edit and who can transition.
 
 This skill is distinct from daily check-ins (handled by `dailybot-checkin`) and free-text reports (handled by `dailybot-report`).

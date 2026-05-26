@@ -10,6 +10,8 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Teams
 
+> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26). `dailybot team list` and `dailybot team get` ship in CLI 1.10.0 — earlier versions don't expose the team commands at all. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+
 You help agents resolve and read teams visible to the logged-in user. Teams are how Dailybot groups people inside an organization — they're the targets for team-scoped kudos, the routing context for some messages, and the source of truth for "who's in X?".
 
 This skill is primarily a **resolver dependency** for other Dailybot skills (most notably `dailybot-kudos`, which uses it to turn "kudos al equipo Engineering" into a team UUID). It also handles direct developer asks like "list my teams" or "who's in QA?".

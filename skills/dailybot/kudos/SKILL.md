@@ -10,6 +10,8 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Kudos
 
+> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26) for team-targeted kudos (`--team`). User-only kudos (`--to`) work on earlier versions, but the team-resolution path documented below assumes 1.10.0. The HTTP fallback payload also changed in 1.10.0 — see Step 7. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+
 You help developers recognize teammates by sending kudos through Dailybot. Kudos are team-visible appreciation messages — the whole team sees them in Dailybot's recognition feed and in connected chat platforms (Slack, Teams, Discord).
 
 Two recipient types are supported:
