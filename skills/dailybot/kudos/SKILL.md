@@ -1,6 +1,6 @@
 ---
 name: dailybot-kudos
-description: Give kudos to a teammate via Dailybot to recognize their contributions. Use when the developer wants to thank or recognize someone on the team. Do not use for general progress reports — those go through dailybot-report.
+description: Give kudos to a teammate or to an entire team via Dailybot to recognize their contributions. Use when the developer wants to thank or recognize one person, or recognize a whole team (e.g. "kudos al equipo Engineering"). Do not use for general progress reports — those go through dailybot-report.
 version: "1.3.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -10,32 +10,42 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Kudos
 
+> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26) for team-targeted kudos (`--team`). User-only kudos (`--to`) work on earlier versions, but the team-resolution path documented below assumes 1.10.0. The HTTP fallback payload also changed in 1.10.0 — see Step 7. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+
 You help developers recognize teammates by sending kudos through Dailybot. Kudos are team-visible appreciation messages — the whole team sees them in Dailybot's recognition feed and in connected chat platforms (Slack, Teams, Discord).
+
+Two recipient types are supported:
+
+- **User kudos** — "kudos to Jane Doe" → single named recipient.
+- **Team kudos** — "kudos al equipo Engineering" → every active member of the team (the caller is excluded server-side, so giving kudos to your own team doesn't bounce as self-kudos).
 
 ---
 
 ## Auth model — user-scoped commands
 
-Kudos commands require a **Bearer token** (user session), not an API key.
-The developer must be logged in via `dailybot login`. This scopes kudos to
-the logged-in human — the kudos appear as coming from them, not from an
-agent.
+Kudos commands require a **Bearer token** (user session), not an API key. The developer must be logged in via `dailybot login`. This scopes kudos to the logged-in human — the kudos appear as coming from them, not from an agent.
 
-If the developer only has an API key (`DAILYBOT_API_KEY`), guide them through
-`dailybot login` first. API keys authenticate agent-scoped endpoints
-(`dailybot agent ...`), not user-scoped ones.
+If the developer only has an API key (`DAILYBOT_API_KEY`), guide them through `dailybot login` first. API keys authenticate agent-scoped endpoints (`dailybot agent ...`), not user-scoped ones.
 
 ---
 
 ## When to Use
 
-- The developer asks "give kudos to Jane", "recognize Alice for the PR review", "thank Bob"
-- After a collaborative session where a teammate helped significantly
-- When the developer explicitly wants to send team recognition
+Trigger phrases the agent should recognize:
 
-Do **not** send kudos autonomously without the developer's explicit request.
-Kudos are a social action with the developer's name attached — always
-confirm intent.
+**User kudos:**
+- "give kudos to Jane"
+- "recognize Alice for the PR review"
+- "thank Bob for the help"
+- "felicita a Carolina por…"
+
+**Team kudos:**
+- "kudos to the engineering team"
+- "give kudos al equipo X"
+- "felicita al team de QA"
+- "thank the entire backend team"
+
+Do **not** send kudos autonomously without the developer's explicit request. Kudos are a social action with the developer's name attached — always confirm intent.
 
 ---
 
@@ -49,18 +59,42 @@ Read and follow the authentication steps in [`../shared/auth.md`](../shared/auth
 dailybot status --auth 2>&1
 ```
 
-If the output shows a logged-in user session, proceed. If not, guide them
-through `dailybot login` (see auth.md for the OTP flow).
+If the output shows a logged-in user session, proceed. If not, guide them through `dailybot login` (see auth.md for the OTP flow).
 
 If auth fails or the developer declines, skip and continue with your primary task.
 
 ---
 
-## Step 2 — Resolve the Recipient
+## Step 2 — Identify the Recipient Type
 
-The developer may refer to a teammate by name. You need either their
-**full name** (the CLI resolves it against the organization directory) or
-their **user UUID**.
+The developer may refer to:
+
+- **A user** by full name or UUID → user-resolution path.
+- **A team** by name → team-resolution path (delegated to `dailybot-teams`).
+- **Both** in the same kudos (rare but supported) → use both flags.
+
+Decide before resolving — the routing differs.
+
+### Resolution flow
+
+```
+1. Detect target type from the developer's phrasing.
+   - "the X team", "el equipo X", "team de X"  → TEAM
+   - "to Jane", "para Carolina", "thank Bob"   → USER
+2. For USER targets → existing user-resolution path (Step 3).
+3. For TEAM targets → delegate to `dailybot-teams` (Step 4).
+4. Build the CLI invocation (Step 5):
+   - dailybot kudos give [--to <user_uuid_or_name>] [--team <team_uuid>] --message "..."
+   - At least one of --to / --team must be present.
+5. Confirm with the developer before sending — show the resolved names + UUIDs
+   AND, for team kudos, the expanded receiver count from the server.
+```
+
+---
+
+## Step 3 — Resolve a User Recipient
+
+The developer may refer to a teammate by name. You need either their **full name** (the CLI resolves it against the organization directory) or their **user UUID**.
 
 ### Look up team members (if needed)
 
@@ -68,11 +102,9 @@ their **user UUID**.
 dailybot user list --json
 ```
 
-This returns all organization members with their names and UUIDs. Use this
-to resolve ambiguous references or to confirm the recipient.
+This returns all organization members with their names and UUIDs. Use this to resolve ambiguous references or to confirm the recipient.
 
-**Privacy note:** Email addresses are intentionally not shown — user emails
-are PII. Use the full name or UUID to identify recipients.
+**Privacy note:** Email addresses are intentionally not shown — user emails are PII. Use the full name or UUID to identify recipients.
 
 ### Present the match to the developer
 
@@ -91,11 +123,36 @@ If the name is ambiguous (matches multiple people):
 
 ---
 
-## Step 3 — Compose and Send Kudos
+## Step 4 — Resolve a Team Recipient (delegated to `dailybot-teams`)
+
+When the developer targets a team by name, **delegate to the `dailybot-teams` skill** rather than re-implementing the resolver. This keeps the scoping-aware error message consistent across skills.
+
+Concretely, the agent runs:
+
+```bash
+dailybot team list --json
+```
+
+…then applies the canonical `resolve_team_by_name` from [`../teams/SKILL.md`](../teams/SKILL.md):
+
+- Match on `name` case-insensitively, exactly (no partial matches).
+- Single match → use that team's UUID.
+- Multiple matches → prompt the developer to disambiguate.
+- **No match** → stop and surface the scoping-aware message from `dailybot-teams`:
+
+  > "I don't see a team named '<name>' on your account. You may not be a member, or it doesn't exist. Org admins see all teams in the org; members see only the teams they belong to. Run `dailybot team list` to confirm what you have access to."
+
+**Never inline the team list parsing here.** If the resolver logic changes in the future (workspace-scoped teams, archived-team filtering), it should change in one place.
+
+---
+
+## Step 5 — Compose and Send Kudos
 
 ### Confirm before sending
 
-Always confirm the kudos content with the developer before sending:
+Always confirm the kudos content with the developer before sending. The confirmation differs for user vs. team kudos.
+
+**User kudos confirmation:**
 
 > "I'll send this kudos via Dailybot:
 >
@@ -104,7 +161,17 @@ Always confirm the kudos content with the developer before sending:
 >
 > **Send?** (yes / edit / cancel)"
 
+**Team kudos confirmation:** include the resolved team name and the **expected expanded receiver count** so the developer knows how many people will see it. The server excludes the caller from the expansion automatically — call that out so the developer doesn't worry about pre-filtering.
+
+> "I'll give kudos to the **Engineering team** (8 active members, excluding you).
+>
+> **Message:** *Por el release de auth — equipo enorme.*
+>
+> **Send?** (yes / edit / cancel)"
+
 ### Send via CLI
+
+**User kudos:**
 
 ```bash
 dailybot kudos give \
@@ -113,45 +180,130 @@ dailybot kudos give \
   --yes
 ```
 
-> **Timeout**: Allow at least 30 seconds for CLI commands to complete. Do not use a shorter timeout.
+**Team kudos:**
+
+```bash
+dailybot kudos give \
+  --team <team_uuid> \
+  --message "Por el release de auth — equipo enorme." \
+  --yes \
+  --json
+```
+
+**Both at once** (rare but supported):
+
+```bash
+dailybot kudos give \
+  --to <user_uuid> \
+  --team <team_uuid> \
+  --message "Jane — and the whole Engineering team — saved the launch." \
+  --yes
+```
+
+> **Timeout**: Allow at least 30 seconds for CLI commands to complete.
 
 ### CLI flags
 
 | Flag | Short | Description |
 |------|-------|-------------|
-| `--to` | `-t` | Receiver full name or UUID. Required. |
+| `--to` | `-t` | User receiver — full name or UUID. Optional if `--team` is provided. |
+| `--team` |    | Team UUID. Optional if `--to` is provided. At least one of `--to` / `--team` is required. |
 | `--message` | `-m` | Kudos message (team-visible). Required. |
-| `--value` | | Optional company value UUID to tag the kudos. |
+| `--value` |   | Optional company value UUID to tag the kudos. |
 | `--yes` | `-y` | Skip confirmation prompt. |
-| `--json` | | Emit machine-readable JSON output. |
+| `--json` |    | Emit machine-readable JSON output. |
 
-### Exit codes
+### Exit codes & error codes
 
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `2` | Ambiguous or invalid receiver — list matches and ask the developer to choose |
-| `3` | Not authenticated — guide through `dailybot login` |
-| `4` | Self-kudos attempted, or daily kudos limit reached |
-| `6` | Rate limited (60 req/min) |
+The server's `{detail, code}` 4xx shape is surfaced verbatim in `--json` mode as `{ error, status, code, detail }`. Match on `code`, not on `detail`:
+
+```json
+{
+  "error": "...",
+  "status": 400,
+  "code": "no_valid_team",
+  "detail": "Team UUID is not valid."
+}
+```
+
+| Exit | Server `code` | Meaning | Agent behavior |
+|------|---------------|---------|----------------|
+| `0`  |              | Success | Surface the response (including expanded receiver count for team kudos). |
+| `2`  | `no_users_found` | Some receivers couldn't be found or were duplicates. | "Some receivers couldn't be found or were duplicates. Re-check the inputs." |
+| `2`  | `no_valid_users` | The receiver list ended up empty (or the legacy `receivers` field was sent). | "The receiver list ended up empty. Check `--to` and `--team` resolve correctly." |
+| `2`  | `no_valid_team`  | The provided team didn't resolve to a valid target. | "I couldn't find that team. Check `dailybot team list` to confirm it's visible to you." |
+| `3`  |              | Not authenticated | Guide through `dailybot login`. |
+| `4`  |              | Self-kudos attempted, or daily kudos limit reached | If self-kudos (single user `--to`), explain it isn't allowed. If daily limit, mention it resets tomorrow. |
+| `6`  |              | Rate limited (60 req/min) | Slow down. Do not retry in a tight loop. |
+| (any 4xx) | (other) | Other server error | Surface the `detail` text verbatim. |
 
 ### Safety constraints
 
-- **No self-kudos.** The CLI prevents giving kudos to yourself (exit code 4).
-  If the developer asks to send kudos to themselves, explain this isn't
-  allowed and suggest recognizing a teammate instead.
-- **Daily limit.** Organizations may have a daily kudos limit per user.
-  If hit (exit code 4 with 406 status), inform the developer and move on.
+- **No self-kudos to yourself directly.** If the developer asks to give kudos to themselves via `--to`, the CLI rejects it. Explain this and suggest recognizing a teammate instead.
+- **Team kudos to your own team are OK.** The server's `_get_receivers_from_teams` excludes the caller from the expanded membership, so giving kudos to a team you belong to does not trip the self-kudos check. The agent doesn't need to pre-filter — the server is the source of truth.
+- **Daily limit.** Organizations may have a daily kudos limit per user. If hit (exit code `4` with 406 status), inform the developer and move on.
 
 ---
 
-## Step 4 — HTTP Fallback (when CLI is unavailable)
+## Step 6 — Sample Multi-turn Dialogues
+
+### Dialogue A — User kudos
+
+```
+Developer: "give kudos to Carolina por la review"
+Agent:
+  1. dailybot user list --json    → resolve "Carolina" → UUID
+  2. Confirm: "I'll send kudos to Carolina Pérez. Message: 'Por la review'. Send? (y/n)"
+  3. dailybot kudos give --to <uuid> --message "Por la review" --yes --json
+  4. Surface response.
+```
+
+### Dialogue B — Team kudos
+
+```
+Developer: "kudos al equipo Engineering por el release"
+Agent:
+  1. (Delegate to dailybot-teams) dailybot team list --json
+     → resolve "Engineering" → UUID (member_count: 8)
+  2. Confirm: "I'll give kudos to the Engineering team
+              (8 active members, excluding you).
+              Message: 'Por el release'. Confirm? (y/n)"
+  3. dailybot kudos give --team <uuid> --message "Por el release" --yes --json
+  4. Surface response — including the expanded receiver count.
+```
+
+### Dialogue C — Team not visible to caller
+
+```
+Developer: "give kudos to the Mobile team for the iOS launch"
+Agent:
+  1. (Delegate to dailybot-teams) dailybot team list --json
+     → no match for "Mobile"
+  2. "I don't see a team named 'Mobile' on your account. You may not be a member,
+      or it doesn't exist. Org admins see all teams in the org; members see only
+      the teams they belong to. Run `dailybot team list` to confirm what you
+      have access to."
+  3. Stop. Do not invoke kudos give with a guessed UUID.
+```
+
+---
+
+## Step 7 — HTTP Fallback (when CLI is unavailable)
 
 See [`../shared/http-fallback.md`](../shared/http-fallback.md) for base patterns.
 
 **Important:** Kudos endpoints use **Bearer token** auth, not API key auth.
 
-### List team members (to resolve names)
+### List teams (to resolve team names)
+
+```bash
+curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  https://api.dailybot.com/v1/teams/
+```
+
+The list is role-scoped server-side.
+
+### List org members (to resolve user names)
 
 ```bash
 curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
@@ -160,7 +312,9 @@ curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
 
 The response is paginated — follow the `next` URL until null (max 50 pages).
 
-### Send kudos
+> **Payload migration:** the `POST /v1/kudos/` body now uses `user_uuid_receivers` (for individuals) and `team_uuid_receivers` (for teams). The **legacy `receivers` field is gone** — sending it will result in `no_valid_users`. The CLI handles this transparently; HTTP fallback callers must update their payloads.
+
+### Send kudos to a user
 
 ```bash
 curl -s -X POST \
@@ -168,29 +322,63 @@ curl -s -X POST \
   -H "Content-Type: application/json" \
   https://api.dailybot.com/v1/kudos/ \
   -d '{
-    "receivers": ["<user-uuid>"],
+    "user_uuid_receivers": ["<user-uuid>"],
     "content": "Shipped the auth refactor cleanly — great work!"
+  }'
+```
+
+### Send kudos to a team
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/kudos/ \
+  -d '{
+    "team_uuid_receivers": ["<team-uuid>"],
+    "content": "Por el release de auth — equipo enorme."
+  }'
+```
+
+### Send kudos to both
+
+```bash
+curl -s -X POST \
+  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  https://api.dailybot.com/v1/kudos/ \
+  -d '{
+    "user_uuid_receivers": ["<user-uuid>"],
+    "team_uuid_receivers": ["<team-uuid>"],
+    "content": "Jane and the whole Engineering team saved the launch."
   }'
 ```
 
 ---
 
-## Step 5 — Confirm
+## Step 8 — Confirm
 
 After the command runs:
 
-- **Success** — briefly confirm. Example: *"Kudos sent to Jane Doe via Dailybot!"*
-- **Failure** — warn briefly. If self-kudos, explain the restriction. If daily limit, mention it resets tomorrow.
+- **Success (user kudos)** — briefly confirm. Example: *"Kudos sent to Jane Doe via Dailybot!"*
+- **Success (team kudos)** — surface the resolved receiver count. Example: *"Kudos sent to the Engineering team (8 active members) via Dailybot!"*
+- **Failure** — warn briefly. Map the `code` per the error table in Step 5.
 - **Skipped** — say nothing.
 
 ---
 
 ## Writing Good Kudos
 
-- **Be specific** — mention what the person did, not just "great job"
-- **Be genuine** — the whole team sees kudos; they should feel earned
-- **Keep it concise** — one or two sentences
-- **Reference the work** — "Great PR review on the auth module" > "Thanks for helping"
+- **Be specific** — mention what the person/team did, not just "great job".
+- **Be genuine** — the whole team sees kudos; they should feel earned.
+- **Keep it concise** — one or two sentences.
+- **Reference the work** — "Great PR review on the auth module" > "Thanks for helping".
+
+---
+
+## Cross-skill contract
+
+The kudos skill **delegates team-name resolution to `dailybot-teams`**. Do not inline the `dailybot team list` parsing logic here — the resolver is one source of truth, in [`../teams/SKILL.md`](../teams/SKILL.md). If the resolver's behavior changes (workspace-scoped teams, archived-team filtering, etc.), the change lands there and propagates automatically.
 
 ---
 
@@ -198,10 +386,10 @@ After the command runs:
 
 Sending kudos must **never block your primary work**. If the CLI is missing, auth fails, the network is down, or the command errors:
 
-1. Warn the developer briefly
-2. Continue with the primary task
-3. Do not retry automatically
-4. Do not enter a diagnostic loop
+1. Warn the developer briefly.
+2. Continue with the primary task.
+3. Do not retry automatically.
+4. Do not enter a diagnostic loop.
 
 ---
 
@@ -209,5 +397,6 @@ Sending kudos must **never block your primary work**. If the CLI is missing, aut
 
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
+- [`../teams/SKILL.md`](../teams/SKILL.md) — team-name resolver (called by this skill)
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
 - **Full agent API skill:** `https://api.dailybot.com/skill.md`

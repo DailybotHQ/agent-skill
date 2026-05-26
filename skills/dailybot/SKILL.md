@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos, and submit forms. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, and run the full forms lifecycle (list, submit, update, transition between workflow states). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "1.3.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -21,7 +21,7 @@ This is the canonical, first-party integration. Source of truth:
 
 ## What it does
 
-Seven coordinated capabilities, with smart routing between them:
+Eight coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
@@ -30,8 +30,9 @@ Seven coordinated capabilities, with smart routing between them:
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
 | **Check-ins** | `dailybot-checkin` | Developer asks to complete a standup or fill in a pending check-in |
-| **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate's contribution |
-| **Forms** | `dailybot-forms` | Developer wants to list or submit a form response (surveys, retros, pulse checks) |
+| **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate or a whole team's contribution |
+| **Teams** | `dailybot-teams` | List teams, inspect members, or resolve a team name → UUID (used as a resolver by other skills) |
+| **Forms** | `dailybot-forms` | Developer wants to list, submit, update, or transition forms — including workflow-state forms with audience permissions |
 
 ## Install
 
@@ -42,6 +43,71 @@ npx skills add DailybotHQ/agent-skill
 Six install methods are supported (skills.sh CLI, OpenClaw native, git
 clone + `setup.sh`, conversational, manual per-agent, and HTTP-only
 fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/agent-skill/blob/main/docs/INSTALLATION.md).
+
+## Required Dailybot CLI version
+
+> **Minimum:** `dailybot-cli >= 1.10.0` (released **2026-05-26**, MIT-licensed,
+> [pypi.org/project/dailybot-cli/1.10.0/](https://pypi.org/project/dailybot-cli/1.10.0/)).
+>
+> Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
+
+### Why this minimum
+
+The `dailybot-forms`, `dailybot-teams`, and `dailybot-kudos` sub-skills depend on
+CLI surface that **first ships in 1.10.0**:
+
+- `dailybot form get` / `form responses` / `form response get` — inspect forms and prior responses.
+- `dailybot form update` / `form transition` / `form delete` — drive a response through its workflow.
+- `dailybot team list` / `team get [--with-members]` — role-scoped team reads.
+- `dailybot kudos give --team "<name>"` — team-targeted kudos (caller excluded from the expansion).
+- Standardized user-scoped exit codes (`0` / `2` / `3` / `4` / `5` / `6` / `7`).
+- `--json` 4xx errors include the structured `code` field (`form_response_change_state_forbidden`, `final_state_locked`, `no_valid_team`, …) so agents can pattern-match without parsing prose.
+
+CLI versions below 1.10.0 only expose `form list` + `form submit` and user-only
+kudos; the sub-skills detect the gap and fail cleanly (exit-code messaging will
+ask the developer to upgrade).
+
+### Checking the installed version
+
+```bash
+# Single-line, scriptable
+dailybot --version
+# → dailybot 1.10.0 (Python 3.12.4)
+
+# Multi-line panel: version, Python runtime, install path, release notes link
+dailybot version
+
+# Same panel + queries PyPI to tell you whether a newer version exists
+dailybot version --check
+```
+
+### Upgrading a stale install
+
+```bash
+dailybot upgrade
+```
+
+The CLI auto-detects how it was installed (`pipx` / `uv tool` / `pip` /
+Homebrew / Linux binary / editable dev) and either runs the right command in a
+subprocess or prints the exact command for installs the CLI shouldn't drive.
+`dailybot upgrade --dry-run` previews without executing.
+
+If the developer is below 1.10.0, ask them to run `dailybot upgrade` once,
+then resume. Do not retry CLI commands in a loop while the upgrade is pending.
+
+### Direct install commands
+
+| Channel | Command |
+|---------|---------|
+| pip      | `pip install 'dailybot-cli>=1.10.0'` |
+| Homebrew | `brew install dailybothq/tap/dailybot` |
+| Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -sSL https://cli.dailybot.com/install.sh \| bash` |
+| Windows PowerShell (when WSL2 / Git Bash unavailable) | `irm https://cli.dailybot.com/install.ps1 \| iex` |
+
+The universal installer auto-detects the OS and routes to Homebrew on macOS,
+the prebuilt binary on Linux x86_64, or pipx / uv tool / pip --user elsewhere.
+Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
+[`shared/auth.md`](shared/auth.md).
 
 ## Why use the official skill
 
@@ -87,8 +153,9 @@ the full step-by-step workflow.
 | "email this to Alice", "send an email", "send a summary to the team" | **Email** → read [`email/SKILL.md`](email/SKILL.md) |
 | "go online", "announce status", "health check" | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
 | "complete my check-in", "fill in my standup", "answer my dailybot", "any pending check-ins?" | **Checkin** → read [`checkin/SKILL.md`](checkin/SKILL.md) |
-| "give kudos to Jane", "recognize Alice for the PR review", "thank Bob for the help" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
-| "list my forms", "fill out the feedback survey", "submit the retro form", "what forms do I have?" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
+| "give kudos to Jane", "recognize Alice", "kudos al equipo Engineering", "felicita al team de QA" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
+| "list my teams", "who's in QA?", "resolve the Engineering team", or another skill needs a team UUID | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) |
+| "list my forms", "submit the retro form", "continue my release-form draft", "transition the release to released", "show me the last form response" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
 
 ### Auto-activation (no explicit request)
 
