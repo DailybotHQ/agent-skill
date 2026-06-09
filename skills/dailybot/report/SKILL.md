@@ -271,6 +271,24 @@ curl -s -X POST https://api.dailybot.com/v1/agent-reports/ \
   }'
 ```
 
+### Response
+
+A successful request returns `201` with the created report, including a
+`url` field that points to where the report landed in Dailybot:
+
+```json
+{
+  "id": "<uuid>",
+  "url": "https://app.dailybot.com/agents/report/<uuid>",
+  "...": "..."
+}
+```
+
+Capture that `url` and surface it when you confirm (see Step 7). The CLI
+prints the same link automatically as a `View:` line **from `dailybot-cli`
+1.11.0 onward**; on earlier CLIs the printed output omits it, but the HTTP
+`201` body above always carries the `url` — read it from there.
+
 ---
 
 ## Step 5 — Trigger Check
@@ -362,7 +380,7 @@ For side-by-side examples, see [`examples.md`](examples.md).
 
 After the command runs:
 
-- **Success** — briefly confirm what was reported. Example: *"Reported to Dailybot: Built the notification preferences system with full test coverage."*
+- **Success** — briefly confirm what was reported, and include the placement link the response returns (the `url` field, printed by the CLI as `View:` from `dailybot-cli` 1.11.0 onward, and always present in the HTTP `201` body) so the developer can jump straight to where it landed. Example: *"Reported to Dailybot: Built the notification preferences system with full test coverage — view it at https://app.dailybot.com/agents/report/<uuid>."* If no `url` is surfaced (an older backend, or a CLI below 1.11.0 where you only see the printed output), just confirm the report without a link.
 - **Failure** — warn briefly. Do not retry in a loop. Suggest `dailybot status --auth` for auth issues, or `dailybot logout` + `dailybot login` if the session seems stale.
 - **Skipped** — say nothing. Complete silence is the correct response.
 

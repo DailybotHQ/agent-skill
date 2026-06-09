@@ -50,6 +50,11 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 > [pypi.org/project/dailybot-cli/1.10.0/](https://pypi.org/project/dailybot-cli/1.10.0/)).
 >
 > Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
+>
+> **`1.11.0` enhancement (optional):** `dailybot agent update` echoes the
+> report's placement link as a `View:` line. Older CLIs still report fine —
+> the link is always in the API response body, just not printed — so this is
+> not a hard floor. See [`report/SKILL.md`](report/SKILL.md) Step 7.
 
 ### Why this minimum
 
