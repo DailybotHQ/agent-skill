@@ -41,7 +41,21 @@ to a global agent config file (`CLAUDE.md`, `AGENTS.md`, etc.) affects every
 future session in every repository, including unrelated work — so the
 developer must explicitly approve it the first time.
 
-### Check if the trigger is already installed
+There are **two independent opt-ins**, and you should consider both every
+first run:
+
+- **Step 0a — Prompt trigger** (works on every agent): a standing
+  instruction in the global config file.
+- **Step 0b — Hook enforcement** (CLI >= 1.12.0, harnesses with a hook
+  system): deterministic, harness-driven reminders.
+
+Check each one separately. **Having the trigger installed does NOT mean
+hooks are installed** — a returning developer who accepted the trigger in
+an older version still needs the hook offer. Never skip Step 0b just because
+Step 0a is already done; only skip an opt-in whose own check shows it is
+present.
+
+### Step 0a — Check if the prompt trigger is already installed
 
 Identify which agent you are and run the corresponding check:
 
@@ -56,9 +70,10 @@ Identify which agent you are and run the corresponding check:
 | Cline | `grep -q "dailybot-auto-activation" ~/.cline/.clinerules 2>/dev/null && echo "installed"` |
 | Gemini CLI | `grep -q "dailybot-auto-activation" ~/.gemini/GEMINI.md 2>/dev/null && echo "installed"` |
 
-If output says "installed" — skip to Step 1.
+If output says "installed" — the prompt trigger is set; **skip the rest of
+Step 0a and go to Step 0b** (do not skip to Step 1).
 
-### If missing — ask before creating
+#### If missing — ask before creating
 
 Read [`triggers.md`](triggers.md) for the exact file path and content for the
 current agent.
@@ -83,31 +98,62 @@ Otherwise, show the developer this prompt **before writing anything**:
 
 - **Yes** — write the trigger block exactly as shown, including the
   `dailybot-auto-activation` opening and closing markers from `triggers.md`,
-  then continue to Step 1.
-- **No / not now** — skip auto-activation for this session and continue to
-  Step 1. Do not re-ask in the same session.
+  then continue to Step 0b.
+- **No / not now** — skip the trigger for this session and continue to
+  Step 0b (hooks are a separate opt-in worth offering even if the trigger
+  was declined). Do not re-ask about the trigger in the same session.
 
 If the developer accepts, briefly confirm:
 
 > "Added. From your next session onward, Dailybot reporting fires
 > automatically. Remove the marked block in `<file path>` to disable."
 
-Then proceed to Step 1.
+Then continue to **Step 0b** (do not skip to Step 1 — hooks are a separate
+opt-in).
 
 ### Step 0b — Hook enforcement (recommended, CLI >= 1.12.0)
 
 Trigger blocks are advisory — the model can forget them in long sessions.
 Since `dailybot-cli` **1.12.0**, the CLI ships a `dailybot hook` command
 group that the harness itself invokes at session start, after file edits,
-and at the end of every turn, making the reminders **deterministic**.
+and at the end of every turn, making the reminders **deterministic**. This
+is what makes reporting truly autonomous, so offer it whenever it is
+available — including to developers who already accepted the Step 0a
+trigger in a previous session.
 
-If `dailybot --version` reports >= 1.12.0 and the current harness has a
-lifecycle-hook system, offer to install the hook config right after the
-trigger consent above (one combined prompt is fine). Read
-[`hooks.md`](hooks.md) for the per-harness file path, exact content, merge
-rules, and uninstall path — the same consent rules apply: show before
-writing, `DAILYBOT_AUTO_YES=1` counts as consent. If the developer declines
-or the CLI is older, the trigger block alone still works — do not nag.
+#### Check whether hooks apply, and whether they are already installed
+
+1. **CLI version.** Run `dailybot --version`. If it reports below `1.12.0`
+   (or the CLI is absent), the `dailybot hook` group does not exist — skip
+   Step 0b silently and continue to Step 1. The Step 0a trigger alone still
+   works.
+2. **Harness support.** If the current harness has no lifecycle-hook system
+   (e.g. Cline today), skip Step 0b silently — Step 0a covers it.
+3. **Already installed?** Check whether the hook config already references
+   `dailybot hook`, and skip to Step 1 if so:
+
+   | Agent | Check |
+   |-------|-------|
+   | Claude Code | `grep -rq "dailybot hook" ~/.claude/settings.json .claude/settings.json 2>/dev/null && echo "installed"` |
+   | Cursor | `grep -rq "dailybot hook" ~/.cursor/hooks.json .cursor/hooks.json 2>/dev/null && echo "installed"` |
+   | Codex | `grep -rq "dailybot hook" ~/.codex/hooks.json .codex/hooks.json 2>/dev/null && echo "installed"` |
+   | Copilot | `grep -rq "dailybot hook" .github/hooks/ 2>/dev/null && echo "installed"` |
+   | Gemini CLI | `grep -rq "dailybot hook" ~/.gemini/settings.json .gemini/settings.json 2>/dev/null && echo "installed"` |
+
+   If output says "installed" — hooks are already set; continue to Step 1.
+
+#### If missing — ask before creating
+
+Read [`hooks.md`](hooks.md) for the current harness's exact config file path,
+content, merge rules, and uninstall path. The **same consent rules as Step
+0a apply**: show the file path and exact content before writing, merge
+(never overwrite) existing config, and `DAILYBOT_AUTO_YES=1` counts as
+consent. A repo-level config (`.claude/settings.json`, `.cursor/hooks.json`,
+…) committed to the repository gives the whole team autonomous reporting on
+clone — offer that when the developer is in a shared project.
+
+If the developer declines, continue to Step 1 and do not re-ask in the same
+session. The Step 0a trigger still provides (probabilistic) coverage.
 
 ### Responding to injected Dailybot reminders
 
