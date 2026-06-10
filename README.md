@@ -17,7 +17,7 @@ sends instructions, and stays coordinated across humans and agents.
 
 | Skill | What it does |
 |-------|-------------|
-| **dailybot-report** | Send progress updates after completing meaningful work. Reports read like standup updates — no one can tell they came from an agent. |
+| **dailybot-report** | Send progress updates after completing meaningful work. Reports read like standup updates — no one can tell they came from an agent. With `dailybot-cli >= 1.12.0`, lifecycle hooks make the reminders deterministic — reporting becomes fully autonomous. |
 | **dailybot-messages** | Check for pending messages and instructions from the team. The "what should I work on next?" skill. |
 | **dailybot-email** | Send emails via Dailybot. Per-recipient first-use approval, mandatory pre-send confirmation, and a credential-pattern scan run before every send. |
 | **dailybot-health** | Announce agent online/offline status. For long-running or scheduled agents to stay visible and pick up instructions. |
@@ -110,6 +110,18 @@ Or invoke directly: `/dailybot_report`. The messages, email, and health
 skills are agent-only — the agent uses them autonomously without a slash
 command.
 
+### Fully autonomous reporting (CLI >= 1.12.0)
+
+With `dailybot-cli >= 1.12.0`, the skill can additionally install
+**lifecycle hooks** (with your consent) so your agent harness itself runs
+`dailybot hook` commands at session start, after file edits, and at the end
+of every turn. A local per-repo ledger detects unreported work — commits
+*and* non-commit work like research or documents — and reminds the model to
+report at the right moment, with built-in anti-noise gates (30-min interval,
+cooldown, snooze, per-repo opt-out). After a one-time `dailybot login`,
+reporting needs no human reminders and survives new sessions and container
+rebuilds. Details: `skills/dailybot/report/hooks.md`.
+
 On first use, the agent shows the proposed CLI install command and asks for
 your confirmation before installing anything. After confirmation, it walks
 you through Dailybot login (OTP preferred; API key or HTTP fallback when the
@@ -191,6 +203,7 @@ export DAILYBOT_AUTO_YES=1
 | `~/.dailybot/email-approvals.json` | Caches addresses you have approved for `dailybot-email` | First time you confirm a recipient | `rm ~/.dailybot/email-approvals.json` |
 | `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`, `~/.cline/.clinerules`, `~/.agents/AGENTS.md` | Auto-activation trigger (only with explicit consent in Step 0 of the report skill) | First time you accept the auto-activation prompt | Delete the block between `<!-- dailybot-auto-activation: BEGIN -->` and `<!-- dailybot-auto-activation: END -->` |
 | `~/.cursor/rules/dailybot.mdc`, `.windsurf/rules/dailybot.md` | Auto-activation rule (file is the marker — same opt-in flow) | First time you accept the auto-activation prompt | `rm` the file |
+| `~/.claude/settings.json`, `~/.cursor/hooks.json` (or their repo-level equivalents, e.g. `.github/hooks/dailybot.json`) | Lifecycle-hook entries running `dailybot hook ...` for deterministic report reminders (opt-in, requires `dailybot-cli >= 1.12.0`; hook commands are local-only and never call the network) | First time you accept the hook-enforcement prompt | Remove the entries containing `dailybot hook` (or delete the dedicated file) |
 
 The skill does **not** modify any file in your project repos other than
 respecting `.dailybot/disabled` (read-only).
@@ -285,6 +298,7 @@ agent-skill/
         ├── report/
         │   ├── SKILL.md           — progress reporting
         │   ├── triggers.md        — auto-activation templates
+        │   ├── hooks.md           — deterministic hook enforcement (CLI >= 1.12.0)
         │   ├── significance.md    — when to report vs stay silent
         │   ├── writing-guide.md   — writing templates
         │   └── examples.md        — good vs bad examples

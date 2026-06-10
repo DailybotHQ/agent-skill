@@ -6,6 +6,13 @@ Dailybot skills after completing tasks or making broad edits — primarily the
 `dailybot-report` skill, but also to check messages at session start and send
 periodic health checks.
 
+> **Prefer hooks where available.** Trigger blocks are prompt instructions —
+> advisory, and forgettable in long sessions. Since `dailybot-cli` 1.12.0
+> the harness can enforce reporting deterministically via lifecycle hooks;
+> see [`hooks.md`](hooks.md). Install both when possible: the trigger block
+> teaches the behavior, the hooks guarantee it. On harnesses without hook
+> support (e.g. Cline), the trigger block is the only mechanism.
+
 Step 0 in [SKILL.md](SKILL.md) uses these templates **only after the developer
 explicitly confirms** the skill should write to a global agent config file.
 Each template is wrapped in a marker so the block can be located and removed

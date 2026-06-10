@@ -55,6 +55,15 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 > report's placement link as a `View:` line. Older CLIs still report fine —
 > the link is always in the API response body, just not printed — so this is
 > not a hard floor. See [`report/SKILL.md`](report/SKILL.md) Step 7.
+>
+> **`1.12.0` enhancement (recommended):** the `dailybot hook` command group
+> (`session-start` / `post-commit` / `activity` / `stop` / `dismiss`) lets
+> the agent harness remind the model **deterministically** to report
+> unreported work — including non-commit work — via lifecycle hooks, backed
+> by a local per-repo ledger. This is what makes reporting fully autonomous.
+> Not a hard floor either: below 1.12.0 the prompt triggers still work. See
+> [`report/hooks.md`](report/hooks.md) and the
+> [CLI hook docs](https://github.com/DailybotHQ/cli/blob/main/docs/AGENT_HOOKS.md).
 
 ### Why this minimum
 
@@ -167,6 +176,7 @@ the full step-by-step workflow.
 | Situation | Route to |
 |-----------|----------|
 | You completed a task/subtask, or edited 3+ files | **Report** → read [`report/SKILL.md`](report/SKILL.md) |
+| A Dailybot hook reminder was injected into your context ("commits have landed…" / "sustained work without a progress report…") | **Report** → read [`report/SKILL.md`](report/SKILL.md); if nothing significant happened, run `dailybot hook dismiss` instead — never ignore the reminder silently |
 | Starting a long work session or idle for 15+ minutes | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
 
 **Disambiguation:** "check in with the team" → **Health**; "complete my

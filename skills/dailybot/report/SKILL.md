@@ -94,6 +94,32 @@ If the developer accepts, briefly confirm:
 
 Then proceed to Step 1.
 
+### Step 0b — Hook enforcement (recommended, CLI >= 1.12.0)
+
+Trigger blocks are advisory — the model can forget them in long sessions.
+Since `dailybot-cli` **1.12.0**, the CLI ships a `dailybot hook` command
+group that the harness itself invokes at session start, after file edits,
+and at the end of every turn, making the reminders **deterministic**.
+
+If `dailybot --version` reports >= 1.12.0 and the current harness has a
+lifecycle-hook system, offer to install the hook config right after the
+trigger consent above (one combined prompt is fine). Read
+[`hooks.md`](hooks.md) for the per-harness file path, exact content, merge
+rules, and uninstall path — the same consent rules apply: show before
+writing, `DAILYBOT_AUTO_YES=1` counts as consent. If the developer declines
+or the CLI is older, the trigger block alone still works — do not nag.
+
+### Responding to injected Dailybot reminders
+
+When a hook injects a reminder ("commits have landed since the last
+report…" / "sustained work without a progress report…") into your context:
+
+- **Meaningful unit complete** (including non-commit work — research,
+  analysis, documents) → compose and send the report now (Steps 3–7).
+- **Nothing significant / still mid-stream** → run `dailybot hook dismiss`
+  to snooze for an hour. Either report or dismiss — never ignore the
+  reminder silently.
+
 ---
 
 ## Step 1 — Verify Setup
@@ -400,6 +426,7 @@ Reporting must **never block your primary work**. If the CLI is missing, auth fa
 ## Additional Resources
 
 - [`triggers.md`](triggers.md) — auto-activation trigger templates for each supported agent
+- [`hooks.md`](hooks.md) — deterministic hook enforcement (CLI >= 1.12.0): per-harness configs, reminder handling, `dismiss`
 - [`significance.md`](significance.md) — when to report and when to stay silent, with edge cases
 - [`writing-guide.md`](writing-guide.md) — writing templates by work type, action verbs, rate limiting
 - [`examples.md`](examples.md) — 15 side-by-side good vs bad comparisons
