@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] — 2026-06-10
+
+### Changes
+
+- Merge pull request #10 from DailybotHQ/feat/hook-enforcement-cli-1-12
+- feat(report): add deterministic hook enforcement via dailybot-cli 1.12.0
+
+
 ## [1.5.0] — 2026-06-09
 
 ### Changes
