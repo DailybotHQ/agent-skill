@@ -36,6 +36,8 @@ the same instructions other agents do.
 | Context detection + opt-out | [skills/dailybot/shared/context.sh](skills/dailybot/shared/context.sh) |
 | HTTP fallback patterns | [skills/dailybot/shared/http-fallback.md](skills/dailybot/shared/http-fallback.md) |
 | Auto-activation triggers | [skills/dailybot/report/triggers.md](skills/dailybot/report/triggers.md) |
+| Hook enforcement (deterministic reminders, CLI >= 1.12.0) | [skills/dailybot/report/hooks.md](skills/dailybot/report/hooks.md) |
+| Hooks architecture (contributor doc, with diagrams) | [docs/HOOKS_ARCHITECTURE.md](docs/HOOKS_ARCHITECTURE.md) |
 | Report writing guide | [skills/dailybot/report/writing-guide.md](skills/dailybot/report/writing-guide.md) |
 
 ## Project Overview
