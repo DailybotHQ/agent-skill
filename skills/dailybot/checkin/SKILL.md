@@ -1,7 +1,7 @@
 ---
 name: dailybot-checkin
 description: List and complete pending check-ins for the developer via Dailybot. Use when the developer asks to fill in their standup, answer daily questions, or complete a pending check-in. Do not use for free-text progress reports — those go through dailybot-report.
-version: "1.7.0"
+version: "1.7.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"✅","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}

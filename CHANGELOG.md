@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1] — 2026-06-12
+
+### Changes
+
+- Merge pull request #13 from DailybotHQ/chore/pin-cli-1.13.1
+- docs(chat): bump dailybot-cli pin reference to 1.13.1 (current published)
+
+
 ## [1.7.0] — 2026-06-12
 
 ### Changes
