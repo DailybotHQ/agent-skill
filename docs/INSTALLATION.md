@@ -146,6 +146,11 @@ cd ~/dailybot-skill
 - `~/.<agent>/skills/dailybot-messages` → `skills/dailybot/messages/`
 - `~/.<agent>/skills/dailybot-email` → `skills/dailybot/email/`
 - `~/.<agent>/skills/dailybot-health` → `skills/dailybot/health/`
+- `~/.<agent>/skills/dailybot-checkin` → `skills/dailybot/checkin/`
+- `~/.<agent>/skills/dailybot-kudos` → `skills/dailybot/kudos/`
+- `~/.<agent>/skills/dailybot-teams` → `skills/dailybot/teams/`
+- `~/.<agent>/skills/dailybot-forms` → `skills/dailybot/forms/`
+- `~/.<agent>/skills/dailybot-chat` → `skills/dailybot/chat/`
 
 The per-sub-skill symlinks are what make `dailybot-report` etc.
 discoverable as standalone slash commands in agents that surface them.
@@ -250,8 +255,9 @@ that the skill is discovered.
 
 A quick way to verify in any agent: ask it *"what dailybot skills are
 available?"* — a properly installed pack will list `dailybot` and the
-four sub-skills (`dailybot-report`, `dailybot-messages`,
-`dailybot-email`, `dailybot-health`).
+nine sub-skills (`dailybot-report`, `dailybot-messages`,
+`dailybot-email`, `dailybot-health`, `dailybot-checkin`,
+`dailybot-kudos`, `dailybot-teams`, `dailybot-forms`, `dailybot-chat`).
 
 To verify the symlink filesystem state directly:
 
@@ -260,8 +266,10 @@ ls -la ~/.claude/skills/   # or your agent's path
 ```
 
 You should see entries for `dailybot`, `dailybot-report`,
-`dailybot-messages`, `dailybot-email`, and `dailybot-health` (or just
-the `dailybot` directory if you used Method 5).
+`dailybot-messages`, `dailybot-email`, `dailybot-health`,
+`dailybot-checkin`, `dailybot-kudos`, `dailybot-teams`,
+`dailybot-forms`, and `dailybot-chat` (or just the `dailybot` directory
+if you used Method 5).
 
 ---
 

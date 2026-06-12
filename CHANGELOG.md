@@ -4,6 +4,24 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **`dailybot-chat` sub-skill** — send and edit Dailybot bot messages on the team's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat). Targets user DMs, channels, and whole teams. Supports **report-style threads** (a short headline plus up to 10 replies posted inside its thread in a single call) and **in-place edits** of the parent or any individual thread reply via the returned `bot_message_id`s. Documents the **dual auth model** for `POST /v1/send-message/` — accepts either the login Bearer token (sends *as the user*, role-scoped to what they can reach in their own org) or an organization API key (org-wide). Requires `dailybot-cli >= 1.13.0`. See [`skills/dailybot/chat/SKILL.md`](skills/dailybot/chat/SKILL.md).
+- **`setup.sh` symlinks `dailybot-chat` and `dailybot-teams`** — the teams sub-skill was previously missing from the SKILLS array (pre-existing oversight); both are now installed by `setup.sh`. Bats coverage extended to assert all nine sub-skill symlinks exist after install.
+
+### Changed
+
+- Router `skills/dailybot/SKILL.md` updated: "What it does" table now lists nine capabilities (added Chat row), routing rules surface chat-intent phrases, and a new Report-vs-Chat disambiguation note explains when to pick which.
+- `README.md` table, install-method snippets, network-call table, repo layout diagram, and uninstall command updated to reflect the new sub-skill and the previously-missing `dailybot-teams` symlink.
+- `docs/INSTALLATION.md` symlink list and verification checklist updated to show all nine sub-skills.
+- `docs/API_REFERENCE.md` and `shared/http-fallback.md` `POST /v1/send-message/` row expanded to document threads, the dual auth, and the in-place edit semantics — mirroring the CLI's `docs/API_REFERENCE.md`.
+
+### Notes
+
+- The CLI side ([`DailybotHQ/cli` PR #25](https://github.com/DailybotHQ/cli/pull/25), merged 2026-06-12) ships the underlying `dailybot chat send` / `chat update` command group, `--thread-message` (≤10 per call), reply-id editing, and the friendlier error translations (`cli_send_message_target_not_allowed`, `invalid_thread_responses`, `429`). Released as **[`dailybot-cli 1.13.0`](https://pypi.org/project/dailybot-cli/1.13.0/)** on 2026-06-12 ([release notes](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0)).
+
 ## [1.6.1] — 2026-06-10
 
 ### Changes

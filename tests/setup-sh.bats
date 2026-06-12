@@ -35,6 +35,11 @@ teardown() {
     [ -L "$FAKE_HOME/.claude/skills/dailybot-messages" ]
     [ -L "$FAKE_HOME/.claude/skills/dailybot-email" ]
     [ -L "$FAKE_HOME/.claude/skills/dailybot-health" ]
+    [ -L "$FAKE_HOME/.claude/skills/dailybot-checkin" ]
+    [ -L "$FAKE_HOME/.claude/skills/dailybot-kudos" ]
+    [ -L "$FAKE_HOME/.claude/skills/dailybot-teams" ]
+    [ -L "$FAKE_HOME/.claude/skills/dailybot-forms" ]
+    [ -L "$FAKE_HOME/.claude/skills/dailybot-chat" ]
 }
 
 @test "is idempotent: running twice produces same symlinks without error" {

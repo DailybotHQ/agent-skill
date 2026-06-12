@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, and run the full forms lifecycle (list, submit, update, transition between workflow states). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), and send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "1.6.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -21,13 +21,14 @@ This is the canonical, first-party integration. Source of truth:
 
 ## What it does
 
-Eight coordinated capabilities, with smart routing between them:
+Nine coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
 | **Progress reports** | `dailybot-report` | After meaningful work — a completed task, or a batch of edits to 3+ files |
 | **Message polling** | `dailybot-messages` | Session start, idle moments, or when the developer asks "what should I work on?" |
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
+| **Chat** | `dailybot-chat` | Developer wants to send / edit a bot message on Slack, Teams, Discord, or Google Chat — to a channel, DMs, or whole team. Supports report-style threads (headline + replies in one call) and editing the parent or any reply afterward |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
 | **Check-ins** | `dailybot-checkin` | Developer asks to complete a standup or fill in a pending check-in |
 | **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate or a whole team's contribution |
@@ -64,6 +65,15 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 > Not a hard floor either: below 1.12.0 the prompt triggers still work. See
 > [`report/hooks.md`](report/hooks.md) and the
 > [CLI hook docs](https://github.com/DailybotHQ/cli/blob/main/docs/AGENT_HOOKS.md).
+>
+> **`1.13.0` floor for `dailybot-chat`** ([PyPI](https://pypi.org/project/dailybot-cli/1.13.0/),
+> released **2026-06-12**): the `dailybot chat send` / `chat update`
+> command group first ships in 1.13.0, together with login-Bearer auth on
+> `/v1/send-message/` (so the developer doesn't need an org API key to
+> send a chat message), report-style threads via `--thread-message`
+> (≤10 per call), and individually-editable thread reply ids. The
+> `dailybot-chat` sub-skill requires this minimum; the other sub-skills
+> are unaffected. See [`chat/SKILL.md`](chat/SKILL.md).
 
 ### Why this minimum
 
@@ -170,6 +180,7 @@ the full step-by-step workflow.
 | "give kudos to Jane", "recognize Alice", "kudos al equipo Engineering", "felicita al team de QA" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
 | "list my teams", "who's in QA?", "resolve the Engineering team", or another skill needs a team UUID | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) |
 | "list my forms", "submit the retro form", "continue my release-form draft", "transition the release to released", "show me the last form response" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
+| "send a Slack message", "DM Sergio in chat", "post the deploy report to #releases (with a thread)", "edit that chat message I just sent", "ping the Engineering team in chat" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) |
 
 ### Auto-activation (no explicit request)
 
@@ -182,6 +193,13 @@ the full step-by-step workflow.
 **Disambiguation:** "check in with the team" → **Health**; "complete my
 check-in" or "fill in standup" → **Checkin**. The word "check-in" alone
 with no verb defaults to **Checkin** (the structured questionnaire).
+
+**Report vs Chat.** "Report this to Dailybot" / "tell my team what we built"
+defaults to **Report** (dashboard). Switch to **Chat** only when the
+developer explicitly mentions a chat platform / channel / channel id, or
+says "send a message" / "ping in chat" / "post to #channel". Chat is
+externally visible to other humans on the connected platform; report goes
+to the Dailybot dashboard.
 
 If the intent is ambiguous, default to **Report** — it's the most
 common use case.
