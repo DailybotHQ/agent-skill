@@ -22,6 +22,7 @@ export DAILYBOT_API_KEY="<their-key>"
 | `GET` | `/v1/agent-health/?agent_name=<n>` | Retrieve last health status |
 | `GET` | `/v1/agent-messages/?agent_name=<n>&delivered=false` | Poll for undelivered messages |
 | `POST` | `/v1/agent-email/send/` | Send an email on behalf of your agent |
+| `POST` | `/v1/send-message/` | Send / edit a bot chat message (DM, channel, team). Accepts `X-API-KEY` **or** `Authorization: Bearer`. Targets `target_users` / `target_channels` / `target_teams`; optional `thread_responses[]` (≤10) posts replies in the parent's thread in the same call; passing `bot_message_id` edits that message (parent or reply). |
 
 ---
 

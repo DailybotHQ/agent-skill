@@ -87,7 +87,12 @@ agent-skill/
     ├── report/                            ← progress reporting + auto-activation
     ├── messages/SKILL.md
     ├── email/SKILL.md
-    └── health/SKILL.md
+    ├── health/SKILL.md
+    ├── checkin/SKILL.md
+    ├── kudos/SKILL.md
+    ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
+    ├── forms/SKILL.md
+    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0)
 ```
 
 The hard rule: **anything you put outside `skills/dailybot/` is invisible
@@ -314,9 +319,10 @@ Co-Authored-By: <agent name + version> <noreply@anthropic.com>
 `refactor` (no user-visible change).
 
 **Scopes:** `skill` (general pack), `report` / `messages` / `email` /
-`health` (specific sub-skill), `shared` (auth.md, context.sh,
-http-fallback.md), `setup` (setup.sh), `ci` (.github/), `docs` (docs/),
-`release` (versioning, CHANGELOG).
+`health` / `checkin` / `kudos` / `teams` / `forms` / `chat` (specific
+sub-skill), `shared` (auth.md, context.sh, http-fallback.md), `setup`
+(setup.sh), `ci` (.github/), `docs` (docs/), `release` (versioning,
+CHANGELOG).
 
 Examples (from this repo's history):
 
