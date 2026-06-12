@@ -67,8 +67,22 @@ out/
 tmp/*
 !tmp/.gitkeep
 
-# Accidentally created skill runtime markers during local testing
-/.dailybot/
+# Local-only Dailybot runtime state can drop into `.dailybot/` during
+# `dailybot login`, `dailybot hook ...` invocations, etc. Ignore the
+# directory's contents broadly so that scratch state does not get
+# committed, but **track `.dailybot/profile.json`** — that file is the
+# repo's committed identity pin (per
+# `skills/dailybot/shared/repo-profile.md`) and MUST be visible to every
+# contributor and every agent.
+#
+# NOTE: the glob `/.dailybot/*` (rather than `/.dailybot/`) is required
+# for the `!` exception below to take effect. Per git's gitignore docs:
+# "It is not possible to re-include a file if a parent directory of
+# that file is excluded." `/.dailybot/*` excludes the *contents* one
+# file at a time; `/.dailybot/` would exclude the directory itself and
+# short-circuit any inclusion attempt.
+/.dailybot/*
+!/.dailybot/profile.json
 
 
 # VS Code workspace settings: personal `.vscode/` (and `.vscode_*` variants
