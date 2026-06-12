@@ -26,7 +26,7 @@ across humans and agents.
 | **dailybot-checkin** | List and complete pending check-ins (daily standups, weekly surveys). Requires user login session. |
 | **dailybot-kudos** | Give kudos to a teammate to recognize their contributions. Team-visible recognition through Dailybot. |
 | **dailybot-forms** | List and submit form responses (feedback surveys, retros, pulse checks). Requires user login session. |
-| **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 1.13.0`. |
+| **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 1.13.0` (current published: [`1.13.1`](https://pypi.org/project/dailybot-cli/1.13.1/)). |
 
 A root **dailybot** meta-skill acts as a router — it describes all
 capabilities and routes to the right sub-skill based on the developer's
@@ -315,7 +315,7 @@ agent-skill/
         ├── kudos/SKILL.md         — user + team recognition (user-scoped)
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
-        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0)
+        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest 1.13.1)
 ```
 
 ## Execution Paths
