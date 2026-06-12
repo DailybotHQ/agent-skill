@@ -239,17 +239,29 @@ Model identifier examples: `"claude-sonnet-4-6"`, `"o3"`, `"gemini-2.5-pro"`, `"
 >
 > **Timeout**: Allow at least 30 seconds for CLI commands to complete. Do not use a shorter timeout.
 
+> ### Pre-flight (mandatory) — respect the repo profile
+>
+> **Before constructing the command, do the repo-profile pre-flight from the router:** [`../SKILL.md` § Mandatory pre-flight](../SKILL.md#mandatory-pre-flight-respect-the-repo-profile). Full procedure in [`../shared/repo-profile.md`](../shared/repo-profile.md). One-liner detection:
+>
+> ```bash
+> ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+> [ -f "$ROOT/.dailybot/profile.json" ] && cat "$ROOT/.dailybot/profile.json"
+> ```
+>
+> The examples below show `--name` and `--metadata` **for the case where the repo has no `.dailybot/profile.json`** (no repo profile, no pinned identity). **If a repo profile exists, omit the flags it already provides** — see the per-key table in the router. The `Plain report (with repo profile)` block at the end shows what each example collapses to in that case.
+
 ### Flag reference
 
-| Flag | Short | Description |
-|------|-------|-------------|
-| `--name` | `-n` | Agent worker name (omit if default profile configured) |
-| `--json-data` | `-j` | Structured JSON data |
-| `--metadata` | `-d` | JSON metadata (repo, branch, model, etc.) |
-| `--milestone` | `-m` | Mark as a milestone accomplishment |
-| `--co-authors` | `-c` | Co-author email or UUID (repeatable, or comma-separated) |
+| Flag | Short | Description | Omit if `.dailybot/profile.json` sets |
+|------|-------|-------------|---------------------------------------|
+| `--name` | `-n` | Agent worker name | `name` |
+| `--profile` | `-p` | Named auth profile slug (from `agents.json`) | `profile` |
+| `--metadata` | `-d` | JSON metadata (repo, branch, model, etc.) | each `default_metadata.<key>` (omit those keys from the JSON; pass only what the profile does NOT set) |
+| `--json-data` | `-j` | Structured JSON data | (always pass — not affected by repo profile) |
+| `--milestone` | `-m` | Mark as a milestone accomplishment | (always pass when relevant — not affected by repo profile) |
+| `--co-authors` | `-c` | Co-author email or UUID (repeatable, or comma-separated) | (always pass when relevant — not affected by repo profile) |
 
-### Plain report
+### Plain report — no repo profile
 
 ```bash
 dailybot agent update "<message>" \
@@ -257,7 +269,7 @@ dailybot agent update "<message>" \
   --metadata '<metadata_json>'
 ```
 
-### Rich report (multiple deliverables)
+### Rich report (multiple deliverables) — no repo profile
 
 ```bash
 dailybot agent update "<message>" \
@@ -266,7 +278,7 @@ dailybot agent update "<message>" \
   --metadata '<metadata_json>'
 ```
 
-### Milestone report
+### Milestone report — no repo profile
 
 ```bash
 dailybot agent update "<message>" \
@@ -276,13 +288,47 @@ dailybot agent update "<message>" \
   --metadata '<metadata_json>'
 ```
 
-### Using a named profile
+### With repo profile (the common case)
 
-If a non-default profile was configured during auth setup:
+When `.dailybot/profile.json` sets `name` (and optionally `default_metadata`), the same three patterns collapse to:
+
+```bash
+# Plain
+dailybot agent update "<message>" \
+  --metadata '<metadata_json_minus_profile_keys>'
+
+# Rich
+dailybot agent update "<message>" \
+  --json-data '<structured_json>' \
+  --metadata '<metadata_json_minus_profile_keys>'
+
+# Milestone
+dailybot agent update "<message>" \
+  --milestone \
+  --json-data '<structured_json>' \
+  --metadata '<metadata_json_minus_profile_keys>'
+```
+
+Where `<metadata_json_minus_profile_keys>` is your inline metadata **with every key already set by `default_metadata` removed** (the CLI shallow-merges them server-side; passing them inline is at best redundant, at worst overrides them silently).
+
+Worked example — given `{"name":"CLI","default_metadata":{"repo":"cli"}}` at repo root, a plain report becomes:
+
+```bash
+dailybot agent update "Implemented X to fix Y." \
+  --metadata '{"model":"claude-opus-4-7"}'
+```
+
+(no `--name`, no `repo` in `--metadata` — both come from the profile).
+
+### Using a named profile (no repo profile)
+
+If a non-default global profile was configured during auth setup AND there is no repo profile pinning it:
 
 ```bash
 dailybot agent --profile <profile_name> update "<message>" ...
 ```
+
+If a repo profile sets `profile`, omit `--profile` from the command line.
 
 ---
 

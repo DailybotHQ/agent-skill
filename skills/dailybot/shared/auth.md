@@ -280,6 +280,13 @@ dailybot agent profiles 2>&1
 If a default profile exists — note the name. You can omit `--name` on
 subsequent CLI commands.
 
+> **Repo profile takes precedence over the global default profile.** If
+> the repo ships a `.dailybot/profile.json` with a `name` field, that
+> name wins over whatever the global default is — and you must omit
+> `--name` regardless of what the global default is. Same for
+> `default_metadata` keys. Full rules:
+> [`shared/repo-profile.md`](repo-profile.md).
+
 If no profile exists and authentication succeeded, create one automatically.
 This is metadata only (no install, no network call beyond the CLI command),
 so no separate confirmation is needed:
