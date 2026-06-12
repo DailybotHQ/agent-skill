@@ -2,6 +2,8 @@
 
 Side-by-side comparisons of weak and strong reports. Use these as a calibration reference.
 
+> **About `--name` and `--metadata` in the rich examples below:** every example assumes the repo does **not** ship a `.dailybot/profile.json` — i.e. there is no pinned identity, so each call must pass `--name` explicitly and put `repo` / `agent_tool` / `agent_name` inline in `--metadata`. **If the repo does ship a `.dailybot/profile.json`, omit every flag the profile already sets** (see [`SKILL.md` § Step 4A "Pre-flight"](SKILL.md#step-4a--send-report-via-cli) and [`../shared/repo-profile.md`](../shared/repo-profile.md) for the full procedure). Don't ever copy these example flag lists wholesale into a repo with a pinned profile — it silently overrides the developer's pin.
+
 ---
 
 ## Plain Reports

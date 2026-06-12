@@ -204,8 +204,32 @@ to the Dailybot dashboard.
 If the intent is ambiguous, default to **Report** — it's the most
 common use case.
 
+### Mandatory pre-flight: respect the repo profile
+
+> **This applies to every sub-skill, every turn, no exceptions.** Before
+> constructing any `dailybot <verb>` command line, the agent **MUST**
+> walk up from `$PWD` looking for a `.dailybot/` directory. If
+> `.dailybot/profile.json` exists in the closest ancestor, **omit from
+> the command line every flag that the profile already provides**:
+>
+> | Profile sets | You must omit |
+> |---|---|
+> | `name` | `--name` / `-n` |
+> | `profile` (slug) | `--profile` / `-p` |
+> | `default_metadata.<key>` | each `<key>` from your inline `--metadata` / `-d` JSON |
+>
+> Passing those flags **silently overrides** the developer-pinned
+> profile (per the CLI's [auth resolution order](https://github.com/DailybotHQ/cli/blob/main/AGENTS.md#14-auth-resolution-order-do-not-break))
+> — that defeats the whole point of `.dailybot/profile.json`.
+>
+> **Full procedure, detection one-liners, worked examples, and the
+> per-sub-skill contract:** [`shared/repo-profile.md`](shared/repo-profile.md).
+> Read it the first time you invoke any Dailybot sub-skill from a new
+> repo; cache the answer for the rest of the turn.
+
 ### Shared resources used by every sub-skill
 
+- [`shared/repo-profile.md`](shared/repo-profile.md) — **mandatory pre-flight** for honouring `.dailybot/profile.json` (see above)
 - [`shared/auth.md`](shared/auth.md) — authentication (CLI login, API
   key, agent registration, profile setup)
 - [`shared/context.sh`](shared/context.sh) — automated repo / branch /

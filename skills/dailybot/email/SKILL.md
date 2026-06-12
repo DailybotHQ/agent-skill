@@ -158,7 +158,7 @@ dailybot agent email send \
 | `--to` | Recipient email address (repeatable for multiple recipients) |
 | `--subject` | Email subject line (max 512 characters) |
 | `--body-html` | HTML email body |
-| `--name` | Agent name (omit if default profile configured) |
+| `--name` | Agent name. **Omit if the repo's `.dailybot/profile.json` sets `name`** — see [`../SKILL.md` § Mandatory pre-flight](../SKILL.md#mandatory-pre-flight-respect-the-repo-profile) and [`../shared/repo-profile.md`](../shared/repo-profile.md). |
 
 ---
 
