@@ -4,6 +4,15 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] — 2026-06-12
+
+### Changes
+
+- Merge pull request #12 from DailybotHQ/feat/dailybot-chat-skill
+- docs(chat): pin dailybot-cli 1.13.0 as the published floor
+- feat(chat): add dailybot-chat sub-skill (Slack/Teams/Discord/Google Chat)
+
+
 ## [Unreleased]
 
 ### Added
