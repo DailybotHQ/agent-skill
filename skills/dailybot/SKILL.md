@@ -66,10 +66,11 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 > [`report/hooks.md`](report/hooks.md) and the
 > [CLI hook docs](https://github.com/DailybotHQ/cli/blob/main/docs/AGENT_HOOKS.md).
 >
-> **`1.13.0` floor for `dailybot-chat`:** the `dailybot chat send` /
-> `chat update` command group ships in 1.13.0, together with login-Bearer
-> auth on `/v1/send-message/` (so the developer doesn't need an org API key
-> to send a chat message), report-style threads via `--thread-message`
+> **`1.13.0` floor for `dailybot-chat`** ([PyPI](https://pypi.org/project/dailybot-cli/1.13.0/),
+> released **2026-06-12**): the `dailybot chat send` / `chat update`
+> command group first ships in 1.13.0, together with login-Bearer auth on
+> `/v1/send-message/` (so the developer doesn't need an org API key to
+> send a chat message), report-style threads via `--thread-message`
 > (≤10 per call), and individually-editable thread reply ids. The
 > `dailybot-chat` sub-skill requires this minimum; the other sub-skills
 > are unaffected. See [`chat/SKILL.md`](chat/SKILL.md).

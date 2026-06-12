@@ -20,7 +20,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Notes
 
-- The CLI side (`DailybotHQ/cli` PR #25) ships the underlying `dailybot chat send` / `chat update` command group, `--thread-message` (≤10 per call), reply-id editing, and the friendlier error translations (`cli_send_message_target_not_allowed`, `invalid_thread_responses`, `429`). The skill assumes that release is published as `dailybot-cli 1.13.0`.
+- The CLI side ([`DailybotHQ/cli` PR #25](https://github.com/DailybotHQ/cli/pull/25), merged 2026-06-12) ships the underlying `dailybot chat send` / `chat update` command group, `--thread-message` (≤10 per call), reply-id editing, and the friendlier error translations (`cli_send_message_target_not_allowed`, `invalid_thread_responses`, `429`). Released as **[`dailybot-cli 1.13.0`](https://pypi.org/project/dailybot-cli/1.13.0/)** on 2026-06-12 ([release notes](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0)).
 
 ## [1.6.1] — 2026-06-10
 

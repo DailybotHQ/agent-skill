@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Chat
 
-> **Requires `dailybot-cli >= 1.13.0`** (ships the `dailybot chat send` / `chat update` command group). For login-Bearer auth on `/v1/send-message/` (so the developer can send without an org API key), the same minimum applies. If `dailybot --version` reports below 1.13.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 1.13.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.13.0/), released 2026-06-12). 1.13.0 is what first shipped the `dailybot chat send` / `chat update` command group, the `--thread-message` flag (≤10 replies per call, each independently editable), and the login-Bearer auth path on `/v1/send-message/` (so the developer can send without an org API key). Below 1.13.0, the `dailybot chat` group does not exist — ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You send **Dailybot bot messages** on the developer's behalf to the organization's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams (expanded to member DMs server-side). This skill is the right surface for:
 
