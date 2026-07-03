@@ -31,7 +31,7 @@ Ten coordinated capabilities, with smart routing between them:
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
 | **Chat** | `dailybot-chat` | Developer wants to send / edit a bot message on Slack, Teams, Discord, or Google Chat — to a channel, DMs, or whole team. Supports report-style threads (headline + replies in one call) and editing the parent or any reply afterward |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
-| **Check-ins** | `dailybot-checkin` | Developer asks to complete a standup or fill in a pending check-in |
+| **Check-ins** | `dailybot-checkin` | Full check-in lifecycle: list/status, complete, inspect questions, history, edit, reset, backfill/future-date |
 | **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate or a whole team's contribution |
 | **Teams** | `dailybot-teams` | List teams, inspect members, or resolve a team name → UUID (used as a resolver by other skills) |
 | **Forms** | `dailybot-forms` | Developer wants to list, submit, update, or transition forms — including workflow-state forms with audience permissions |
@@ -85,6 +85,11 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 > AI chat is interactive-only (`dailybot interactive`) and the user-scoped
 > commands require a Bearer login. The `dailybot-ask` sub-skill requires this
 > minimum. See [`ask/SKILL.md`](ask/SKILL.md) and [`shared/auth.md`](shared/auth.md) § 4.
+>
+> 1.15.0 also expands **check-ins** to the full lifecycle — `dailybot checkin
+> status / show / history / edit / reset` plus backfill/future-dating — all
+> headless with `--json`. See [`checkin/SKILL.md`](checkin/SKILL.md) § "The full
+> check-in lifecycle". Below 1.15.0 only `checkin list` + `complete` exist.
 
 ### Why this minimum
 
@@ -188,7 +193,7 @@ the full step-by-step workflow.
 | "check messages", "do I have messages?", "what should I work on?", "any instructions?" | **Messages** → read [`messages/SKILL.md`](messages/SKILL.md) |
 | "email this to Alice", "send an email", "send a summary to the team" | **Email** → read [`email/SKILL.md`](email/SKILL.md) |
 | "go online", "announce status", "health check" | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
-| "complete my check-in", "fill in my standup", "answer my dailybot", "any pending check-ins?" | **Checkin** → read [`checkin/SKILL.md`](checkin/SKILL.md) |
+| "complete my check-in", "fill in my standup", "check-in status", "what does my standup ask?", "check-in history", "edit / reset my check-in", "submit my standup for yesterday" | **Checkin** → read [`checkin/SKILL.md`](checkin/SKILL.md) |
 | "give kudos to Jane", "recognize Alice", "kudos al equipo Engineering", "felicita al team de QA" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
 | "list my teams", "who's in QA?", "resolve the Engineering team", or another skill needs a team UUID | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) |
 | "list my forms", "submit the retro form", "continue my release-form draft", "transition the release to released", "show me the last form response" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |

@@ -23,7 +23,7 @@ across humans and agents.
 | **dailybot-messages** | Check for pending messages and instructions from the team. The "what should I work on next?" skill. |
 | **dailybot-email** | Send emails via Dailybot. Per-recipient first-use approval, mandatory pre-send confirmation, and a credential-pattern scan run before every send. |
 | **dailybot-health** | Announce agent online/offline status. For long-running or scheduled agents to stay visible and pick up instructions. |
-| **dailybot-checkin** | List and complete pending check-ins (daily standups, weekly surveys). Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
+| **dailybot-checkin** | Full check-in lifecycle: list/status, complete, inspect questions & schedule, response history, edit/reset a response, and backfill or future-date — all headless with `--json`. Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
 | **dailybot-kudos** | Give kudos to a teammate to recognize their contributions. Team-visible recognition through Dailybot. |
 | **dailybot-forms** | List and submit form responses (feedback surveys, retros, pulse checks). Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
 | **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 1.13.0`. |
@@ -224,7 +224,9 @@ All outbound calls go to `api.dailybot.com` over HTTPS:
 | `GET /v1/agent-messages/` | `dailybot-messages` skill | `agent_name` query param |
 | `POST /v1/agent-email/send/` | `dailybot-email` skill (after confirmation + secret scan) | `agent_name`, `to`, `subject`, `body_html`, `metadata` |
 | `GET /v1/cli/status/` | `dailybot-checkin` skill | `X-API-KEY` **or** Bearer |
-| `POST /v1/checkins/<uuid>/responses/` | `dailybot-checkin` skill | `X-API-KEY` or Bearer, responses array |
+| `GET /v1/checkins/` `GET /v1/checkins/<uuid>/` | `dailybot-checkin` (status/show) | `X-API-KEY` or Bearer; `?date&include_summary` |
+| `GET /v1/templates/<uuid>/` | `dailybot-checkin` (show questions) | `X-API-KEY` or Bearer; `?render_special_vars&followup_id` |
+| `GET/POST/PUT/DELETE /v1/checkins/<uuid>/responses/` | `dailybot-checkin` (history/complete/edit/reset) | `X-API-KEY` or Bearer; `?date_start&date_end` |
 | `GET /v1/forms/` | `dailybot-forms` skill | `X-API-KEY` **or** Bearer |
 | `POST /v1/forms/<uuid>/responses/` | `dailybot-forms` skill | `X-API-KEY` or Bearer, content map |
 | `GET /v1/users/` | `dailybot-kudos` and `dailybot-chat` skills (recipient resolution) | `X-API-KEY` **or** Bearer |

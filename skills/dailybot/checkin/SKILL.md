@@ -1,6 +1,6 @@
 ---
 name: dailybot-checkin
-description: List and complete pending check-ins for the developer via Dailybot. Use when the developer asks to fill in their standup, answer daily questions, or complete a pending check-in. Do not use for free-text progress reports — those go through dailybot-report.
+description: Drive the full check-in lifecycle via Dailybot — list and complete pending check-ins, see pending/completed status for a day, inspect a check-in's questions and schedule, browse response history, edit or reset a submitted response, and backfill or future-date responses. Works headless with an API key. Use when the developer asks to fill in their standup, answer daily questions, check what check-ins they have, edit or reset a check-in, or review past check-in responses. Do not use for free-text progress reports — those go through dailybot-report.
 version: "1.7.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -31,8 +31,12 @@ pending check-ins. (On CLIs older than 1.15.0, these required a Bearer session �
 
 ## When to Use
 
-- The developer asks "complete my check-in", "fill in my standup", "answer my dailybot"
-- The developer asks "what check-ins do I have?", "any pending standups?"
+- "complete my check-in", "fill in my standup", "answer my dailybot"
+- "what check-ins do I have?", "any pending standups?", "check-in status"
+- "what does my standup ask?" / inspect a check-in's questions or schedule (`show`)
+- "show my past check-ins", "check-in history"
+- "edit / update my check-in answer", "reset / delete today's check-in" (`edit` / `reset`)
+- "submit my standup for yesterday / for a specific date" (backfill / future-date)
 - At the start of a work session when the developer wants to catch up on rituals
 
 Do **not** use this skill for free-text progress reports — route those to
@@ -165,6 +169,83 @@ dailybot checkin complete <followup_uuid> \
 | `0` | Success |
 | `3` | Not authenticated — guide through `dailybot login` |
 | `7` | User aborted the confirmation prompt |
+
+---
+
+## Step 3.5 — The full check-in lifecycle (`dailybot-cli >= 1.15.0`)
+
+Beyond `list` + `complete`, the CLI covers the whole check-in lifecycle. **Every
+command below takes `--json` and works headless with an API key** — this is what
+lets an agent do almost everything with check-ins from the terminal.
+
+### Status for a day
+
+```bash
+dailybot checkin status [--date YYYY-MM-DD] [--json]
+```
+
+Each check-in with its **pending/completed** state for that day (default today).
+JSON: `{ "date", "count", "checkins": [{ uuid, name, response_completed, ... }] }`.
+
+### Inspect a check-in's questions & schedule
+
+```bash
+dailybot checkin show <followup_uuid> [--json]
+```
+
+Name, schedule (frequency / time / timezone), and every question with its type
+and UUID. Use this to know **what** a check-in asks (and each question's `uuid`)
+before completing or editing it.
+
+### Browse response history
+
+```bash
+dailybot checkin history <followup_uuid> --days 7 [--json]
+dailybot checkin history <followup_uuid> --from 2026-06-01 --to 2026-06-30 --json
+```
+
+Your past responses over a date range (date, completed, answer summary).
+
+### Edit an existing response
+
+```bash
+dailybot checkin edit <followup_uuid> -a 0="Updated answer" --yes [--json]
+dailybot checkin edit <followup_uuid> [--date YYYY-MM-DD]   # prompts each question with the current value
+```
+
+Overrides specific answers on the already-submitted response, then re-submits.
+Use `dailybot checkin history`/`show` first to learn the question order.
+
+### Reset (delete) a response
+
+```bash
+dailybot checkin reset <followup_uuid> [--date YYYY-MM-DD] [--yes] [--json]
+```
+
+Deletes your own response for a day (confirms first unless `--yes` / `--json`).
+
+### Backfill (past) & future-dating
+
+`complete` accepts `--response-date`; `edit` / `reset` / `history` accept
+`--date` (or `--from/--to`). The server may refuse when the check-in disallows
+it — the CLI maps the `code` to a friendly message (and includes it in `--json`
+errors):
+
+| `code` | Meaning |
+|--------|---------|
+| `previous_responses_are_not_allowed` | Backfill is disabled for this check-in |
+| `future_responses_are_not_allowed` | Future-dating is disabled |
+| `followup_not_allow_responses_before_trigger_time` | Too early (before the trigger time) |
+| `user_is_not_a_followup_member` | You're not a participant |
+| `responses_not_allowed_on_inactive_followup` | The check-in is inactive |
+| `template_questions_version_conflict` | Questions changed — re-run `show` and retry |
+| `response_date_format_is_invalid` | Use `YYYY-MM-DD` |
+
+### Interactive terminal chat
+
+In `dailybot ask` (the AI chat), the native slash commands `/checkins`,
+`/checkin edit`, and `/checkin reset` drive these same flows with numbered
+prompts — handy for humans; agents should use the headless commands above.
 
 ---
 
