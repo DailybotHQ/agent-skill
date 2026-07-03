@@ -284,13 +284,13 @@ In `.dailybot/profile.json` at the repo root, under the CLI's free-form `vars` n
 
 ```json
 {
-  "name": "API Services",
-  "default_metadata": { "repo": "api-services" },
+  "name": "My Team",
+  "default_metadata": { "repo": "my-service" },
   "vars": {
-    "active_organization_uuid": "00e2b30f-b581-44ae-8981-4cdbd060b78d",
+    "active_organization_uuid": "<your-org-uuid>",
     "custom_form_skills": {
       "by_uuid": {
-        "65de0ec6-2353-4e17-94d7-7beaa905e92a": ".agents/skills/dailybot-custom/coderelease-form"
+        "<form-uuid>": ".agents/skills/dailybot-custom/coderelease-form"
       },
       "by_slug": {
         "code-release-form": ".agents/skills/dailybot-custom/coderelease-form"

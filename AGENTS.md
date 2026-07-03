@@ -133,6 +133,32 @@ bash scripts/verify-cdn.sh
 All code, comments, documentation, and commit messages MUST be in English.
 This is a public open-source repo consumed worldwide.
 
+### 1.a Open-source privacy hygiene — this repo is PUBLIC and SHIPS to user machines
+
+`DailybotHQ/agent-skill` is **public and open-source**, and everything under
+`skills/dailybot/` is **installed onto end users' machines**. Never commit
+**real internal or personal data** into any tracked file (SKILL.md, docs,
+scripts, examples) — it's world-readable in git history *and* shipped to users.
+This applies even to "just an example":
+
+- **No real credentials/tokens** — no API keys, Bearer tokens, or secrets. Use
+  `DAILYBOT_API_KEY` / `<your-api-key>` placeholders.
+- **No real identifiers or PII** — no real organization/user/form UUIDs, no real
+  emails or names in examples. Use placeholders: `<your-org-uuid>`, `<form-uuid>`,
+  `me@example.com`, `Jane Doe`, `My Team`, `my-service`. (`security@dailybot.com`
+  and `ops@dailybot.com` are the *intended* public contacts and are fine.)
+- **No internal infrastructure or private repo names** — do not name internal
+  Dailybot repos, hostnames, or internal skill paths in shipped content. When an
+  example needs a repo name or a "reference implementation", describe it
+  generically (`.agents/skills/dailybot-custom/<form-slug>/`) rather than
+  pointing at a real internal repo.
+- **Scratch stays in `tmp/`** — probe output, screenshots, and API dumps with
+  real data live in `tmp/` (gitignored) and are never promoted into the repo.
+  Prefer `git add -u` + explicit paths over `git add -A`.
+
+When in doubt, genericize. Vulnerabilities go to `security@dailybot.com`
+([SECURITY.md](SECURITY.md)), never a public issue.
+
 ### 2. The runtime artifact is `skills/dailybot/` — keep it pure
 
 If you create a new file or directory, ask: *"does this need to be on the

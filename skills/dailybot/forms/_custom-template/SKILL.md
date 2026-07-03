@@ -114,7 +114,7 @@ What does the agent do when:
 
 ## 7 — Reference implementation
 
-For a complete reference of this template applied to a real workflow form, see the Dailybot-internal code-release skill at `api-services/.agents/skills/dailybot-custom/coderelease-form/SKILL.md` (ships in the `api-services` repo, separate from this skill pack). It demonstrates per-state validation, autofill from repo metadata, and channel-routing reminders end-to-end.
+A complete reference implementation of this template lives as a custom skill at `.agents/skills/dailybot-custom/<form-slug>/SKILL.md` in the consuming repo (a customer- or team-owned namespace, separate from this skill pack). Such a skill demonstrates per-state validation, autofill from repo metadata, and channel-routing reminders end-to-end.
 
 ---
 
