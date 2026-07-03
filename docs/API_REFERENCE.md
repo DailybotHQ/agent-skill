@@ -245,6 +245,7 @@ All Dailybot operations have CLI equivalents. Once authenticated, use these dire
 | Send email | `dailybot agent email send --to alice@company.com --to bob@company.com --subject "Report" --body-html "<p>Done</p>" --name "your-agent-name"` |
 | Register webhook | `dailybot agent webhook register --url https://your-server.com/hook --secret your-token --name "your-agent-name"` |
 | Unregister webhook | `dailybot agent webhook unregister --name "your-agent-name"` |
+| Ask the Dailybot AI (headless) | `dailybot ask "What are my pending check-ins?" --json` (requires CLI >= 1.15.0) |
 
 ---
 

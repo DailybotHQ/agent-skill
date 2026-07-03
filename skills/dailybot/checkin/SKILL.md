@@ -14,16 +14,18 @@ You help developers complete their pending check-ins (daily standups, weekly sur
 
 ---
 
-## Auth model — user-scoped commands
+## Auth model — API key or login
 
-Check-in commands require a **Bearer token** (user session), not an API key.
-The developer must be logged in via `dailybot login`. This is the same
-session used by the webapp — it scopes actions to the logged-in human's
-permissions and pending check-ins.
+Check-in commands accept **either** a Bearer login session (`dailybot login`)
+**or** an org API key (`DAILYBOT_API_KEY`) — as of `dailybot-cli >= 1.15.0`.
+A login session is the same one used by the webapp — it scopes actions to the
+acting identity's permissions and pending check-ins (the server resolves the
+API key's owner).
 
-If the developer only has an API key (`DAILYBOT_API_KEY`), guide them through
-`dailybot login` first. API keys authenticate agent-scoped endpoints
-(`dailybot agent ...`), not user-scoped ones.
+If the developer has only an API key, check-in commands still work — the CLI
+falls back to `X-API-KEY`. Prefer `dailybot login` for the human's own personal
+pending check-ins. (On CLIs older than 1.15.0, these required a Bearer session —
+`dailybot upgrade` or `dailybot login`.)
 
 ---
 
@@ -43,15 +45,15 @@ specific questions; reports are freeform updates.
 
 Read and follow the authentication steps in [`../shared/auth.md`](../shared/auth.md). That file covers CLI installation, login, API key setup, and agent profile configuration.
 
-**Additionally**, verify the developer has a user session (Bearer token):
+**Additionally**, confirm at least one credential is present (a login session or an API key):
 
 ```bash
 dailybot status --auth 2>&1
 ```
 
-If the output shows a logged-in user session, proceed. If not, guide them
-through `dailybot login` (see auth.md for the OTP flow). Check-in commands
-will not work with only an API key.
+If the output shows a logged-in user session **or** a configured API key,
+proceed. Otherwise guide them through `dailybot login` (see auth.md) or ask
+them to set `DAILYBOT_API_KEY`.
 
 If auth fails or the developer declines, skip and continue with your primary task.
 
@@ -170,7 +172,7 @@ dailybot checkin complete <followup_uuid> \
 
 See [`../shared/http-fallback.md`](../shared/http-fallback.md) for base patterns.
 
-**Important:** Check-in endpoints use **Bearer token** auth, not API key auth.
+**Important:** Check-in endpoints accept **either** Bearer token or `X-API-KEY` auth.
 
 ### List pending check-ins
 

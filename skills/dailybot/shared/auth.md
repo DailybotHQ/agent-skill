@@ -310,33 +310,62 @@ Dailybot → Settings → API Keys.
 
 ---
 
-## 4. User-Scoped Commands (Bearer Token Auth)
+## 4. Auth model — API key *or* login, almost everywhere
 
-Some Dailybot features — **check-ins**, **forms**, **kudos**, and **user
-directory** — are scoped to the logged-in human's session, not to an agent
-identity. These commands use a **Bearer token** stored at
-`~/.config/dailybot/credentials.json` after `dailybot login`.
+As of the CLI's full-parity release (`dailybot-cli >= 1.15.0`, paired with the
+matching API server rollout), **every authenticated CLI command accepts either
+credential** — a Bearer login session **or** an org API key. The server resolves
+the acting user from the API key's `owner`, so the two paths behave identically.
+This is what lets an autonomous agent do **everything** with only
+`DAILYBOT_API_KEY` set — including `dailybot ask` (the AI chat).
 
-### Auth model distinction
+| Scope | Accepted credentials | Used by |
+|-------|----------------------|---------|
+| **Agent endpoints** | API key (`X-API-KEY`) preferred, Bearer fallback | `dailybot agent update`, `dailybot agent health`, `dailybot agent email send` |
+| **User / CLI / AI commands** | Bearer token preferred, API key fallback — **either works** | `dailybot status`, `update`, `checkin`, `form`, `kudos`, `team`, `user`, `chat`, `ask` (AI chat) |
+| **Login lifecycle** | OTP / Bearer only | `dailybot login`, `dailybot logout` (revokes the session token) |
 
-| Scope | Auth method | How to set up | Used by |
-|-------|-------------|---------------|---------|
-| **Agent endpoints** | API key (`X-API-KEY` header) | `dailybot config key=...` or `DAILYBOT_API_KEY` env | `dailybot agent update`, `dailybot agent health`, `dailybot agent email send` |
-| **User endpoints** | Bearer token (`Authorization: Bearer <token>`) | `dailybot login` (OTP email flow) | `dailybot checkin`, `dailybot form`, `dailybot kudos`, `dailybot user` |
+Both credentials can coexist — the CLI stores them separately, and a developer
+can hold an API key and a Bearer session at the same time. The CLI prefers the
+login session when present and falls back to the API key.
 
-Both auth paths can coexist — the CLI stores them separately. A developer
-can have both an API key (for agent operations) and a Bearer session (for
-user-scoped operations) active at the same time.
+> **Older CLIs (< 1.15.0).** Before full parity, the user-scoped commands
+> (`checkin`, `form`, `kudos`, `user`) and the AI chat required a Bearer login
+> session and rejected API keys. If the developer is on an older CLI and an
+> API-key-only command exits `3` (not authenticated), either `dailybot upgrade`
+> or guide them through `dailybot login`.
 
-### Checking user session status
+### Checking session status
 
 ```bash
 dailybot status --auth 2>&1
 ```
 
-The output shows both the agent API key status and the Bearer session status.
-If the user session is missing or expired, guide through `dailybot login`
-using the OTP flow in Section 2 above.
+The output shows both the API key status and the Bearer session status. If
+neither is present, guide the developer through `dailybot login` (Section 2) or
+ask them to set `DAILYBOT_API_KEY`.
+
+### Config directory override
+
+The `DAILYBOT_CONFIG_DIR` environment variable overrides where all credential
+and config files are stored (default: `~/.config/dailybot/`):
+
+```bash
+export DAILYBOT_CONFIG_DIR=/tmp/my-sandbox-config
+dailybot login --email me@example.com
+```
+
+This is useful for development sandboxes, CI environments, or testing
+scenarios with isolated config directories. The directory is created
+automatically if it does not exist.
+
+### Commands need *some* credential
+
+Every authenticated command works with **either** a login session or an API
+key; they exit with a non-zero "not authenticated" code only when **neither**
+is present. The single command that still requires a Bearer session is
+`dailybot logout` (it revokes the session token itself). Guide the developer
+through `dailybot login` or ask them to set `DAILYBOT_API_KEY`.
 
 ### Config directory override
 

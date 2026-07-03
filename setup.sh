@@ -58,7 +58,7 @@ resolve_skills_dir() {
 }
 
 # ─── Sub-skills to link ──────────────────────────────────────
-SKILLS=("report" "messages" "email" "health" "checkin" "kudos" "teams" "forms" "chat")
+SKILLS=("report" "messages" "email" "health" "checkin" "kudos" "teams" "forms" "chat" "ask")
 
 # ─── Link one agent ──────────────────────────────────────────
 link_agent() {
@@ -157,5 +157,6 @@ echo "  dailybot-kudos     — give kudos to a teammate or to a whole team"
 echo "  dailybot-teams     — list, inspect, and resolve teams (used by kudos / chat)"
 echo "  dailybot-forms     — list and submit form responses"
 echo "  dailybot-chat      — send / edit bot messages on Slack/Teams/Discord/Google Chat"
+echo "  dailybot-ask       — ask the Dailybot AI a question headlessly (dailybot ask)"
 echo ""
 echo "The root 'dailybot' skill acts as a router if your agent discovers it."
