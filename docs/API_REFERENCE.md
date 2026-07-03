@@ -830,7 +830,7 @@ Beyond agent-specific endpoints, your API key gives you access to the full Daily
 | `GET /v1/users/` | List team members |
 | `GET /v1/teams/` | List teams |
 | `GET /v1/organization/` | Get organization info |
-| `POST /v1/send-message/` | Send a bot message to a chat platform (Slack, Teams, Discord, Google Chat). Accepts `X-API-KEY` **or** `Authorization: Bearer` (login session, role-scoped). Targets `target_users` / `target_channels` / `target_teams`; optional `thread_responses[]` (≤10) posts replies inside the parent's thread in the same call; passing `bot_message_id` edits that message (parent or reply). Exposed in the CLI as `dailybot chat send` / `dailybot chat update` (introduced in [`1.13.0`](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0); current published version [`1.15.1`](https://pypi.org/project/dailybot-cli/)) and in the `dailybot-chat` sub-skill. |
+| `POST /v1/send-message/` | Send a bot message to a chat platform (Slack, Teams, Discord, Google Chat). Accepts `X-API-KEY` **or** `Authorization: Bearer` (login session, role-scoped). Targets `target_users` / `target_channels` / `target_teams`; optional `thread_responses[]` (≤10) posts replies inside the parent's thread in the same call; passing `bot_message_id` edits that message (parent or reply). Exposed in the CLI as `dailybot chat send` / `dailybot chat update` (introduced in [`1.13.0`](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0); current published version [`1.16.0`](https://pypi.org/project/dailybot-cli/)) and in the `dailybot-chat` sub-skill. |
 | `POST /v1/send-email/` | Send an email |
 | `GET /v1/followups/` | List daily standups |
 | `GET /v1/checkins/` | List standup check-ins |

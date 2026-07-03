@@ -53,7 +53,7 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 >
 > Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
 >
-> **Current published version:** [`dailybot-cli 1.15.1`](https://pypi.org/project/dailybot-cli/) —
+> **Current published version:** [`dailybot-cli 1.16.0`](https://pypi.org/project/dailybot-cli/) —
 > what `pip install --upgrade dailybot-cli` (or `dailybot upgrade`) resolves to
 > today. Everything below is additive on top of the 1.10.0 minimum; the
 > per-feature floors say which release first shipped each sub-skill.
@@ -153,6 +153,23 @@ The universal installer auto-detects the OS and routes to Homebrew on macOS,
 the prebuilt binary on Linux x86_64, or pipx / uv tool / pip --user elsewhere.
 Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
 [`shared/auth.md`](shared/auth.md).
+
+#### Pinning a specific version
+
+Every install method defaults to the latest release but can pin an exact
+version — useful when a developer needs to reproduce a known-good setup or
+match a floor a sub-skill requires (**since `dailybot-cli >= 1.16.0`** for the
+installer scripts; `pip` and Homebrew work on any version):
+
+| Channel | Pin a version |
+|---------|---------------|
+| pip      | `pip install dailybot-cli==<version>` |
+| Homebrew | installs latest only — pin via `pip install dailybot-cli==<version>` |
+| Universal installer | `curl -sSL https://cli.dailybot.com/install.sh \| DAILYBOT_VERSION=<version> bash` (or `\| bash -s -- --version <version>`) |
+| Windows PowerShell | `$env:DAILYBOT_VERSION='<version>'; irm https://cli.dailybot.com/install.ps1 \| iex` |
+
+Prefer `pip install dailybot-cli==<version>` when the developer already has
+Python — it is the most portable pin and works on every CLI release.
 
 ## Why use the official skill
 

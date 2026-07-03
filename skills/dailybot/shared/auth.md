@@ -43,6 +43,22 @@ treat that as session-wide consent.
 > If the developer is on Windows but has WSL2 or Git Bash, prefer
 > `install.sh` — it has broader testing coverage.
 
+> [!NOTE]
+> **Installing a specific version.** Both installers default to the latest
+> release but accept a pin (**`dailybot-cli >= 1.16.0`**):
+> - `install.sh` — set `DAILYBOT_VERSION=<version>` in the environment, or
+>   pass `bash -s -- --version <version>`. Example (drop it into the verified
+>   snippet below, right before `bash /tmp/install.sh`):
+>   `DAILYBOT_VERSION=<version> bash /tmp/install.sh`.
+> - `install.ps1` — set `$env:DAILYBOT_VERSION = '<version>'` before running
+>   (piping to `iex` cannot forward arguments).
+> - Both scripts validate the value before use, so a malformed version aborts
+>   the install rather than being interpolated into a command.
+>
+> When the developer already has Python, `pip install dailybot-cli==<version>`
+> is the simplest pin and works on every release. See
+> [`../SKILL.md` § Pinning a specific version](../SKILL.md#pinning-a-specific-version).
+
 #### Primary path: defense-in-depth verified install (Linux, macOS, WSL2, Git Bash, Docker, CI)
 
 Show the developer this prompt the first time:
