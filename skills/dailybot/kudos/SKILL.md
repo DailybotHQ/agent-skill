@@ -21,11 +21,11 @@ Two recipient types are supported:
 
 ---
 
-## Auth model — user-scoped commands
+## Auth model — API key or login
 
-Kudos commands require a **Bearer token** (user session), not an API key. The developer must be logged in via `dailybot login`. This scopes kudos to the logged-in human — the kudos appear as coming from them, not from an agent.
+Kudos commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`) — as of `dailybot-cli >= 1.15.0`. Kudos are scoped to the acting identity (the server resolves the API key's owner), so they appear as coming from that user.
 
-If the developer only has an API key (`DAILYBOT_API_KEY`), guide them through `dailybot login` first. API keys authenticate agent-scoped endpoints (`dailybot agent ...`), not user-scoped ones.
+If the developer has only an API key, kudos still work — the CLI falls back to `X-API-KEY`. Prefer `dailybot login` when they want the kudos attributed to their own human account. (On CLIs older than 1.15.0, kudos required a Bearer session — `dailybot upgrade` or `dailybot login`.)
 
 ---
 
@@ -53,7 +53,7 @@ Do **not** send kudos autonomously without the developer's explicit request. Kud
 
 Read and follow the authentication steps in [`../shared/auth.md`](../shared/auth.md). That file covers CLI installation, login, API key setup, and agent profile configuration.
 
-**Additionally**, verify the developer has a user session (Bearer token):
+**Additionally**, confirm at least one credential is present (a login session or an API key):
 
 ```bash
 dailybot status --auth 2>&1
@@ -230,7 +230,7 @@ The server's `{detail, code}` 4xx shape is surfaced verbatim in `--json` mode as
 |------|---------------|---------|----------------|
 | `0`  |              | Success | Surface the response (including expanded receiver count for team kudos). |
 | `2`  | `no_users_found` | Some receivers couldn't be found or were duplicates. | "Some receivers couldn't be found or were duplicates. Re-check the inputs." |
-| `2`  | `no_valid_users` | The receiver list ended up empty (or the legacy `receivers` field was sent). | "The receiver list ended up empty. Check `--to` and `--team` resolve correctly." |
+| `2`  | `no_valid_users` | The receiver list ended up empty. | "The receiver list ended up empty. Check `--to` and `--team` resolve correctly." |
 | `2`  | `no_valid_team`  | The provided team didn't resolve to a valid target. | "I couldn't find that team. Check `dailybot team list` to confirm it's visible to you." |
 | `3`  |              | Not authenticated | Guide through `dailybot login`. |
 | `4`  |              | Self-kudos attempted, or daily kudos limit reached | If self-kudos (single user `--to`), explain it isn't allowed. If daily limit, mention it resets tomorrow. |
@@ -292,7 +292,7 @@ Agent:
 
 See [`../shared/http-fallback.md`](../shared/http-fallback.md) for base patterns.
 
-**Important:** Kudos endpoints use **Bearer token** auth, not API key auth.
+**Important:** Kudos endpoints accept **either** Bearer token or `X-API-KEY` auth.
 
 ### List teams (to resolve team names)
 
@@ -312,17 +312,17 @@ curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
 
 The response is paginated — follow the `next` URL until null (max 50 pages).
 
-> **Payload migration:** the `POST /v1/kudos/` body now uses `user_uuid_receivers` (for individuals) and `team_uuid_receivers` (for teams). The **legacy `receivers` field is gone** — sending it will result in `no_valid_users`. The CLI handles this transparently; HTTP fallback callers must update their payloads.
+> **Payload — canonical `receivers`:** the `POST /v1/kudos/` body now takes a single `receivers` list of UUIDs (users **and** teams merged — the server resolves each UUID's type and expands teams into their members, excluding the caller). The split `user_uuid_receivers` / `team_uuid_receivers` fields are **legacy** — still accepted during a deprecation window, but new callers should send `receivers`. The CLI (>= 1.15.0) sends `receivers` transparently; HTTP fallback callers should too. Either credential works (`X-API-KEY` or Bearer).
 
 ### Send kudos to a user
 
 ```bash
 curl -s -X POST \
-  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "X-API-KEY: $DAILYBOT_API_KEY" \
   -H "Content-Type: application/json" \
   https://api.dailybot.com/v1/kudos/ \
   -d '{
-    "user_uuid_receivers": ["<user-uuid>"],
+    "receivers": ["<user-uuid>"],
     "content": "Shipped the auth refactor cleanly — great work!"
   }'
 ```
@@ -331,25 +331,24 @@ curl -s -X POST \
 
 ```bash
 curl -s -X POST \
-  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "X-API-KEY: $DAILYBOT_API_KEY" \
   -H "Content-Type: application/json" \
   https://api.dailybot.com/v1/kudos/ \
   -d '{
-    "team_uuid_receivers": ["<team-uuid>"],
+    "receivers": ["<team-uuid>"],
     "content": "Por el release de auth — equipo enorme."
   }'
 ```
 
-### Send kudos to both
+### Send kudos to both (users + teams in one list)
 
 ```bash
 curl -s -X POST \
-  -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
+  -H "X-API-KEY: $DAILYBOT_API_KEY" \
   -H "Content-Type: application/json" \
   https://api.dailybot.com/v1/kudos/ \
   -d '{
-    "user_uuid_receivers": ["<user-uuid>"],
-    "team_uuid_receivers": ["<team-uuid>"],
+    "receivers": ["<user-uuid>", "<team-uuid>"],
     "content": "Jane and the whole Engineering team saved the launch."
   }'
 ```

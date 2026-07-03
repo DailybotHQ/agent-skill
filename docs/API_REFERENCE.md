@@ -245,6 +245,12 @@ All Dailybot operations have CLI equivalents. Once authenticated, use these dire
 | Send email | `dailybot agent email send --to alice@company.com --to bob@company.com --subject "Report" --body-html "<p>Done</p>" --name "your-agent-name"` |
 | Register webhook | `dailybot agent webhook register --url https://your-server.com/hook --secret your-token --name "your-agent-name"` |
 | Unregister webhook | `dailybot agent webhook unregister --name "your-agent-name"` |
+| Ask the Dailybot AI (headless) | `dailybot ask "What are my pending check-ins?" --json` (requires CLI >= 1.15.0) |
+| Check-in status for a day | `dailybot checkin status [--date YYYY-MM-DD] --json` (CLI >= 1.15.0) |
+| Inspect a check-in's questions | `dailybot checkin show <followup-uuid> --json` |
+| Check-in response history | `dailybot checkin history <followup-uuid> --days 7 --json` |
+| Edit a check-in response | `dailybot checkin edit <followup-uuid> -a 0="new answer" --yes --json` |
+| Reset a check-in response | `dailybot checkin reset <followup-uuid> [--date YYYY-MM-DD] --yes` |
 
 ---
 

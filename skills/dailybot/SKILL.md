@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), and send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads), and ask the Dailybot AI a question headlessly. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "1.7.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -21,16 +21,17 @@ This is the canonical, first-party integration. Source of truth:
 
 ## What it does
 
-Nine coordinated capabilities, with smart routing between them:
+Ten coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
 | **Progress reports** | `dailybot-report` | After meaningful work — a completed task, or a batch of edits to 3+ files |
+| **Ask the AI** | `dailybot-ask` | Developer or agent wants a one-shot, headless answer from the Dailybot AI assistant |
 | **Message polling** | `dailybot-messages` | Session start, idle moments, or when the developer asks "what should I work on?" |
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
 | **Chat** | `dailybot-chat` | Developer wants to send / edit a bot message on Slack, Teams, Discord, or Google Chat — to a channel, DMs, or whole team. Supports report-style threads (headline + replies in one call) and editing the parent or any reply afterward |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
-| **Check-ins** | `dailybot-checkin` | Developer asks to complete a standup or fill in a pending check-in |
+| **Check-ins** | `dailybot-checkin` | Full check-in lifecycle: list/status, complete, inspect questions, history, edit, reset, backfill/future-date |
 | **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate or a whole team's contribution |
 | **Teams** | `dailybot-teams` | List teams, inspect members, or resolve a team name → UUID (used as a resolver by other skills) |
 | **Forms** | `dailybot-forms` | Developer wants to list, submit, update, or transition forms — including workflow-state forms with audience permissions |
@@ -73,7 +74,22 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 > send a chat message), report-style threads via `--thread-message`
 > (≤10 per call), and individually-editable thread reply ids. The
 > `dailybot-chat` sub-skill requires this minimum; the other sub-skills
-> are unaffected. **Current published version: [`dailybot-cli 1.13.1`](https://pypi.org/project/dailybot-cli/1.13.1/)** — what `pip install --upgrade dailybot-cli` resolves to today; functionally identical to 1.13.0 for chat purposes. See [`chat/SKILL.md`](chat/SKILL.md).
+> are unaffected. Functionally identical across 1.13.x for chat purposes. See [`chat/SKILL.md`](chat/SKILL.md).
+>
+> **`1.15.0` floor for `dailybot-ask` + full API-key parity** (paired with the
+> matching API server rollout): the `dailybot ask` command (headless one-shot AI
+> chat) first ships in 1.15.0, alongside **full auth parity** — every
+> authenticated command now accepts an org API key **or** a login session (only
+> `dailybot logout` stays Bearer-only). This is what lets an agent with only
+> `DAILYBOT_API_KEY` use every sub-skill, including the AI chat. Below 1.15.0 the
+> AI chat is interactive-only (`dailybot interactive`) and the user-scoped
+> commands require a Bearer login. The `dailybot-ask` sub-skill requires this
+> minimum. See [`ask/SKILL.md`](ask/SKILL.md) and [`shared/auth.md`](shared/auth.md) § 4.
+>
+> 1.15.0 also expands **check-ins** to the full lifecycle — `dailybot checkin
+> status / show / history / edit / reset` plus backfill/future-dating — all
+> headless with `--json`. See [`checkin/SKILL.md`](checkin/SKILL.md) § "The full
+> check-in lifecycle". Below 1.15.0 only `checkin list` + `complete` exist.
 
 ### Why this minimum
 
@@ -173,10 +189,11 @@ the full step-by-step workflow.
 | Developer says… | Route to |
 |------------------|----------|
 | "report this to Dailybot", "send a Dailybot update", "let my team know what we built" | **Report** → read [`report/SKILL.md`](report/SKILL.md) |
+| "ask Dailybot …", "query the Dailybot AI", "what does Dailybot say about …", "have Dailybot summarize my check-ins" | **Ask** → read [`ask/SKILL.md`](ask/SKILL.md) |
 | "check messages", "do I have messages?", "what should I work on?", "any instructions?" | **Messages** → read [`messages/SKILL.md`](messages/SKILL.md) |
 | "email this to Alice", "send an email", "send a summary to the team" | **Email** → read [`email/SKILL.md`](email/SKILL.md) |
 | "go online", "announce status", "health check" | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
-| "complete my check-in", "fill in my standup", "answer my dailybot", "any pending check-ins?" | **Checkin** → read [`checkin/SKILL.md`](checkin/SKILL.md) |
+| "complete my check-in", "fill in my standup", "check-in status", "what does my standup ask?", "check-in history", "edit / reset my check-in", "submit my standup for yesterday" | **Checkin** → read [`checkin/SKILL.md`](checkin/SKILL.md) |
 | "give kudos to Jane", "recognize Alice", "kudos al equipo Engineering", "felicita al team de QA" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
 | "list my teams", "who's in QA?", "resolve the Engineering team", or another skill needs a team UUID | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) |
 | "list my forms", "submit the retro form", "continue my release-form draft", "transition the release to released", "show me the last form response" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
@@ -200,6 +217,12 @@ developer explicitly mentions a chat platform / channel / channel id, or
 says "send a message" / "ping in chat" / "post to #channel". Chat is
 externally visible to other humans on the connected platform; report goes
 to the Dailybot dashboard.
+
+**Ask vs Chat vs Report.** **Ask** *queries* the Dailybot AI and reads its
+answer back (input → the agent). **Chat** and **Report** *send* something
+outward (the agent → a chat platform / the dashboard). If the developer wants an
+*answer from* Dailybot, route to **Ask**; if they want to *tell* the team
+something, route to **Report** (default) or **Chat**.
 
 If the intent is ambiguous, default to **Report** — it's the most
 common use case.
