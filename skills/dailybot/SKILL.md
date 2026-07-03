@@ -53,6 +53,11 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 >
 > Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
 >
+> **Current published version:** [`dailybot-cli 1.15.1`](https://pypi.org/project/dailybot-cli/) —
+> what `pip install --upgrade dailybot-cli` (or `dailybot upgrade`) resolves to
+> today. Everything below is additive on top of the 1.10.0 minimum; the
+> per-feature floors say which release first shipped each sub-skill.
+>
 > **`1.11.0` enhancement (optional):** `dailybot agent update` echoes the
 > report's placement link as a `View:` line. Older CLIs still report fine —
 > the link is always in the API response body, just not printed — so this is
