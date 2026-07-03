@@ -319,7 +319,7 @@ agent-skill/
         ├── kudos/SKILL.md         — user + team recognition (user-scoped)
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
-        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest 1.15.1)
+        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest 1.16.0)
 ```
 
 ## Execution Paths
