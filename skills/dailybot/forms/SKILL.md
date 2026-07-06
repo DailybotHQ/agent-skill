@@ -223,7 +223,7 @@ When the form has a workflow (`workflow.enabled: true`), the agent must understa
 
 ## Step 5.5 — Authoring forms (create / configure / questions)
 
-> **Requires `dailybot-cli >= 1.17.0`.** The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, and the 3 report-channel cap — ships in CLI **1.17.0**. Steps 1–5 and 6–16 (the response lifecycle) still work on older CLIs — only authoring needs 1.17.0. If `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
+> **Requires `dailybot-cli >= 1.17.1`.** The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — ships in CLI **1.17.1** (the current published release). Steps 1–5 and 6–16 (the response lifecycle) still work on older CLIs — only authoring needs 1.17.1. If `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
 
 Everything above this point *reads* and *responds to* forms. This section *builds and reshapes* them. An agent with the right permissions can now create a form, wire up its workflow states, permission audiences, approval flow, and ChatOps command, and manage its questions — all end-to-end from the CLI, without opening the Dailybot webapp.
 
@@ -242,7 +242,7 @@ There are two ways to reach the same configured form. Pick based on how much you
 - `form config` is a **full partial-update**: send only the flags you want to change; anything you omit is left untouched. It is a strict **superset of `form edit`** (which only touches name + report channels). Prefer `form config` for anything beyond a name/channel tweak.
 - **`--report-channel` and the permission/approver objects use full-replace semantics** — see the callouts below. Most other scalar flags are simple set-if-passed.
 
-Forms are **valid with zero questions** — this is by design, and unlike check-ins (which require at least one participant). A workflow-only routing form, or an approval-only intake form with no questions, is completely legitimate. Do not force the developer to add a question.
+A form **must have at least one question at create time** — `POST` create with a missing/empty `questions` array is rejected with `400 {"code": "questions_required"}` ("A form must have at least one question."). Seed at least one question inline on create (see the `--questions-file` schema below); you can add, edit, remove, and reorder questions afterward via the `form questions` group. (Even a workflow-only or approval-routing form needs a seed question.)
 
 ### Config flag reference
 
@@ -624,6 +624,7 @@ Soft-deletes the form (`is_archived: true`). Confirm before invoking — archive
 
 | Server `code` | Meaning / fix |
 |---------------|---------------|
+| `questions_required` | `create` had no questions. A form needs ≥ 1 question at create time — seed with `--questions-file`/`--interactive`. |
 | `too_many_report_channels` | More than 3 `--report-channel` values. Trim to ≤ 3. |
 | `short_question_required` | A `questions add` omitted both `--short-question` and `--ai-short-question`. Supply one. |
 | `workflow_requires_states` | Tried to enable a workflow with no states. Pass at least one `--state`. |
@@ -676,11 +677,13 @@ dailybot form questions add <form_uuid> --type numeric \
   --question "How likely are you to recommend us (0–10)?" --short-question "NPS score" --required
 ```
 
-**C — Approval-routing intake form (zero-question is fine)**
+**C — Approval-routing intake form**
 
 ```bash
-# A workflow + approval form with no questions — a legitimate routing form.
+# A workflow + approval routing form. Even routing forms need >= 1 question at
+# create time (questions_required), so seed one with --questions-file.
 dailybot form create -n "Budget Approval" \
+  --questions-file budget-questions.json \
   --approval \
   --approver-user finance-lead@example.com \
   --approver-team "Finance" \
