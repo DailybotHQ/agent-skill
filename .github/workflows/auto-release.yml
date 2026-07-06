@@ -119,10 +119,16 @@ jobs:
 
       - name: Update CHANGELOG.md
         if: steps.version.outputs.skip != 'true'
+        env:
+          # Pass commit subjects through the environment, NOT via ${{ }}
+          # interpolation into the script. A commit message can contain shell
+          # metacharacters (e.g. a `"` in `pin agent identity to "Agent Skill"`),
+          # which would otherwise break the string assignment and execute the rest
+          # as commands (exit 127) — and is a command-injection vector.
+          COMMITS: ${{ steps.version.outputs.commits }}
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
           DATE=$(date -u +%Y-%m-%d)
-          COMMITS="${{ steps.version.outputs.commits }}"
 
           # Build the new section.
           {
