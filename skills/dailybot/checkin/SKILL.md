@@ -1,6 +1,6 @@
 ---
 name: dailybot-checkin
-description: Drive the full check-in lifecycle via Dailybot — list and complete pending check-ins, see pending/completed status for a day, inspect a check-in's questions and schedule, browse response history, edit or reset a submitted response, and backfill or future-date responses. Also **author check-ins**: create and configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions (types, report titles, variations, conditional logic). Works headless with an API key. Use when the developer asks to fill in their standup, answer daily questions, check what check-ins they have, edit or reset a check-in, review past responses, or create/configure a check-in. Do not use for free-text progress reports — those go through dailybot-report.
+description: Drive the full check-in lifecycle via Dailybot — list and complete pending check-ins, see pending/completed status for a day, inspect a check-in's questions and schedule, browse response history, edit or reset a submitted response, and backfill or future-date responses. Also authors check-ins — create and configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions (types, report titles, variations, conditional logic). Works headless with an API key. Use when the developer asks to fill in their standup, answer daily questions, check what check-ins they have, edit or reset a check-in, review past responses, or create/configure a check-in. Do not use for free-text progress reports — those go through dailybot-report.
 version: "1.7.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -250,6 +250,12 @@ prompts — handy for humans; agents should use the headless commands above.
 ---
 
 ## Step 3.7 — Authoring check-ins (create / configure / questions)
+
+> **Requires `dailybot-cli >= 1.17.0`.** The authoring surface — `checkin create`,
+> `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
+> group, resolving people by email, and the smart/AI flags — ships in CLI **1.17.0**.
+> The response lifecycle above works on older CLIs; only authoring needs 1.17.0. If
+> `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
 
 Everything above **answers** a check-in. This section **builds** one. As of the
 authoring release, an agent can create a check-in from scratch, tune every

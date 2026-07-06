@@ -1,6 +1,6 @@
 ---
 name: dailybot-forms
-description: List, inspect, submit, update, and transition form responses via Dailybot — including forms with workflow states and audience-scoped permissions. Also **author forms**: create and configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions (types, report titles, variations, conditional logic). Use when the developer wants to see available forms, fill out a survey, continue an in-progress response, move a response between states, read prior responses, or create/configure a form. Do not use for daily check-ins — those go through dailybot-checkin.
+description: List, inspect, submit, update, and transition form responses via Dailybot — including forms with workflow states and audience-scoped permissions. Also authors forms — create and configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions (types, report titles, variations, conditional logic). Use when the developer wants to see available forms, fill out a survey, continue an in-progress response, move a response between states, read prior responses, or create/configure a form. Do not use for daily check-ins — those go through dailybot-checkin.
 version: "1.7.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -223,7 +223,7 @@ When the form has a workflow (`workflow.enabled: true`), the agent must understa
 
 ## Step 5.5 — Authoring forms (create / configure / questions)
 
-> **Requires `dailybot-cli >= 1.16.0`.** The authoring surface (`form create`, `form config`, `form archive`, and the `form questions add|edit|delete|reorder` group) ships in CLI 1.16.0. Steps 1–5 and 6–16 (the response lifecycle) still work on older CLIs — only authoring needs 1.16.0. If `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
+> **Requires `dailybot-cli >= 1.17.0`.** The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, and the 3 report-channel cap — ships in CLI **1.17.0**. Steps 1–5 and 6–16 (the response lifecycle) still work on older CLIs — only authoring needs 1.17.0. If `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
 
 Everything above this point *reads* and *responds to* forms. This section *builds and reshapes* them. An agent with the right permissions can now create a form, wire up its workflow states, permission audiences, approval flow, and ChatOps command, and manage its questions — all end-to-end from the CLI, without opening the Dailybot webapp.
 
