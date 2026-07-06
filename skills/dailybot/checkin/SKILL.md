@@ -251,11 +251,12 @@ prompts — handy for humans; agents should use the headless commands above.
 
 ## Step 3.7 — Authoring check-ins (create / configure / questions)
 
-> **Requires `dailybot-cli >= 1.17.0`.** The authoring surface — `checkin create`,
+> **Requires `dailybot-cli >= 1.17.1`.** The authoring surface — `checkin create`,
 > `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
-> group, resolving people by email, and the smart/AI flags — ships in CLI **1.17.0**.
-> The response lifecycle above works on older CLIs; only authoring needs 1.17.0. If
-> `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
+> group, resolving people by email, the smart/AI flags, and the **create requires
+> ≥ 1 question** rule (`questions_required`) — ships in CLI **1.17.1** (the current
+> published release). The response lifecycle above works on older CLIs; only authoring
+> needs 1.17.1. If `dailybot --version` is below that, run `dailybot upgrade`.
 
 Everything above **answers** a check-in. This section **builds** one. As of the
 authoring release, an agent can create a check-in from scratch, tune every
@@ -273,21 +274,22 @@ it — all headless with an API key.
 There are two authoring styles, and they share the same flag vocabulary:
 
 - **One-shot create** — `dailybot checkin create -n "Name" [all the flags]`
-  builds a fully-configured check-in in a single call, optionally seeding
-  questions with `--questions-file` / `--interactive` / `--ai-short-question`.
-- **Incremental configure** — `dailybot checkin create -n "Name" --user @me`
-  first (minimal), then `dailybot checkin config <followup_uuid> [flags]` to
-  change settings later. **`config` is a partial update: only the flags you
-  pass change**; everything else is left untouched. This is the safest way for
-  an agent to adjust one setting without disturbing the rest.
+  builds a fully-configured check-in in a single call, seeding questions with
+  `--questions-file` / `--interactive` / `--ai-short-question`.
+- **Incremental configure** — `dailybot checkin create -n "Name" --user @me
+  --questions-file q.json` first (participant + at least one question are both
+  mandatory), then `dailybot checkin config <followup_uuid> [flags]` to change
+  settings later. **`config` is a partial update: only the flags you pass
+  change**; everything else is left untouched. This is the safest way for an
+  agent to adjust one setting without disturbing the rest.
 
 Both accept the same scheduling / reminder / submission / privacy / smart-AI /
 participant / channel flags below. A few flags are **create-only** or
 **config-only** — the reference table calls those out.
 
 ```bash
-# Create a check-in (minimal — one participant is mandatory, see the callout)
-dailybot checkin create -n "Daily Standup" --user me@example.com
+# Create a check-in (minimal — one participant AND one question are mandatory)
+dailybot checkin create -n "Daily Standup" --user me@example.com --questions-file q.json
 
 # Later, flip one setting without touching anything else
 dailybot checkin config <followup_uuid> --time 09:30 --reminders 2
@@ -297,11 +299,14 @@ dailybot checkin config <followup_uuid> --time 09:30 --reminders 2
 
 ### Participants are required (read this first)
 
-**A check-in must have at least one participant** — a team or a person.
+**A check-in must have at least one participant AND at least one question.**
 
 - **Non-interactive create with no `--user` and no `--team` fails fast** with
   `checkin_requires_participant`. Always pass at least one participant when
   scripting a create.
+- **Create with no questions fails fast** with `questions_required` — seed at
+  least one question with `--questions-file` or `--interactive` (add/edit/remove
+  more later via `checkin questions`).
 - In an interactive TTY, `create` **prompts** for participants instead of
   erroring.
 - On **`config`, `--user` / `--team` REPLACE the entire participant set** (full
@@ -659,6 +664,7 @@ For `multiple_choice`, `choices` is populated as `[{"label": "...", "value": "..
 
 | `code` | Meaning |
 |--------|---------|
+| `questions_required` | Create had no questions — seed ≥ 1 with `--questions-file`/`--interactive`. |
 | `checkin_requires_participant` | Create had no `--user`/`--team` — add at least one participant. |
 | `intelligence_requires_smart_checkin` | `--intelligence` needs `--smart`; `--max-clarifying > 0` needs `--intelligence`. |
 | `anonymous_irreversible` | Tried `--no-anonymous` on an already-anonymous check-in — not allowed. |
