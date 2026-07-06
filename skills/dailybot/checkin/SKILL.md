@@ -1,6 +1,6 @@
 ---
 name: dailybot-checkin
-description: Drive the full check-in lifecycle via Dailybot — list and complete pending check-ins, see pending/completed status for a day, inspect a check-in's questions and schedule, browse response history, edit or reset a submitted response, and backfill or future-date responses. Works headless with an API key. Use when the developer asks to fill in their standup, answer daily questions, check what check-ins they have, edit or reset a check-in, or review past check-in responses. Do not use for free-text progress reports — those go through dailybot-report.
+description: Drive the full check-in lifecycle via Dailybot — list and complete pending check-ins, see pending/completed status for a day, inspect a check-in's questions and schedule, browse response history, edit or reset a submitted response, and backfill or future-date responses. Also authors check-ins — create and configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions (types, report titles, variations, conditional logic). Works headless with an API key. Use when the developer asks to fill in their standup, answer daily questions, check what check-ins they have, edit or reset a check-in, review past responses, or create/configure a check-in. Do not use for free-text progress reports — those go through dailybot-report.
 version: "1.7.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
@@ -246,6 +246,481 @@ errors):
 In `dailybot ask` (the AI chat), the native slash commands `/checkins`,
 `/checkin edit`, and `/checkin reset` drive these same flows with numbered
 prompts — handy for humans; agents should use the headless commands above.
+
+---
+
+## Step 3.7 — Authoring check-ins (create / configure / questions)
+
+> **Requires `dailybot-cli >= 1.17.0`.** The authoring surface — `checkin create`,
+> `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
+> group, resolving people by email, and the smart/AI flags — ships in CLI **1.17.0**.
+> The response lifecycle above works on older CLIs; only authoring needs 1.17.0. If
+> `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
+
+Everything above **answers** a check-in. This section **builds** one. As of the
+authoring release, an agent can create a check-in from scratch, tune every
+scheduling / reminder / privacy / AI setting, manage its questions (including
+conditional jump logic), verify the result with a round-trip read, and archive
+it — all headless with an API key.
+
+> **Role-gated.** Creating, configuring, or archiving a check-in and editing its
+> questions are **admin/manager** operations server-side. With a plain-member
+> credential these calls fail with a `401`/`403` — surface that to the developer
+> and stop (don't retry). Answering check-ins (Steps 2–3.5) is not gated this way.
+
+### Create in one shot vs. configure incrementally
+
+There are two authoring styles, and they share the same flag vocabulary:
+
+- **One-shot create** — `dailybot checkin create -n "Name" [all the flags]`
+  builds a fully-configured check-in in a single call, optionally seeding
+  questions with `--questions-file` / `--interactive` / `--ai-short-question`.
+- **Incremental configure** — `dailybot checkin create -n "Name" --user @me`
+  first (minimal), then `dailybot checkin config <followup_uuid> [flags]` to
+  change settings later. **`config` is a partial update: only the flags you
+  pass change**; everything else is left untouched. This is the safest way for
+  an agent to adjust one setting without disturbing the rest.
+
+Both accept the same scheduling / reminder / submission / privacy / smart-AI /
+participant / channel flags below. A few flags are **create-only** or
+**config-only** — the reference table calls those out.
+
+```bash
+# Create a check-in (minimal — one participant is mandatory, see the callout)
+dailybot checkin create -n "Daily Standup" --user me@example.com
+
+# Later, flip one setting without touching anything else
+dailybot checkin config <followup_uuid> --time 09:30 --reminders 2
+```
+
+> **Timeout**: Allow at least 30 seconds for these commands. Do not use a shorter timeout.
+
+### Participants are required (read this first)
+
+**A check-in must have at least one participant** — a team or a person.
+
+- **Non-interactive create with no `--user` and no `--team` fails fast** with
+  `checkin_requires_participant`. Always pass at least one participant when
+  scripting a create.
+- In an interactive TTY, `create` **prompts** for participants instead of
+  erroring.
+- On **`config`, `--user` / `--team` REPLACE the entire participant set** (full
+  replace, not append). To add one person you must re-list everyone who should
+  remain. Same semantics for `--report-channel` (see channels below).
+
+```bash
+# Two people + a whole team as participants
+dailybot checkin create -n "Daily Standup" \
+  --user me@example.com --user "Jane Doe" \
+  --team "My Team"
+```
+
+### Full flag reference (`create` / `config`)
+
+Users resolve by **name, email, or UUID**. Resolving a `--user` by **email
+needs admin/manager permissions**; when that lookup isn't allowed the CLI falls
+back with a clear message (use a UUID or name instead).
+
+#### Scheduling
+
+| Flag | Values / format | Notes |
+|------|-----------------|-------|
+| `--time` | `HH:MM` | Delivery time. |
+| `--days` | comma weekdays `0-6` | `0 = Sunday`. E.g. `1,2,3,4,5` = Mon–Fri. |
+| `--timezone` | IANA name | E.g. `America/New_York`. |
+| `--schedule-file` | JSON path | Full schedule object from a file. |
+| `--start-on` / `--end-on` | `YYYY-MM-DD` | Active window bounds. |
+| `--frequency` | `weekly` **only** | Weekly cadence. Monthly/custom go through `--frequency-advanced` — `--frequency monthly` fails fast (`invalid_frequency_type`). |
+| `--every` | integer `>= 1` | Repeat interval (every N periods). |
+| `--frequency-advanced` | `disabled` / `monthly` / `custom` | Advanced cadence selector. Use `custom` with `--cron`. |
+| `--cron` | `"m h dom mon dow"` | 5-field cron, **for `custom` cadence only**. |
+| `--trigger-based` / `--fixed-time` | flag | Trigger-based vs. fixed-time delivery. |
+| `--participant-timezone` / `--custom-timezone` | flag | Use each participant's TZ vs. one custom TZ. |
+| `--report-time` | `HH:MM` | When the aggregated report is posted. |
+
+#### Reminders
+
+| Flag | Values | Notes |
+|------|--------|-------|
+| `--reminders` | `0-5` | Number of reminders. `0` = off. |
+| `--reminder-interval` | `0-60` | Minutes between reminders. |
+| `--reminder-condition` | `smart_frequency` / `fixed_frequency` | When reminders fire. |
+| `--reminder-tone` | `standard` / `persuasive` | Reminder voice (`invalid_reminder_tone` if other). |
+
+#### Submission rules
+
+| Flag | Notes |
+|------|-------|
+| `--work-days` / `--no-work-days` | Restrict to working days. |
+| `--allow-early` / `--no-early` | Allow submitting before the trigger time. |
+| `--allow-past` / `--no-past` | Allow backfilling past responses. |
+| `--allow-future` / `--no-future` | Allow future-dating responses. |
+| `--one-by-one` / `--aggregated` | Deliver questions one-by-one vs. all at once. |
+
+#### Privacy / anonymity
+
+| Flag | Values | Notes |
+|------|--------|-------|
+| `--anonymous` / `--no-anonymous` | flag | **Irreversible**: once anonymous, `--no-anonymous` fails with `anonymous_irreversible` (unlike forms). |
+| `--privacy` | `only_owner`, `owner_and_members`, `managers_and_members`, `managers_and_admins`, `org_admins`, `everyone`, `custom` | Who can see responses. |
+
+#### Smart / AI
+
+| Flag | Values | Dependency |
+|------|--------|-----------|
+| `--smart` / `--no-smart` | flag | Adaptive AI conversation mode. |
+| `--intelligence` / `--no-intelligence` | flag | AI insights on responses. **Requires `--smart`.** |
+| `--max-clarifying` | `0-5` | Cap on AI follow-up questions. **Requires `--intelligence`** when `> 0`. |
+
+The dependency chain is enforced server-side: `--intelligence` without `--smart`
+and `--max-clarifying > 0` without `--intelligence` both fail with
+`intelligence_requires_smart_checkin`.
+
+#### Intro / outro
+
+| Flag | Notes |
+|------|-------|
+| `--intro` | Opening message, `3–1024` chars. |
+| `--outro` | Closing message, `3–1024` chars. |
+
+#### Participants
+
+| Flag | Scope | Notes |
+|------|-------|-------|
+| `--user` | create + config | Name, email, or UUID. Repeatable. On `config`, REPLACES the user set. |
+| `--team` | create + config | Name or UUID. Repeatable. On `config`, REPLACES the team set. |
+
+#### Channels
+
+| Flag | Notes |
+|------|-------|
+| `--report-channel` | Channel UUID. Repeatable, **max 3** (`too_many_report_channels`, enforced client- and server-side). On `config`, REPLACES the channel set. |
+
+#### Questions seeding (create) + config-only flags
+
+| Flag | Scope | Notes |
+|------|-------|-------|
+| `--questions-file` | create | Seed questions from a JSON array (see below). |
+| `--interactive` | create | Prompt for questions interactively. |
+| `--ai-short-question` | create | Let AI generate report titles for seeded questions. |
+| `-n` / `--name` | create + config | Check-in name. |
+| `--active` / `--inactive` | config | Activate / deactivate the check-in. |
+
+### Question authoring (`checkin questions ...`)
+
+Questions are managed with a dedicated subgroup. **This is the same question
+model forms use** — the types, report-title rule, variations, and conditional
+logic below are shared.
+
+```bash
+dailybot checkin questions add    <followup_uuid> --type TYPE --question TEXT [flags]
+dailybot checkin questions edit   <followup_uuid> <question_uuid> [same flags]
+dailybot checkin questions delete <followup_uuid> <question_uuid>
+dailybot checkin questions reorder <followup_uuid> <q_uuid> <q_uuid> ...
+```
+
+#### Question types
+
+The complete catalog is **four** types — there are no others:
+
+| `--type` | Options? | Behavior |
+|----------|----------|----------|
+| `text` | no | Free-text answer. |
+| `multiple_choice` | **yes** — `--options "A,B,C"` | Choose from a fixed list. |
+| `boolean` | no | Yes/No answer. |
+| `numeric` | no | Numeric answer. |
+
+Common flags on `add` / `edit`:
+
+| Flag | Notes |
+|------|-------|
+| `--required` / `--optional` | Whether an answer is mandatory. |
+| `--blocker` / `--no-blocker` | Tag the "blocker" question. |
+| `--short-question` | Report title, `<= 512` chars. See the rule below. |
+| `--ai-short-question` | Let AI generate the report title instead. |
+| `--variation` | Alternate phrasing. Repeatable, **up to 10**, rotated per run. |
+| `--logic-file` | Conditional logic from a JSON file. |
+| `--jump-if-equals` / `--jump-to` / `--else-jump-to` | Inline conditional logic (see below). |
+
+#### Report title is REQUIRED on `add`
+
+Every added question needs a **report title** (the short label used in the
+posted report). Provide it **one of two ways**:
+
+- `--short-question "Title"` — an explicit title (`<= 512` chars), **or**
+- `--ai-short-question` — let Dailybot's AI generate one.
+
+Explicit titles are preserved; **AI only fills in the blanks**. Passing neither
+is an error: `short_question_required`. On **`edit`** the report title is **not**
+required (edits are partial updates).
+
+```bash
+# Add a required text question with an explicit report title + two variations
+dailybot checkin questions add <followup_uuid> \
+  --type text --question "What did you complete yesterday?" \
+  --short-question "Yesterday" --required \
+  --variation "What did you get done since your last update?" \
+  --variation "Recap of yesterday's work?"
+
+# Add a multiple-choice question and let AI name it
+dailybot checkin questions add <followup_uuid> \
+  --type multiple_choice --question "How's the sprint going?" \
+  --options "On track,At risk,Blocked" --ai-short-question
+```
+
+#### Reordering
+
+`questions reorder` takes the **complete set** of question UUIDs in the new
+order. Passing a partial/incomplete set is rejected with
+`question_uuids_incomplete` — always list **every** question.
+
+```bash
+dailybot checkin questions reorder <followup_uuid> \
+  <q_uuid_c> <q_uuid_a> <q_uuid_b>
+```
+
+#### Conditional logic (jump rules)
+
+A question can branch to a later question (or end the check-in) based on the
+answer. Attach logic **either** with a full JSON file (`--logic-file`) **or**
+inline with `--jump-if-equals VALUE --jump-to N [--else-jump-to M]`.
+
+**Logic shape:**
+
+```json
+{
+  "rules": {
+    "rules_if": [
+      {
+        "conditions": [
+          {"operator": "is_equal_to", "comparison_value": "Blocked", "logic_connector": "or"}
+        ],
+        "then": {"action": "jump_to", "target": 5}
+      }
+    ],
+    "rules_else": {"action": "jump_to", "target": -1}
+  }
+}
+```
+
+- **`rules_else` is required.**
+- **Jump targets are forward-only**: `target` must be **greater than this
+  question's index**, or `-1` (end the check-in). The **server owns the index**
+  and **auto-clamps dangling targets** when a question is deleted or reordered.
+
+**Operators by question type:**
+
+| Type | Operators |
+|------|-----------|
+| `text` | `is_equal_to`, `is_not_equal_to`, `contains`, `not_contains`, `begins_with`, `not_begins_with`, `ends_with`, `not_ends_with` |
+| `numeric` | `is_equal_to`, `is_not_equal_to`, `lower_than`, `lower_or_equal_than`, `greater_than`, `greater_or_equal_than` |
+| `multiple_choice` / `boolean` | `is_equal_to`, `is_not_equal_to` |
+
+**Logic connectors:**
+
+| Type | Allowed connectors |
+|------|--------------------|
+| `text` / `numeric` / `boolean` | `and`, `or` |
+| `multiple_choice` | `or` only |
+
+Boolean comparison values are JSON `true` / `false` (the CLI coerces
+`--jump-if-equals true` / `--jump-if-equals false`).
+
+**Actions:**
+
+| `action` | `target` |
+|----------|----------|
+| `jump_to` | integer question index (forward-only, or `-1` = end) |
+| `trigger_checkin` | a check-in UUID |
+| `trigger_form` | a form UUID |
+
+**Inline jump example** — if the blocker answer is `Yes`, skip ahead to question 4:
+
+```bash
+dailybot checkin questions add <followup_uuid> \
+  --type boolean --question "Any blockers?" \
+  --short-question "Blockers" --blocker \
+  --jump-if-equals true --jump-to 4 --else-jump-to -1
+```
+
+### `--questions-file` JSON format
+
+`--questions-file` (and forms' equivalent) is a **JSON array**, **max 50
+questions**. Each object supports:
+
+| Key | Alias | Notes |
+|-----|-------|-------|
+| `question_type` | `type` | One of the four types. |
+| `question` | `label` | The question text. |
+| `options` | | For `multiple_choice`. |
+| `required` | | Boolean. |
+| `is_blocker` | | Boolean. |
+| `short_question` | | Report title. |
+| `variations` | | Array of alternate phrasings. |
+| `logic` | | Logic object (same shape as above). |
+
+```json
+[
+  {
+    "question_type": "text",
+    "question": "What did you complete yesterday?",
+    "short_question": "Yesterday",
+    "required": true,
+    "variations": ["Recap of yesterday's work?"]
+  },
+  {
+    "question_type": "text",
+    "question": "What are you working on today?",
+    "short_question": "Today",
+    "required": true
+  },
+  {
+    "question_type": "boolean",
+    "question": "Any blockers?",
+    "short_question": "Blockers",
+    "is_blocker": true,
+    "logic": {
+      "rules": {
+        "rules_if": [
+          {"conditions": [{"operator": "is_equal_to", "comparison_value": true, "logic_connector": "or"}],
+           "then": {"action": "jump_to", "target": 3}}
+        ],
+        "rules_else": {"action": "jump_to", "target": -1}
+      }
+    }
+  }
+]
+```
+
+### Round-trip verification (`checkin show`)
+
+After authoring, read the full config back with `dailybot checkin show
+<followup_uuid> --json` and confirm it matches your intent. The detail JSON:
+
+```json
+{
+  "id": "<uuid>",
+  "name": "Daily Standup",
+  "is_active": true,
+  "is_archived": false,
+  "schedule": {"days": [1, 2, 3, 4, 5], "time": "09:00", "timezone": "America/New_York"},
+  "start_on": "2026-07-01",
+  "end_on": null,
+  "frequency_type": "weekly",
+  "frequency": 1,
+  "frequency_advanced": "disabled",
+  "frequency_cron": null,
+  "reminders_max_count": 2,
+  "reminders_frequency_time": 15,
+  "reminders_trigger_condition": "smart_frequency",
+  "reminder_tone": "standard",
+  "is_anonymous": false,
+  "privacy": "owner_and_members",
+  "use_participant_timezone": true,
+  "allow_past_responses": true,
+  "allow_future_responses": false,
+  "is_smart_checkin": false,
+  "is_intelligence_enabled": false,
+  "max_clarifying_questions": 0,
+  "custom_template_intro": "Good morning! Time for standup.",
+  "custom_template_outro": "Thanks — have a great day!",
+  "participants": {
+    "users": [{"uuid": "<uuid>", "name": "Jane Doe"}],
+    "teams": [{"uuid": "<uuid>", "name": "My Team"}]
+  },
+  "report_channels": [
+    {"id": "<uuid>", "name": "standups", "platform": "slack", "type": "channel"}
+  ],
+  "questions": [
+    {
+      "uuid": "<uuid>",
+      "index": 0,
+      "question": "What did you complete yesterday?",
+      "question_type": "text",
+      "required": true,
+      "is_blocker": false,
+      "short_question": "Yesterday",
+      "choices": [],
+      "variations": ["Recap of yesterday's work?"],
+      "logic": null
+    }
+  ]
+}
+```
+
+For `multiple_choice`, `choices` is populated as `[{"label": "...", "value": "..."}]`.
+
+### Archiving
+
+`dailybot checkin archive <followup_uuid> [--yes]` soft-deletes a check-in
+(confirms first unless `--yes`).
+
+### Authoring error codes
+
+| `code` | Meaning |
+|--------|---------|
+| `checkin_requires_participant` | Create had no `--user`/`--team` — add at least one participant. |
+| `intelligence_requires_smart_checkin` | `--intelligence` needs `--smart`; `--max-clarifying > 0` needs `--intelligence`. |
+| `anonymous_irreversible` | Tried `--no-anonymous` on an already-anonymous check-in — not allowed. |
+| `too_many_report_channels` | More than 3 `--report-channel` values. |
+| `short_question_required` | `add` had neither `--short-question` nor `--ai-short-question`. |
+| `invalid_frequency_type` | Used `--frequency` for a non-weekly cadence — use `--frequency-advanced`. |
+| `invalid_reminder_tone` | `--reminder-tone` was not `standard`/`persuasive`. |
+| `invalid_frequency_cron` | Malformed 5-field `--cron` expression. |
+| `question_uuids_incomplete` | `reorder` didn't list every question UUID. |
+| `unknown_field` | CLI sent a field the server doesn't recognize → suggests `dailybot upgrade`. |
+
+### End-to-end examples
+
+**1. Daily standup with participants + reminders, seeded from a questions file:**
+
+```bash
+# 1. Create with schedule, participants, a report channel, and reminders
+dailybot checkin create -n "Daily Standup" \
+  --time 09:00 --days 1,2,3,4,5 --timezone America/New_York \
+  --frequency weekly --every 1 \
+  --reminders 2 --reminder-interval 15 --reminder-condition smart_frequency \
+  --user me@example.com --team "My Team" \
+  --report-channel <channel-uuid> \
+  --intro "Good morning! Time for standup." \
+  --questions-file ./standup-questions.json
+
+# 2. Verify the round-trip
+dailybot checkin show <followup_uuid> --json
+```
+
+**2. Smart AI check-in with insights and capped follow-ups:**
+
+```bash
+dailybot checkin create -n "Weekly Retro" \
+  --time 16:00 --days 5 --timezone America/New_York \
+  --smart --intelligence --max-clarifying 3 \
+  --privacy managers_and_members \
+  --user me@example.com
+
+dailybot checkin questions add <followup_uuid> \
+  --type text --question "What went well this week?" \
+  --short-question "Wins" --required
+```
+
+**3. Custom-cron cadence (first business day of the month) + conditional logic:**
+
+```bash
+# Custom cadence needs --frequency-advanced custom + a 5-field --cron
+dailybot checkin create -n "Monthly Ops Review" \
+  --frequency-advanced custom --cron "0 9 1 * *" \
+  --timezone America/New_York \
+  --team "My Team"
+
+# A blocker question that jumps to a detail question when there ARE blockers
+dailybot checkin questions add <followup_uuid> \
+  --type boolean --question "Any blockers?" \
+  --short-question "Blockers" --blocker \
+  --jump-if-equals true --jump-to 2 --else-jump-to -1
+
+# Incrementally flip one setting later (partial update — nothing else changes)
+dailybot checkin config <followup_uuid> --reminders 1 --reminder-tone persuasive
+```
 
 ---
 
