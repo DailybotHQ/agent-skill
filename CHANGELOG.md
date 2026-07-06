@@ -4,6 +4,29 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] — 2026-07-06
+
+### Changes
+
+- Merge pull request #19 from DailybotHQ/fix/auto-release-commit-message-quoting
+- fix(ci): pass commit messages via env in auto-release (was breaking on quotes)
+- Merge pull request #18 from DailybotHQ/docs/checkin-forms-authoring
+- fix(skill): valid YAML in authoring descriptions + reference CLI 1.17.0
+- feat(checkin,forms): document check-in & form authoring (create/configure/questions)
+- Merge pull request #17 from DailybotHQ/docs/installer-version-pinning
+- docs(skill): document installer version pinning + bump to CLI 1.16.0
+- Merge pull request #16 from DailybotHQ/docs/repo-profile-report-block
+- docs(skill): point CLI version references at the current published 1.15.1
+- docs(shared): document the report policy block in repo-profile.md
+- Merge pull request #15 from DailybotHQ/feat/ask-subskill-full-parity
+- docs(checkin): document the full check-in lifecycle in the skill pack
+- fix(skill): redact real internal identifiers from examples + add privacy rule
+- feat(ask): add headless AI-chat sub-skill + full API-key parity
+- Merge pull request #14 from DailybotHQ/chore/report-skill-respect-repo-profile
+- chore(repo): pin agent identity to "Agent Skill" via .dailybot/profile.json
+- feat(skill): mandatory pre-flight to respect .dailybot/profile.json
+
+
 ## [1.7.1] — 2026-06-12
 
 ### Changes
