@@ -70,7 +70,7 @@ sequenceDiagram
     S->>L: gates: disabled? snoozed? cooldown? min interval?
     alt unreported commits exist
         S-->>H: strong reminder (N commits)
-    else file activity or 8+ turns, no commits
+    else file activity or N+ turns (threshold from profile), no commits
         S-->>H: soft reminder (mentions non-commit work + dismiss)
     else nothing accumulated
         S-->>H: silence (exit 0)
@@ -85,9 +85,27 @@ sequenceDiagram
 ```
 
 The **soft tier** is what covers the dominant modern case: work that never
-produces a commit (research, analysis, generated documents). File-write
-activity and the turn counter are deterministic proxies; the reminder text
-explicitly tells the model to consider non-commit work.
+produces a commit (research, analysis, generated documents, architecture
+decisions, plans). File-write activity and the turn counter are
+deterministic proxies; the reminder text explicitly tells the model to
+consider non-commit work and to default toward reporting when a deliverable
+finished (see [`significance.md`](../skills/dailybot/report/significance.md)
+Trigger 3).
+
+## Per-repo policy keys (CLI)
+
+The committed `.dailybot/profile.json` `report` block supports:
+
+| Key | Default | Effect |
+|-----|---------|--------|
+| `min_interval_minutes` | `30` (`20` in `continuous` mode when omitted) | Min gap before reminders resume |
+| `nudge` | `true` | `false` silences hook reminders |
+| `mode` | `"balanced"` | `"continuous"` lowers soft-nudge thresholds |
+| `soft_turn_threshold` | `8` (`5` in `continuous` mode when omitted) | Turns without report before soft nudge |
+
+Invalid values are ignored; existing repos without these keys keep current
+behavior. Full reference:
+[CLI — docs/AGENT_HOOKS.md](https://github.com/DailybotHQ/cli/blob/main/docs/AGENT_HOOKS.md).
 
 ## What this repo ships vs. what the CLI owns
 

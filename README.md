@@ -19,7 +19,7 @@ across humans and agents.
 
 | Skill | What it does |
 |-------|-------------|
-| **dailybot-report** | Send progress updates after completing meaningful work. Reports read like standup updates — no one can tell they came from an agent. With `dailybot-cli >= 1.12.0`, lifecycle hooks make the reminders deterministic — reporting becomes fully autonomous. |
+| **dailybot-report** | Send progress updates after completing meaningful work — code, research with conclusions, docs, plans, or broad edits. Reports read like standup updates — no one can tell they came from an agent. With `dailybot-cli >= 1.12.0`, lifecycle hooks make the reminders deterministic — reporting becomes fully autonomous. Use `report.mode: continuous` in `.dailybot/profile.json` for more frequent non-commit reminders. |
 | **dailybot-messages** | Check for pending messages and instructions from the team. The "what should I work on next?" skill. |
 | **dailybot-email** | Send emails via Dailybot. Per-recipient first-use approval, mandatory pre-send confirmation, and a credential-pattern scan run before every send. |
 | **dailybot-health** | Announce agent online/offline status. For long-running or scheduled agents to stay visible and pick up instructions. |

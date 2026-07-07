@@ -219,6 +219,26 @@ Why: Specific findings, quantified impact, clear deliverables — even though no
 
 ---
 
+### 16. Research deliverable (no code, no milestone)
+
+**Weak:**
+```bash
+dailybot agent update "Finished researching auth options" \
+  --name "cursor"
+```
+
+**Strong:**
+```bash
+dailybot agent update \
+  "Investigated authentication options for the new microservices — recommending JWT over server sessions because cross-service token validation and stateless scaling matter more than sticky sessions here." \
+  --name "cursor" \
+  --metadata '{"repo":"my-api","branch":"main","agent_tool":"cursor","agent_name":"cursor","model":"claude-sonnet-4-20250514"}'
+```
+
+Why: States the decision and rationale — a concrete deliverable even though no files were committed.
+
+---
+
 ## The Standup Test — Quick Calibration
 
 Before sending any report, ask: "Would this be worth saying in a real standup?"
@@ -235,3 +255,6 @@ Before sending any report, ask: "Would this be worth saying in a real standup?"
 | "3 files modified" | No |
 | "Drafted the Q3 product roadmap with prioritized initiatives" | Yes |
 | "Had a conversation with no conclusions" | No |
+| "Completed the API performance audit — 3 N+1 issues documented with fix order" | Yes |
+| "Investigated auth options — recommending JWT over sessions for cross-service" | Yes |
+| "Researched hook thresholds — proposing SOFT_NUDGE 8→5" | Yes |

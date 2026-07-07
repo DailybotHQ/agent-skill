@@ -174,7 +174,8 @@ Use `--json-data` when a report covers three or more distinct deliverables.
 Quality over quantity. One rich, specific report is worth more than ten shallow ones.
 
 - If you completed related changes, aggregate into one report
-- Aim for roughly 10 meaningful reports per day at most, not 100
+- Aim for roughly 10 meaningful reports per day at most — this is a **soft ceiling for noise**, not an excuse to skip completed deliverables
+- **Completed research/analysis counts as a full report** — use the Analysis template; include 1–3 concrete findings or the decision it enables
 - If the last report was less than 30 minutes ago, consider waiting and combining
 - Back-to-back reports about the same feature should always be merged
 

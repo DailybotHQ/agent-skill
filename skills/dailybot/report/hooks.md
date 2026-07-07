@@ -50,6 +50,17 @@ hooks:
    or dismiss so the ledger reflects your judgment.
 3. **Never block the developer's primary work** on either path.
 
+## Responding to reminders — default bias
+
+When a hook reminder lands:
+
+1. **Scan the session** for completed deliverables (Trigger 1 in [`significance.md`](significance.md)) — including research, docs, plans.
+2. **If any exist** → compose and send the report. Do not dismiss.
+3. **If only WIP** → `dailybot hook dismiss` (snooze 1 hour).
+4. **Never ignore** silently.
+
+Bias: when unsure between "done enough" and "still going", ask: *"Would the team want to know this now?"* — if a decision, finding, or shipped artifact exists, report.
+
 ## Installation (consent required — same rules as triggers)
 
 Hook configs are written to the developer's harness config files. Exactly
@@ -140,9 +151,11 @@ the only remaining per-person step is `dailybot login`, and the
 ## Per-repo controls
 
 - `.dailybot/disabled` — silences hooks (and all skill telemetry) for a repo.
-- `.dailybot/profile.json` → `"report": {"min_interval_minutes": 30, "nudge": true}`
+- `.dailybot/profile.json` → `"report": {"min_interval_minutes": 30, "nudge": true, "mode": "balanced", "soft_turn_threshold": 8}`
   — committed team policy; `"nudge": false` turns reminders off for the repo
-  while keeping manual reporting available.
+  while keeping manual reporting available. `"mode": "continuous"` lowers soft
+  nudge thresholds (5 turns, 20 min interval by default) for research-heavy
+  repos — see [`../shared/repo-profile.md`](../shared/repo-profile.md).
 
 ## Troubleshooting
 

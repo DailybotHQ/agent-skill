@@ -1,7 +1,7 @@
 ---
 name: dailybot
 description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads), and ask the Dailybot AI a question headlessly. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
-version: "1.8.1"
+version: "1.8.2"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"📡","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -25,7 +25,7 @@ Ten coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
-| **Progress reports** | `dailybot-report` | After meaningful work — a completed task, or a batch of edits to 3+ files |
+| **Progress reports** | `dailybot-report` | After meaningful work — a completed task or deliverable (code, research with conclusions, docs, plans), a batch of edits to 3+ files, or a hook reminder when a unit finished |
 | **Ask the AI** | `dailybot-ask` | Developer or agent wants a one-shot, headless answer from the Dailybot AI assistant |
 | **Message polling** | `dailybot-messages` | Session start, idle moments, or when the developer asks "what should I work on?" |
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
@@ -227,8 +227,8 @@ the full step-by-step workflow.
 
 | Situation | Route to |
 |-----------|----------|
-| You completed a task/subtask, or edited 3+ files | **Report** → read [`report/SKILL.md`](report/SKILL.md) |
-| A Dailybot hook reminder was injected into your context ("commits have landed…" / "sustained work without a progress report…") | **Report** → read [`report/SKILL.md`](report/SKILL.md); if nothing significant happened, run `dailybot hook dismiss` instead — never ignore the reminder silently |
+| You completed a task/deliverable (code, research with conclusions, docs, plans), edited 3+ files in a completed batch, or a hook reminder landed and a unit finished | **Report** → read [`report/SKILL.md`](report/SKILL.md) |
+| A Dailybot hook reminder was injected into your context ("commits have landed…" / "sustained work without a progress report…") | **Report** if a deliverable completed; otherwise `dailybot hook dismiss` — never ignore silently |
 | Starting a long work session or idle for 15+ minutes | **Health** → read [`health/SKILL.md`](health/SKILL.md) |
 
 **Disambiguation:** "check in with the team" → **Health**; "complete my

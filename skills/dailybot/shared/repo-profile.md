@@ -32,15 +32,32 @@ The profile may also carry a `report` object. It is **not** a command-line conce
   "default_metadata": { "repo": "cli" },
   "report": {
     "min_interval_minutes": 30,
-    "nudge": true
+    "nudge": true,
+    "mode": "balanced",
+    "soft_turn_threshold": 8
   }
 }
 ```
 
 | `report` key | Effect | Default |
 |---|---|---|
-| `min_interval_minutes` | Minimum gap before the hooks surface another "you have unreported work" reminder for this repo. Raise it to make reminders less frequent. | `30` |
+| `min_interval_minutes` | Minimum gap before the hooks surface another "you have unreported work" reminder for this repo. Raise it to make reminders less frequent. | `30` (`20` when `mode` is `continuous` and this key is omitted) |
 | `nudge` | `false` turns hook reminders off repo-wide (manual `dailybot agent update` still works); `true` keeps them on. | `true` |
+| `mode` | `"balanced"` uses standard thresholds; `"continuous"` lowers soft-nudge frequency for research-heavy repos. Invalid values fall back to `"balanced"`. | `"balanced"` |
+| `soft_turn_threshold` | Agent turns without a report before a soft nudge is eligible (with interval elapsed). | `8` (`5` when `mode` is `continuous` and this key is omitted) |
+
+Requires `dailybot-cli` with `report.mode` support (see CLI release notes).
+Teams wanting more frequent non-commit reminders can commit:
+
+```json
+{
+  "report": {
+    "mode": "continuous",
+    "min_interval_minutes": 20,
+    "nudge": true
+  }
+}
+```
 
 This block is consumed by the deterministic hook reminders (`dailybot hook session-start` / `stop`), not by the report command itself. See [`../report/hooks.md`](../report/hooks.md) § "Per-repo controls" for the full hook policy (including the `.dailybot/disabled` kill-switch and `dailybot hook dismiss` snooze).
 

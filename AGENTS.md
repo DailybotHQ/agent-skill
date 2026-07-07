@@ -365,8 +365,9 @@ This repository **is the dailybot agent skill pack**. When an AI agent
 works on it, that agent should use the skill it's editing to report
 progress. The skill exists for exactly this kind of work.
 
-After significant work (feature, bug fix, refactor, docs rewrite, three or
-more related commits), submit a Daily Standup-style update to Dailybot.
+After significant work (feature, bug fix, refactor, docs rewrite, completed
+research with conclusions, architecture decision, or three or more related
+commits), submit a Daily Standup-style update to Dailybot.
 Once the skill is installed locally, the agent does this autonomously
 because the auto-activation trigger is in place. If you're a contributor
 who hasn't installed the skill in your agent yet, do it now — it's a
@@ -379,6 +380,7 @@ two-command setup and you'll see what end users see.
 - Never say *"Agent completed..."* — describe outcomes, not process
 - Never include file paths, git stats, branch names, or raw commit messages
 - **Silence > noise** — if you can't be specific, don't report
+- **Completed research/analysis/docs count as deliverables** — report when you have conclusions, not when you're still exploring
 - 1 rich, complete report > 10 shallow reports
 
 See `skills/dailybot/report/SKILL.md` and `skills/dailybot/report/writing-guide.md`

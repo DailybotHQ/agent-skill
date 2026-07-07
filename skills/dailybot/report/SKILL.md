@@ -1,7 +1,7 @@
 ---
 name: dailybot-report
-description: Report work progress to Dailybot. Activate after completing a discrete task or subtask, or after any batch of edits that modifies 3 or more files. Compose a standup-style update describing what changed and why.
-version: "1.8.1"
+description: Report work progress to Dailybot. Activate after completing a discrete task or deliverable (including research with conclusions, docs, or plans), after a batch of edits to 3+ files, or when a hook reminder lands and a unit of work is complete. Compose a standup-style update describing what changed and why.
+version: "1.8.2"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"📡","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -160,11 +160,17 @@ session. The Step 0a trigger still provides (probabilistic) coverage.
 When a hook injects a reminder ("commits have landed since the last
 report…" / "sustained work without a progress report…") into your context:
 
-- **Meaningful unit complete** (including non-commit work — research,
-  analysis, documents) → compose and send the report now (Steps 3–7).
-- **Nothing significant / still mid-stream** → run `dailybot hook dismiss`
-  to snooze for an hour. Either report or dismiss — never ignore the
-  reminder silently.
+1. **Scan for completed deliverables** — code, research with conclusions,
+   docs, plans, reviews (see Trigger 1 in [`significance.md`](significance.md)).
+2. **If any deliverable is complete** → compose and send the report now
+   (Steps 3–7). Do not dismiss.
+3. **If only WIP / nothing significant** → run `dailybot hook dismiss` to
+   snooze for an hour.
+4. **Never ignore** the reminder silently — report or dismiss.
+
+Bias: when unsure, ask *"Would the team want to know this now?"* — if a
+decision, finding, or shipped artifact exists, report. Full guidance:
+[`hooks.md`](hooks.md) § "Responding to reminders — default bias".
 
 ---
 
@@ -413,13 +419,14 @@ prints the same link automatically as a `View:` line **from `dailybot-cli`
 
 Send a progress report after each of the following:
 
-1. **Task completed** — You finished a discrete task or subtask (e.g., a todo item, a user-requested change, a bug fix, a feature).
-2. **Broad edit** — You modified 3 or more files in a single batch of edits.
+1. **Task or deliverable completed** — Code (bug fix, feature, refactor, tests, deployment, PR), knowledge work with conclusions (research, decision, recommendation), documents (spec, ADR, plan, audit), or review/analysis with an actionable outcome. Structural test: can you state a specific outcome in 1–2 sentences?
+2. **Broad edit** — You modified 3 or more files in a **completed** batch. Report the aggregate outcome, not "3 files changed".
+3. **Hook reminder + completed unit** — A Dailybot hook injected a reminder and a deliverable from (1) finished since the last report → report now; do not dismiss. If genuinely mid-stream → `dailybot hook dismiss`.
 
 Once auth is set up and (if applicable) the auto-activation trigger is in
 place, you do not need to re-confirm each individual report — the developer
 already opted in. Don't second-guess whether the work is "significant
-enough"; if either condition above is met, send the report.
+enough" when a structural trigger is met; send the report.
 
 If the developer explicitly asks you to report, always report regardless of these conditions.
 
