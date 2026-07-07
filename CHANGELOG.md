@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] — 2026-07-07
+
+### Changes
+
+- Merge pull request #22 from DailybotHQ/docs/reference-cli-1.18.0
+- docs(skill): reference dailybot-cli 1.18.0 as current published release
+
+
 ## [1.8.2] — 2026-07-07
 
 ### Changes
