@@ -53,7 +53,7 @@ fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/ag
 >
 > Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
 >
-> **Current published version:** [`dailybot-cli 1.17.1`](https://pypi.org/project/dailybot-cli/) —
+> **Current published version:** [`dailybot-cli 1.18.0`](https://pypi.org/project/dailybot-cli/) —
 > what `pip install --upgrade dailybot-cli` (or `dailybot upgrade`) resolves to
 > today. Everything below is additive on top of the 1.10.0 minimum; the
 > per-feature floors say which release first shipped each sub-skill.
