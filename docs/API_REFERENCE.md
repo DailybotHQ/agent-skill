@@ -777,6 +777,14 @@ curl -s -X POST -H "$AUTH" -H "Content-Type: application/json" \
   https://api.dailybot.com/v1/checkins/<followup_uuid>/responses/ \
   -d '{"responses":[{"uuid":"<q-uuid>","index":0,"response":"Done"}],"last_question_index":0}'
 
+# List check-in responses — default returns ALL participants' responses in the range
+curl -s -H "$AUTH" \
+  "https://api.dailybot.com/v1/checkins/<followup_uuid>/responses/?date_start=2026-06-01&date_end=2026-06-30"
+
+# Filter to one participant (admin/manager only; members are guarded to their own)
+curl -s -H "$AUTH" \
+  "https://api.dailybot.com/v1/checkins/<followup_uuid>/responses/?date_start=2026-06-01&date_end=2026-06-30&user=<user_uuid>"
+
 # List forms (with questions)
 curl -s -H "$AUTH" "https://api.dailybot.com/v1/forms/?include=questions"
 
@@ -793,6 +801,14 @@ curl -s -X POST -H "$AUTH" -H "Content-Type: application/json" \
   https://api.dailybot.com/v1/kudos/ \
   -d '{"receivers":["<user-uuid>"],"content":"Great work!"}'
 ```
+
+> **Response-listing scope differs between check-ins and forms.**
+> `GET /v1/checkins/<uuid>/responses/` defaults to **all participants'** responses;
+> add `?user=<uuid>` to narrow (admin/manager callers only — members are guarded to
+> their own). `?all=true` is a harmless no-op here. By contrast,
+> `GET /v1/forms/<uuid>/responses/` defaults to the **caller's own** responses and
+> needs `?all=true` (admin/owner with `VIEW_REPORTS`) to see everyone. The asymmetry
+> is intentional.
 
 **How to obtain a Bearer token programmatically:**
 
