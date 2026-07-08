@@ -82,7 +82,8 @@ agent-skill/
 │   ├── skill.md                           ← mirrored at api.dailybot.com/skill.md
 │   └── openclaw.md
 └── skills/dailybot/                       ← THE INSTALLED ARTIFACT — only this ships
-    ├── SKILL.md                           ← router
+    ├── SKILL.md                           ← router (+ "Start here (first run)" self-contained setup)
+    ├── TRUST.md                           ← install-time trust & guarantees + self-audit (ships)
     ├── shared/                            ← auth.md, context.sh, http-fallback.md
     ├── report/                            ← progress reporting + auto-activation
     ├── messages/SKILL.md

@@ -19,6 +19,36 @@ across humans and agents in the same workspace.
 This is the canonical, first-party integration. Source of truth:
 <https://github.com/DailybotHQ/agent-skill>. License: MIT.
 
+## Start here (first run)
+
+This skill is a **self-sufficient entry point**: whether you arrive from the web
+(<https://api.dailybot.com/skill.md>) or simply install this skill from a
+registry, the setup is the same — and it lives **here, in the shipped files, so
+no network fetch is required** to know what to do. Run first-run setup in order:
+
+1. **Install the Dailybot CLI (with consent).** This skill is the prompt layer;
+   the `dailybot` CLI is the integration surface. If it is missing, follow
+   [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
+   installer and installs **only after the developer confirms**. Confirm with
+   `dailybot --version` (minimum `>= 1.10.0`; hooks in step 3 need `>= 1.12.0`,
+   and continuous mode in step 4 needs `>= 1.19.0`).
+2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
+   see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
+   (`0600`) and masked in all output.
+3. **Turn on autonomous reporting (opt-in).** So reporting fires without invoking
+   the skill each session, offer the auto-activation trigger and the `dailybot hook`
+   lifecycle enforcement in [`report/SKILL.md`](report/SKILL.md) Step 0 / Step 0b.
+   Both are shown to the developer verbatim and written **only on consent**, each
+   with an uninstall marker.
+4. **Make reporting proactive for this repo.** Commit a `.dailybot/profile.json`
+   with a `report` block. For research/docs-heavy repos, set `"mode": "continuous"`
+   so non-commit work (research, analysis, design docs, plans) is nudged sooner —
+   see [`report/hooks.md`](report/hooks.md) § Per-repo controls.
+
+Then route by intent (below). What this skill will and will **not** do on your
+machine — permissions, consent guarantees, and a self-audit you can run — is in
+[`TRUST.md`](TRUST.md).
+
 ## What it does
 
 Ten coordinated capabilities, with smart routing between them:
@@ -44,7 +74,11 @@ npx skills add DailybotHQ/agent-skill
 
 Six install methods are supported (skills.sh CLI, OpenClaw native, git
 clone + `setup.sh`, conversational, manual per-agent, and HTTP-only
-fallback). Full guide: [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/agent-skill/blob/main/docs/INSTALLATION.md).
+fallback). Full guide (online): [`docs/INSTALLATION.md`](https://github.com/DailybotHQ/agent-skill/blob/main/docs/INSTALLATION.md).
+
+Installing the skill sets up the **prompt layer** only. Everything an agent needs
+to then install and authenticate the `dailybot` CLI, and to turn on autonomous
+reporting, ships **inside this skill** — follow **[Start here (first run)](#start-here-first-run)** above. No external page is required.
 
 ## Required Dailybot CLI version
 
