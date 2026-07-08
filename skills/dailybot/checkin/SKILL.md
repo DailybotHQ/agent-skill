@@ -260,7 +260,7 @@ prompts — handy for humans; agents should use the headless commands above.
 > `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
 > group, resolving people by email, the smart/AI flags, and the **create requires
 > ≥ 1 question** rule (`questions_required`) — ships in CLI **1.17.1** (current
-> published release: **1.18.0**). The response lifecycle above works on older CLIs; only authoring
+> published release: **1.19.0**). The response lifecycle above works on older CLIs; only authoring
 > needs 1.17.1. If `dailybot --version` is below that, run `dailybot upgrade`.
 
 Everything above **answers** a check-in. This section **builds** one. As of the

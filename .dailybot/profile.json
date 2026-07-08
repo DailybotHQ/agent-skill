@@ -2,5 +2,9 @@
   "name": "Agent Skill",
   "default_metadata": {
     "repo": "agent-skill"
+  },
+  "report": {
+    "mode": "continuous",
+    "nudge": true
   }
 }
