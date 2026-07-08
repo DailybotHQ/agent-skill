@@ -152,6 +152,12 @@ consent. A repo-level config (`.claude/settings.json`, `.cursor/hooks.json`,
 …) committed to the repository gives the whole team autonomous reporting on
 clone — offer that when the developer is in a shared project.
 
+Once hooks are wired, consider the repo's **report cadence**. For research- or
+docs-heavy repos where much of the valuable work never lands as a commit, add
+`"report": {"mode": "continuous"}` to the committed `.dailybot/profile.json` so
+non-commit work (research, analysis, design docs, plans) is nudged sooner (a
+lower interval and turn threshold). See [`hooks.md`](hooks.md) § Per-repo controls.
+
 If the developer declines, continue to Step 1 and do not re-ask in the same
 session. The Step 0a trigger still provides (probabilistic) coverage.
 
