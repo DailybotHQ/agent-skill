@@ -30,7 +30,8 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    the `dailybot` CLI is the integration surface. If it is missing, follow
    [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
    installer and installs **only after the developer confirms**. Confirm with
-   `dailybot --version` (minimum `>= 1.10.0`; the hooks in step 3 need `>= 1.19.0`).
+   `dailybot --version` (minimum `>= 1.10.0`; hooks in step 3 need `>= 1.12.0`,
+   and continuous mode in step 4 needs `>= 1.19.0`).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.
