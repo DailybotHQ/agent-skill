@@ -4,6 +4,16 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4] — 2026-07-08
+
+### Changes
+
+- Merge pull request #23 from DailybotHQ/feat/report-continuous-mode-docs
+- docs(skill): reference dailybot-cli 1.19.0 as the current published release
+- chore(report): enable continuous report mode for this repo (dogfood)
+- docs(report): document continuous report mode and soft_turn_threshold
+
+
 ## [1.8.3] — 2026-07-07
 
 ### Changes
