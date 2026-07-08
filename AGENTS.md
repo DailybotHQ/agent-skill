@@ -93,7 +93,7 @@ agent-skill/
     ├── kudos/SKILL.md
     ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
     ├── forms/SKILL.md
-    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest 1.19.0)
+    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest on PyPI)
 ```
 
 The hard rule: **anything you put outside `skills/dailybot/` is invisible
