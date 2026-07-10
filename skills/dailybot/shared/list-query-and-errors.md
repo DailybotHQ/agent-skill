@@ -7,6 +7,14 @@
 > Below that, list commands take no query flags and the CLI matches on the human
 > `detail` prose rather than the stable `code` field. Ask the developer to run
 > `dailybot upgrade` if `dailybot --version` reports below 2.0.0.
+>
+> Four behaviours on this page arrived later, with the CLI release that migrated
+> to the uuid-keyed API: `uuid` as the identifier on forms and form responses
+> (§ 4), the envelope with no opt-in parameter (§ 2), `--page` / `--page-size` /
+> `--limit` on `form responses` and `checkin history` (§ 1), and
+> `invalid_user_identifier` (§ 5). If a developer is on an older CLI, those
+> commands still work — they simply return every page and key forms on `id`.
+> `dailybot upgrade` gets them current.
 
 This is the **single source of truth** for behavior shared across every
 list-style Dailybot command. The sub-skills (`forms`, `kudos`, `workflow`,
@@ -18,12 +26,14 @@ cache the answer.
 ## 1. The list query flags
 
 These flags are accepted by the list commands noted below. `--search` is also
-accepted on `form responses` and `checkin history`.
+accepted on `form responses` and `checkin history`, which additionally take
+`--page` / `--page-size` / `--limit` (but **not** `--all` — on `form responses`
+that flag already means "every author's responses", not "every page").
 
 | Flag | Alias | Meaning |
 |------|-------|---------|
 | `--page N` | | Fetch page `N` (1-based). |
-| `--page-size N` | | Items per page. **Max 200** — larger values are clamped server-side. |
+| `--page-size N` | | Items per page. **Max 100** — larger values are clamped client-side. Passing it alone returns that one page, not the whole list. |
 | `--all` | | Fetch **every** page and concatenate the results. Mutually exclusive with `--limit`. |
 | `--limit N` | | Stop after the first `N` items (across pages). Mutually exclusive with `--all`. |
 | `--search TEXT` | `--grep TEXT` | Case-insensitive substring filter. **Max 256 chars** — longer queries are truncated client-side before the request. |
@@ -34,9 +44,10 @@ accepted on `form responses` and `checkin history`.
 | `--today` | | The current day. |
 
 **Which commands take the full set:** `dailybot form list`,
-`dailybot kudos list`, `dailybot workflow list`.
-**`--search` only** (no pagination/date flags): `dailybot form responses`,
-`dailybot checkin history`.
+`dailybot kudos list`, `dailybot kudos org`, `dailybot workflow list`.
+**Paging (`--page` / `--page-size` / `--limit`) + `--search`, but no `--all`:**
+`dailybot form responses`, `dailybot checkin history`. Both also take their own
+date flags (`--from` / `--to`, and `--days` on `checkin history`).
 
 ### Defaults and combinations
 
@@ -59,8 +70,8 @@ Every list endpoint returns a standard envelope:
 ```json
 {
   "count": 137,
-  "next": "https://api.dailybot.com/v1/forms/?page=3&paginated=true",
-  "previous": "https://api.dailybot.com/v1/forms/?page=1&paginated=true",
+  "next": "https://api.dailybot.com/v1/forms/?page=3",
+  "previous": "https://api.dailybot.com/v1/forms/?page=1",
   "results": [ ... ]
 }
 ```
@@ -71,11 +82,9 @@ Every list endpoint returns a standard envelope:
   flags).
 - `results` — the items on the current page.
 
-> **`?paginated=true` on the forms endpoints.** For the two forms list
-> endpoints — `GET /v1/forms/` and `GET /v1/forms/<uuid>/responses/` — the CLI
-> **always** sends `?paginated=true` so the response is the envelope shape
-> above. HTTP-fallback callers hitting those endpoints directly should send it
-> too, or they get the legacy bare-array shape.
+> **The envelope is unconditional.** Every `/v1` list endpoint returns the shape
+> above with no opt-in parameter. HTTP-fallback callers can rely on it
+> everywhere. Default page size is 25; `?page_size=N` raises it to at most 100.
 
 ---
 
@@ -97,7 +106,31 @@ Showing 25 of 137
 
 ---
 
-## 4. Machine-readable error codes
+## 4. Reading a resource's identifier — `uuid` or `id`
+
+Resources do not agree on the name of their identifier field:
+
+| Field | Resources |
+|-------|-----------|
+| `uuid` | forms, form responses, check-in responses, workflows, users, teams |
+| `id` | kudos, check-ins (followups) |
+| both (same value) | agent reports, agent messages, agent health |
+
+**Always read `.uuid // .id`.** It is correct for every resource today and stays
+correct as more of them migrate to `uuid`:
+
+```bash
+FID=$(dailybot form create -n "Release" --json | jq -r '.uuid // .id')
+CID=$(dailybot checkin list --json | jq -r '.checkins[0].uuid // .checkins[0].id')
+```
+
+Do **not** hardcode `.id` for a form or a form response — that field no longer
+exists there, and `jq -r '.id'` yields the string `null`, which then gets
+interpolated into a URL as a literal `null`.
+
+---
+
+## 5. Machine-readable error codes
 
 Since 2.0.0 the CLI dispatches on a stable `code` field in the error body and
 prints a friendly, actionable message. **Always match on `code`, never on the
@@ -106,6 +139,11 @@ human `detail` prose** — `detail` is display text and may change wording.
 In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 
 ### 403 — permission / plan gating
+
+> **A `403` never means the session expired.** Only a `401` does. A `403` is a
+> verdict about the caller's role or plan, and re-running `dailybot login` will
+> reproduce it exactly. Read the `code` and tell the developer what they lack —
+> a role, a plan, or membership in a scope.
 
 | `code` | Meaning | What to do |
 |--------|---------|------------|
@@ -124,6 +162,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `target_user_inactive` | The targeted user is deactivated. | Pick an active user. |
 | `search_query_too_long` | `--search` exceeded the limit. | The CLI truncates to 256 chars client-side; if you see this, shorten the query. |
 | `invalid_date_range` | `--since`/`--until` are malformed or reversed. | Fix the dates (`YYYY-MM-DD`, since ≤ until). |
+| `invalid_user_identifier` | `--user` was given an email or a name. | `--user` takes **only a UUID**. Get it from `dailybot user list --json`. (Caught client-side before the request.) |
 | `send_as_user_conflict` | `--send-as-user`/`--send-as-me` combined with `--bot-name`/`--bot-icon-*`. | Drop the custom-identity flags; the two are mutually exclusive. |
 | `send_as_user_invalid_uuid` | `--send-as-user` value isn't a valid UUID. | Fix the UUID. (Caught client-side before the request.) |
 | `send_as_user_not_found` | The `--send-as-user` UUID doesn't resolve to a user. | Confirm the user exists (`dailybot user list`). |
@@ -137,7 +176,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 
 ---
 
-## 5. Auth model — API key ↔ Bearer parity, and plan gating
+## 6. Auth model — API key ↔ Bearer parity, and plan gating
 
 ### Parity
 
@@ -168,7 +207,7 @@ applies), subject to the usual role scoping.
 
 ---
 
-## 6. Non-blocking rule
+## 7. Non-blocking rule
 
 As with every Dailybot operation: if a list/read errors, warn briefly, honor
 the `code`, and continue the primary task. Never retry in a tight loop —

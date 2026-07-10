@@ -204,7 +204,7 @@ dailybot org [--json]                       # the org the credential is scoped t
 
 Both are on the FREE-plan Bearer allowlist (along with `dailybot status`), so
 they work even where other reads are plan-gated — see
-[`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md) § 5.
+[`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md) § 6.
 
 ---
 

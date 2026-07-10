@@ -114,7 +114,7 @@ Returns all forms visible to the logged-in user. The shape is stable and machine
 ```json
 [
   {
-    "id": "<form-uuid>",
+    "uuid": "<form-uuid>",
     "slug": "team-feedback",
     "name": "Team Feedback",
     "workflow": null,
@@ -127,7 +127,7 @@ Returns all forms visible to the logged-in user. The shape is stable and machine
     ]
   },
   {
-    "id": "<form-uuid>",
+    "uuid": "<form-uuid>",
     "slug": "code-release-form",
     "name": "Code Release Form",
     "workflow": { "enabled": true, "states": [ ... ] },
@@ -161,10 +161,9 @@ dailybot form list --all --json
 dailybot form list --page 2 --page-size 20 --json
 ```
 
-> **`?paginated=true`.** The CLI always sends `?paginated=true` on
-> `GET /v1/forms/` (and on the responses endpoint below), so the response is the
-> envelope shape. HTTP-fallback callers hitting those two endpoints directly
-> should send it too — see the shared doc.
+> **The envelope is unconditional.** `GET /v1/forms/` and the responses endpoint
+> below always return `{count, next, previous, results}`; no query parameter is
+> needed. See the shared doc.
 
 ### Present forms to the developer
 
@@ -202,7 +201,7 @@ server-defined.
 
 ```json
 {
-  "id": "<form-uuid>",
+  "uuid": "<form-uuid>",
   "slug": "code-release-form",
   "name": "Code Release Form",
   "allow_reopen_from_final_state": false,
@@ -591,7 +590,7 @@ dailybot form create -n "Code Release Form" \
 
 ```json
 {
-  "id": "<form-uuid>",
+  "uuid": "<form-uuid>",
   "name": "Code Release Form",
   "is_active": true,
   "is_archived": false,
@@ -671,7 +670,7 @@ Soft-deletes the form (`is_archived: true`). Confirm before invoking — archive
 
 ```bash
 # 1. Create the shell.
-FID=$(dailybot form create -n "Code Release Form" --active --json | jq -r '.id')
+FID=$(dailybot form create -n "Code Release Form" --active --json | jq -r '.uuid')
 
 # 2. Wire the workflow, permissions, report channel, and command in one config call.
 dailybot form config "$FID" \
@@ -735,9 +734,9 @@ dailybot form responses <form_uuid> --latest --json
 The standard shell pattern for "continue if there's an in-progress response, otherwise create one":
 
 ```bash
-RID=$(dailybot form responses <form_uuid> --latest --json | jq -r '.[0].id // empty')
+RID=$(dailybot form responses <form_uuid> --latest --json | jq -r '.[0].uuid // empty')
 if [ -z "$RID" ]; then
-  RID=$(dailybot form submit <form_uuid> --content '{...}' --yes --json | jq -r '.id')
+  RID=$(dailybot form submit <form_uuid> --content '{...}' --yes --json | jq -r '.uuid')
 fi
 # $RID is now the response UUID — pass it to subsequent update / transition calls.
 ```
@@ -754,15 +753,17 @@ Useful flags:
 > **`form responses` search (CLI ≥ 2.0.0).** The `--search` / `--grep` flag
 > filters responses case-insensitively — handy for finding a past response by a
 > service name or keyword. Like `form list`, this endpoint
-> (`GET /v1/forms/<uuid>/responses/`) is sent with `?paginated=true` and returns
-> the `{count, next, previous, results}` envelope with a `Showing X of N` footer.
+> (`GET /v1/forms/<uuid>/responses/`) returns the `{count, next, previous,
+> results}` envelope with a `Showing X of N` footer. It also takes `--page` /
+> `--page-size` / `--limit`. Careful: `--all` here means **every author's**
+> responses (admin/owner only), not every page.
 > See [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
 
 ### JSON shape (single response)
 
 ```json
 {
-  "id": "<response-uuid>",
+  "uuid": "<response-uuid>",
   "form_id": "<form-uuid>",
   "current_state": "review",
   "allowed_transitions": [
@@ -999,6 +1000,12 @@ When the form is workflow-enabled and `allowed_transitions` is non-empty:
 ```bash
 dailybot form transition <form_uuid> <response_uuid> <to_state> --yes
 ```
+
+> **Pass `to_state`, never `label`.** In `allowed_transitions`, `to_state` is the
+> machine key (`released`) and `label` is display text (`Mark released`). The API
+> matches on the key and answers `Unknown workflow state: 'Mark released'`
+> otherwise. Read the key from the response payload rather than typing the state
+> name you saw in the panel.
 
 Confirm with the developer before transitioning:
 
