@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] — 2026-07-10
+
+### Changes
+
+- Merge pull request #31 from DailybotHQ/feat/cli-floor-3.1.2
+- feat(skill): set dailybot-cli >= 3.1.2 as the single baseline for every sub-skill
+
+
 ## [3.2.0] — 2026-07-10
 
 ### Changes
