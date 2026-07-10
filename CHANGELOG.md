@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] — 2026-07-10
+
+### Changes
+
+- Merge pull request #27 from DailybotHQ/fix/safer-install-guidance
+- docs(skill): standardize on curl -fsSL and document the verified install for agents
+
+
 ## [3.0.0] — 2026-07-10
 
 ### Changes

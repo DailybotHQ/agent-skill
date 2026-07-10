@@ -1,7 +1,7 @@
 ---
 name: dailybot-workflow
 description: List and inspect Dailybot workflows (read-only) — enumerate the workflows configured for the organization and read one workflow's configuration. Use when the developer asks "list my workflows", "show workflows", or "what's in the release workflow?". Writes are done in the Dailybot web app; this skill only reads. Plan-gated feature.
-version: "3.0.0"
+version: "3.0.1"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"🔀","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
