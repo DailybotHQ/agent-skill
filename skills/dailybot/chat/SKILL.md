@@ -209,7 +209,7 @@ dailybot chat send -c C0123 -m "Standup starting" --send-as-me
   `send_as_user_not_found` (400).
 - **Slack only** — on Teams/Discord/Google Chat the flags are ignored.
 - **Admin-only** — a non-admin caller is rejected server-side (see the role
-  error codes in [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md) § 4).
+  error codes in [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md) § 5).
 
 ### Ephemeral message (Slack only; only the recipient sees it)
 
