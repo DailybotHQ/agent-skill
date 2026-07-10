@@ -210,13 +210,24 @@ then resume. Do not retry CLI commands in a loop while the upgrade is pending.
 |---------|---------|
 | pip      | `pip install 'dailybot-cli>=1.10.0'` |
 | Homebrew | `brew install dailybothq/tap/dailybot` |
-| Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -sSL https://cli.dailybot.com/install.sh \| bash` |
+| Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -fsSL https://cli.dailybot.com/install.sh \| bash` |
 | Windows PowerShell (when WSL2 / Git Bash unavailable) | `irm https://cli.dailybot.com/install.ps1 \| iex` |
 
 The universal installer auto-detects the OS and routes to Homebrew on macOS,
 the prebuilt binary on Linux x86_64, or pipx / uv tool / pip --user elsewhere.
 Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
 [`shared/auth.md`](shared/auth.md).
+
+> **Always fetch with `curl -fsSL`.** The `-f` makes curl fail on an HTTP error
+> instead of writing the error page to stdout with exit status `0` — which, in a
+> pipe, `bash` would execute.
+>
+> **Agents: do not run the piped one-liner.** The commands above are what a *human*
+> types. `curl … | bash` streams, so a truncated download executes a partial script,
+> and in a shell without `pipefail` a failed download exits `0` and installs nothing,
+> silently. Always use the **verified install** (download → cross-origin diff →
+> SHA-256 → execute) in
+> [`shared/auth.md`](shared/auth.md#primary-path-defense-in-depth-verified-install-linux-macos-wsl2-git-bash-docker-ci).
 
 #### Pinning a specific version
 
@@ -229,7 +240,7 @@ installer scripts; `pip` and Homebrew work on any version):
 |---------|---------------|
 | pip      | `pip install dailybot-cli==<version>` |
 | Homebrew | installs latest only — pin via `pip install dailybot-cli==<version>` |
-| Universal installer | `curl -sSL https://cli.dailybot.com/install.sh \| DAILYBOT_VERSION=<version> bash` (or `\| bash -s -- --version <version>`) |
+| Universal installer | `curl -fsSL https://cli.dailybot.com/install.sh \| DAILYBOT_VERSION=<version> bash` (or `\| bash -s -- --version <version>`) |
 | Windows PowerShell | `$env:DAILYBOT_VERSION='<version>'; irm https://cli.dailybot.com/install.ps1 \| iex` |
 
 Prefer `pip install dailybot-cli==<version>` when the developer already has
