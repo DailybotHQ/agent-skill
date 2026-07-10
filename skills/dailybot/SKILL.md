@@ -87,9 +87,10 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 >
 > Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
 >
-> **Current published version:** [`dailybot-cli 1.19.0`](https://pypi.org/project/dailybot-cli/) —
-> what `pip install --upgrade dailybot-cli` (or `dailybot upgrade`) resolves to
-> today. Everything below is additive on top of the 1.10.0 minimum; the
+> **Current published version:** the latest [`dailybot-cli`](https://pypi.org/project/dailybot-cli/)
+> release on PyPI — what `pip install --upgrade dailybot-cli` (or `dailybot
+> upgrade`) resolves to today; run `dailybot version --check` to see the exact
+> number. Everything below is additive on top of the 1.10.0 minimum; the
 > per-feature floors say which release first shipped each sub-skill.
 >
 > **`1.11.0` enhancement (optional):** `dailybot agent update` echoes the
