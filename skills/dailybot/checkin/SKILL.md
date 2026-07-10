@@ -1,7 +1,7 @@
 ---
 name: dailybot-checkin
 description: Drive the full check-in lifecycle via Dailybot — list and complete pending check-ins, see pending/completed status for a day, inspect a check-in's questions and schedule, browse response history, edit or reset a submitted response, and backfill or future-date responses. Also authors check-ins — create and configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions (types, report titles, variations, conditional logic). Works headless with an API key. Use when the developer asks to fill in their standup, answer daily questions, check what check-ins they have, edit or reset a check-in, review past responses, or create/configure a check-in. Do not use for free-text progress reports — those go through dailybot-report.
-version: "1.8.6"
+version: "2.0.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"✅","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -203,6 +203,7 @@ before completing or editing it.
 dailybot checkin history <followup_uuid> --days 7 [--json]
 dailybot checkin history <followup_uuid> --from 2026-06-01 --to 2026-06-30 --json
 dailybot checkin history <followup_uuid> --user <user_uuid> --days 30   # one participant
+dailybot checkin history <followup_uuid> --search "deploy" --days 30    # keyword filter (CLI ≥ 2.0.0)
 ```
 
 Responses over a date range (date, completed, answer summary). Check-ins are
@@ -210,6 +211,11 @@ team-wide, so this lists **every participant's** responses by default (unlike
 forms, which default to your own). Pass `--user <uuid>` to narrow to one
 participant — that filter is admin/manager only; a member always sees only their
 own responses regardless of the flag.
+
+> **`--search` / `--grep` (CLI ≥ 2.0.0).** `checkin history` accepts a
+> case-insensitive substring filter (max 256 chars, truncated client-side) to
+> find past responses by keyword. See the shared query-flag reference in
+> [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
 
 ### Edit an existing response
 

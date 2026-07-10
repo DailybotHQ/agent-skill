@@ -1,7 +1,7 @@
 ---
 name: dailybot-chat
 description: Send and edit Dailybot bot messages on the team's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams. Supports report-style threads (one headline + replies, in one call) and editing the parent or any reply afterward. Use when the developer says "send a message to my Slack channel", "ping the team in chat", "post the deploy report to #releases", or wants to update a previously sent bot message. Works headless for agents.
-version: "1.8.6"
+version: "2.0.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"💬","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -174,6 +174,43 @@ dailybot chat send -c C0123 -m "Build #421 ✅" \
 
 `--bot-icon-url` (https-only) and `--bot-icon-emoji` are mutually exclusive. Custom identity requires the Slack `chat:write.customize` scope on the Dailybot app — without it Slack uses the default identity and the API still returns `ok: true`. On Teams/Discord/Google Chat, custom identity is silently ignored.
 
+### Send as a user's identity (Slack only, admin-only)
+
+> **Requires `dailybot-cli >= 2.0.0`.** The `--send-as-user` / `--send-as-me`
+> flags first ship in CLI **2.0.0**.
+
+Instead of a custom bot name/icon, an admin can post the message **with a real
+user's identity** — their name and profile picture — so it reads as if that
+person sent it. **Slack only. Admin-only.** Two flags:
+
+| Flag | Meaning |
+|------|---------|
+| `--send-as-user <UUID>` | Send with the identity of that user (name + profile picture). |
+| `--send-as-me` | Shortcut — send as the **authenticated user** (the CLI resolves your own UUID). |
+
+```bash
+# Post to a channel as a specific teammate (admin only):
+dailybot chat send -c C0123 -m "Deploying the hotfix now" \
+  --send-as-user 294bf2cc-e3c7-401d-a1d6-bf20aa64bb33
+
+# Post as yourself:
+dailybot chat send -c C0123 -m "Standup starting" --send-as-me
+```
+
+**Constraints (validated client-side before the request):**
+
+- **Mutually exclusive with** `--bot-name` / `--bot-icon-url` /
+  `--bot-icon-emoji` — you send as a *user identity* or a *custom bot
+  identity*, not both. The conflict is rejected up front with
+  `send_as_user_conflict`.
+- An invalid `--send-as-user` UUID is rejected client-side with
+  `send_as_user_invalid_uuid` before any request goes out.
+- A well-formed UUID that doesn't resolve to a user comes back as
+  `send_as_user_not_found` (400).
+- **Slack only** — on Teams/Discord/Google Chat the flags are ignored.
+- **Admin-only** — a non-admin caller is rejected server-side (see the role
+  error codes in [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md) § 4).
+
 ### Ephemeral message (Slack only; only the recipient sees it)
 
 ```bash
@@ -251,6 +288,8 @@ The chat platform keeps the message's original bot name/avatar on an edit, so id
 | `--bot-name` |  | Custom bot display name (Slack only) |
 | `--bot-icon-url` |  | Custom bot avatar URL, https (Slack only) |
 | `--bot-icon-emoji` |  | Custom bot avatar emoji (Slack only) |
+| `--send-as-user` |  | Send with a user's identity by UUID (Slack only, admin-only; excludes `--bot-*`) — CLI ≥ 2.0.0 |
+| `--send-as-me` |  | Send as the authenticated user (Slack only, admin-only) — CLI ≥ 2.0.0 |
 | `--ephemeral` |  | Send ephemerally — recipient-only (Slack; needs `--user`) |
 | `--skip-time-off` |  | Skip users currently flagged as away / on time-off |
 | `--metadata` | `-d` | JSON metadata to attach |
@@ -353,6 +392,9 @@ The CLI translates these to friendly messages automatically. In `--json` mode (o
 |--------|------|---------|----------------|
 | `200`  |  | Success | Surface `bot_message_id` + any `thread_responses` ids. |
 | `400`  | `invalid_thread_responses` | Too many (>10), bad structure, or nested targeting | Trim to ≤10 replies, no targeting on replies, retry. |
+| `400`  | `send_as_user_conflict` | `--send-as-user`/`--send-as-me` combined with `--bot-name`/`--bot-icon-*` | Drop the custom-identity flags — the two are mutually exclusive. (Caught client-side.) |
+| `400`  | `send_as_user_invalid_uuid` | `--send-as-user` isn't a valid UUID | Fix the UUID. (Caught client-side before the request.) |
+| `400`  | `send_as_user_not_found` | The `--send-as-user` UUID doesn't resolve to a user | Confirm the user exists (`dailybot user list`). |
 | `400`  | (other) | No/invalid targets, malformed UUID, empty channel id, invalid bot identity | Surface the `detail` verbatim and fix the input. |
 | `401` / `403` |  | Unauthenticated / invalid auth | Suggest `dailybot login` (or, if the developer prefers, `dailybot config key=...`). |
 | `403`  | `cli_send_message_target_not_allowed` | Login Bearer caller targeting outside their role scope (cross-org, channel they can't post to, team they don't belong to) | Tell the developer which target was rejected and suggest either picking an in-scope target or using an org API key for org-wide reach. |

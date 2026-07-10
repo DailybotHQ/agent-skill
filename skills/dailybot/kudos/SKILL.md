@@ -1,7 +1,7 @@
 ---
 name: dailybot-kudos
 description: Give kudos to a teammate or to an entire team via Dailybot to recognize their contributions. Use when the developer wants to thank or recognize one person, or recognize a whole team (e.g. "kudos al equipo Engineering"). Do not use for general progress reports — those go through dailybot-report.
-version: "1.8.6"
+version: "2.0.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"🏆","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -26,6 +26,72 @@ Two recipient types are supported:
 Kudos commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`) — as of `dailybot-cli >= 1.15.0`. Kudos are scoped to the acting identity (the server resolves the API key's owner), so they appear as coming from that user.
 
 If the developer has only an API key, kudos still work — the CLI falls back to `X-API-KEY`. Prefer `dailybot login` when they want the kudos attributed to their own human account. (On CLIs older than 1.15.0, kudos required a Bearer session — `dailybot upgrade` or `dailybot login`.)
+
+---
+
+## Browsing kudos (read)
+
+> **Requires `dailybot-cli >= 2.0.0`.** The three read commands below
+> (`kudos list`, `kudos org`, `kudos wall-of-fame`) first ship in CLI **2.0.0**.
+> Below that only *giving* kudos exists. If `dailybot --version` is below 2.0.0,
+> ask the developer to run `dailybot upgrade`.
+
+Beyond *giving* kudos, an agent can **browse** the recognition feed and read
+org-wide stats. All three return the standard pagination envelope where
+applicable and honor the shared query flags — the full flag table, count
+footer, error codes, and plan-gating rules live in
+[`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
+
+### `kudos list` — browse the recognition feed (paginated)
+
+```bash
+# Everything (default — walks all pages):
+dailybot kudos list --json
+
+# Only kudos you received, most recent page:
+dailybot kudos list --filter KUDOS_RECEIVED --page-size 20 --json
+
+# Kudos you gave, this month, matching a term:
+dailybot kudos list --filter KUDOS_GIVEN --search release --since 2026-07-01 --json
+```
+
+`kudos list` accepts the **full shared list query flag set** — pagination
+(`--page`, `--page-size`, `--all`, `--limit`), search (`--search` / `--grep`),
+and date range (`--since`, `--until`, `--date`, `--last-week`, `--today`) — plus:
+
+| Flag | Meaning |
+|------|---------|
+| `--filter KUDOS_RECEIVED` | Only kudos the caller **received**. |
+| `--filter KUDOS_GIVEN` | Only kudos the caller **gave**. |
+
+Omit `--filter` to see both directions.
+
+### `kudos org` — org-wide kudos stats
+
+```bash
+dailybot kudos org --json
+```
+
+Returns organization-wide kudos statistics.
+
+> ⚠️ **API-key-only.** This endpoint (`GET /v1/kudos/organization/`) is
+> **API-key-only server-side** — it **rejects a CLI Bearer login with `403`**.
+> Set `DAILYBOT_API_KEY` (or `dailybot config key=...`) before calling it; a
+> plain `dailybot login` session is **not** sufficient here. This is the one
+> kudos read that does not honor the usual API-key ↔ Bearer parity. If the
+> developer only has a login session, tell them this specific stat needs an org
+> API key.
+
+### `kudos wall-of-fame` — the leaderboard
+
+```bash
+dailybot kudos wall-of-fame --json
+dailybot kudos wall-of-fame --limit 10 --json
+```
+
+Returns the recognition leaderboard — the top receiver, the top giver, and the
+ranked leaderboard entries. `--limit N` caps the number of leaderboard entries
+returned.
 
 ---
 

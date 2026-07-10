@@ -4,6 +4,56 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] — 2026-07-10
+
+### Added
+
+- **Browse/read surface for the workspace (requires `dailybot-cli >= 2.0.0`).**
+  Documented an entire new read-only capability cluster:
+  - **Account context** — `dailybot me` (`GET /v1/me/`), `dailybot org`
+    (`GET /v1/organization/`), and `dailybot user get <uuid>`
+    (`GET /v1/users/<uuid>/`) in `teams/SKILL.md`.
+  - **Kudos browsing** — `kudos list` (with `--filter KUDOS_RECEIVED|KUDOS_GIVEN`),
+    `kudos org` (org-wide stats, **API-key-only** — rejects a Bearer login with
+    403), and `kudos wall-of-fame` (leaderboard) in `kudos/SKILL.md`.
+  - **Workflows (read-only)** — new `dailybot-workflow` sub-skill
+    (`workflow/SKILL.md`) covering `workflow list` / `workflow get`. Writes are
+    web-app only; the feature is plan-gated.
+- **Shared list query flags** — new `shared/list-query-and-errors.md` reference
+  documenting pagination (`--page`, `--page-size`, `--all`, `--limit`), search
+  (`--search` / `--grep`, max 256 chars), and date filters (`--since`, `--until`,
+  `--date`, `--last-week`, `--today`) on `form list` / `kudos list` /
+  `workflow list` (plus `--search` on `form responses` and `checkin history`),
+  the `{count, next, previous, results}` envelope, the `Showing X of N` footer,
+  and the `?paginated=true` behavior on the two forms endpoints.
+- **Chat send-as-identity** — documented `dailybot chat send --send-as-user <uuid>`
+  and `--send-as-me` (Slack only, admin-only, mutually exclusive with the
+  `--bot-*` identity flags, validated client-side) in `chat/SKILL.md`.
+- **Machine-readable error codes** — the shared reference now catalogs the stable
+  `code` field the CLI dispatches on (never the human `detail`): 403
+  (`plan_upgrade_required`, `plan_free_api_keys_forbidden`,
+  `plan_missing_core_api_integrations`, `api_key_owner_inactive`,
+  `insufficient_role`, `member_in_scope_required`, `org_admin_required`), 400
+  (`target_user_inactive`, `search_query_too_long`, `invalid_date_range`,
+  `send_as_user_conflict`, `send_as_user_invalid_uuid`, `send_as_user_not_found`),
+  and 429 (`free_plan_daily_limit_exceeded`, plus the bounded back-off on generic
+  429s).
+- **Auth parity + free-plan gating** — documented that `X-API-KEY` works on every
+  `/v1/` endpoint except `POST /v1/cli/auth/logout/` (Bearer-only), that API keys
+  and Bearer sessions are interchangeable on user-scoped commands, and that FREE
+  plans block API keys entirely while restricting Bearer to an allowlist
+  (agent-reports, send-email, agent-messages, agent health, agent register+claim,
+  and `me` / `org` / `cli status`).
+
+### Changed
+
+- Main `SKILL.md`: extended the frontmatter description, grew the capability
+  table to eleven entries (added **Workflows**; noted the new read/browse
+  abilities under Kudos, Forms, Teams, Chat), added routing rules for the new
+  intents, added a `2.0.0` version-floor block, and linked the new shared doc.
+
+> All 2.0.0 features require **`dailybot-cli >= 2.0.0`**.
+
 ## [1.8.6] — 2026-07-10
 
 ### Changes
