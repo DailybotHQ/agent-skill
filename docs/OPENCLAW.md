@@ -5,7 +5,7 @@
 - **Registry:** `openclaw skills install dailybot`
 - **Manual:** Clone `https://github.com/DailybotHQ/agent-skill` into `<workspace>/skills/dailybot/` (or `~/.openclaw/skills/dailybot/`).
 
-Do **not** treat `https://api.dailybot.com/skill.md` as the skill pack. That file is the **public API reference**. The real pack lives in the GitHub repository above.
+Do **not** treat `https://www.dailybot.com/skill.md` as the skill pack. That file is the **public API reference**. The real pack lives in the GitHub repository above.
 
 ## CLI on first use
 

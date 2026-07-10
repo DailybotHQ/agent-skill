@@ -2,7 +2,7 @@
 name: dailybot
 description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads and sending as a user's identity), ask the Dailybot AI a question headlessly, **and browse/read the workspace** — who am I / my org / a user's profile (`me` / `org` / `user get`), browse the kudos feed + the org-wide feed + wall of fame, and list/read workflows, all with shared pagination / search / date-range filters. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "3.1.0"
-documentation_url: https://api.dailybot.com/skill.md
+documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"📡","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
 allowed-tools: Bash, Read, Grep, Glob
@@ -22,7 +22,7 @@ This is the canonical, first-party integration. Source of truth:
 ## Start here (first run)
 
 This skill is a **self-sufficient entry point**: whether you arrive from the web
-(<https://api.dailybot.com/skill.md>) or simply install this skill from a
+(<https://www.dailybot.com/skill.md>) or simply install this skill from a
 registry, the setup is the same — and it lives **here, in the shipped files, so
 no network fetch is required** to know what to do. Run first-run setup in order:
 
@@ -51,7 +51,7 @@ machine — permissions, consent guarantees, and a self-audit you can run — is
 
 ## What it does
 
-Eleven coordinated capabilities, with smart routing between them:
+Twelve coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
@@ -66,6 +66,7 @@ Eleven coordinated capabilities, with smart routing between them:
 | **Teams** | `dailybot-teams` | List teams, inspect members, resolve a team name → UUID (used as a resolver by other skills) — **plus account context**: `dailybot me` (who am I / role), `dailybot org` (which org), and `dailybot user get` (one user's profile) |
 | **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (list + responses now support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
 | **Workflows** | `dailybot-workflow` | Developer wants to **read** the org's workflows — `workflow list` (paginated/searchable) and `workflow get`. Read-only; writes are web-app only. Plan-gated |
+| **Report channels** | `dailybot-channels` | Discover report-channel UUIDs to attach to forms/check-ins with `--report-channel` (CLI ≥ 1.17.0) |
 
 ## Install
 
@@ -269,7 +270,7 @@ Python — it is the most portable pin and works on every CLI release.
 ## Resources
 
 - [Installation guide](https://github.com/DailybotHQ/agent-skill/blob/main/docs/INSTALLATION.md) (six install methods, compare/update/uninstall)
-- [Public API reference](https://api.dailybot.com/skill.md) (mirrored at <https://www.dailybot.com/skill.md>)
+- [Public API reference](https://www.dailybot.com/skill.md) (mirrored at <https://www.dailybot.com/skill.md>)
 - [Design decisions](https://github.com/DailybotHQ/agent-skill/blob/main/docs/DESIGN.md) (why the layout is what it is)
 - [Security policy](https://github.com/DailybotHQ/agent-skill/blob/main/SECURITY.md)
 - [Changelog](https://github.com/DailybotHQ/agent-skill/blob/main/CHANGELOG.md)
@@ -300,6 +301,7 @@ the full step-by-step workflow.
 | "who am I?", "what's my role?", "which org am I in?", "show a user's profile" | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) § Step 4.5 (`me` / `org` / `user get`) |
 | "browse kudos", "kudos I received / gave", "org kudos stats", "who's on the wall of fame?" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) § Browsing kudos |
 | "list my workflows", "show workflows", "what's in workflow X?" | **Workflows** → read [`workflow/SKILL.md`](workflow/SKILL.md) |
+| "which channels can Dailybot post to?", "list report channels", "I need a channel UUID for the form / check-in" | **Channels** → read [`channels/SKILL.md`](channels/SKILL.md) |
 | "send a Slack message", "DM Sergio in chat", "post the deploy report to #releases (with a thread)", "edit that chat message I just sent", "ping the Engineering team in chat" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) |
 | "send this to #releases as me", "post as <user> in Slack", "send the message with Jane's identity" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) § Send as a user's identity (`--send-as-user` / `--send-as-me`) |
 
@@ -380,7 +382,7 @@ developer for confirmation rather than executing it autonomously.
 ### `documentation_url` vs. the skill pack
 
 The `documentation_url` in this frontmatter points to
-`https://api.dailybot.com/skill.md` — that URL is the **public API
+`https://www.dailybot.com/skill.md` — that URL is the **public API
 reference** (HTTP endpoints and curl examples), mirrored at
 `https://www.dailybot.com/skill.md`. It is **not** a re-fetch source
 for skill content. The runtime skill is whatever was installed at

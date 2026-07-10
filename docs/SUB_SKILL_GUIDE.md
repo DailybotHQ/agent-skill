@@ -57,7 +57,7 @@ Copy this template and adjust:
 name: dailybot-<short-name>
 description: <one-sentence description with trigger phrases — when to activate, what it produces, when NOT to use it>
 version: "1.0.0"
-documentation_url: https://api.dailybot.com/skill.md
+documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true|false
 metadata: {"openclaw":{"emoji":"🎯","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
 allowed-tools: Bash, Read, Grep, Glob
@@ -124,7 +124,7 @@ This must **never block your primary work**. If the CLI is missing, auth fails, 
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
-- **Full agent API skill:** `https://api.dailybot.com/skill.md`
+- **Full agent API skill:** `https://www.dailybot.com/skill.md`
 ```
 
 ### Frontmatter checklist
@@ -189,7 +189,7 @@ edge case.
   section
 - `docs/API_REFERENCE.md` — if the new skill exposes a new HTTP
   endpoint or CLI command, document it here so the public reference at
-  `api.dailybot.com/skill.md` stays in sync
+  `www.dailybot.com/skill.md` stays in sync
 
 ## 8. Pre-merge checks
 

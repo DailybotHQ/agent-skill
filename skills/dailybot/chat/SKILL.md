@@ -2,7 +2,7 @@
 name: dailybot-chat
 description: Send and edit Dailybot bot messages on the team's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams. Supports report-style threads (one headline + replies, in one call) and editing the parent or any reply afterward. Use when the developer says "send a message to my Slack channel", "ping the team in chat", "post the deploy report to #releases", or wants to update a previously sent bot message. Works headless for agents.
 version: "3.1.0"
-documentation_url: https://api.dailybot.com/skill.md
+documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"💬","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
 allowed-tools: Bash, Read, Grep, Glob
@@ -522,5 +522,5 @@ Sending chat messages must **never block the developer's primary work**. If the 
 - [`../teams/SKILL.md`](../teams/SKILL.md) — team-name resolver (called by this skill)
 - [`../kudos/SKILL.md`](../kudos/SKILL.md) — user-resolution pattern (same approach as Step 2a)
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
-- **Full agent API skill:** `https://api.dailybot.com/skill.md`
+- **Full agent API skill:** `https://www.dailybot.com/skill.md`
 - **CLI command reference:** [`DailybotHQ/cli` — `dailybot chat send/update`](https://github.com/DailybotHQ/cli/blob/main/docs/API_REFERENCE.md)

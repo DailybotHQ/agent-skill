@@ -297,7 +297,7 @@ agent-skill/
 ├── setup.sh                       — symlink installer for non-skills.sh users
 ├── docs/
 │   ├── openclaw.md                — OpenClaw-specific notes
-│   └── skill.md                   — public API reference (served at api.dailybot.com/skill.md)
+│   └── skill.md                   — public API reference (served at www.dailybot.com/skill.md)
 └── skills/
     └── dailybot/                  — the discoverable skill (skills.sh entry point)
         ├── SKILL.md               — router meta-skill
@@ -392,7 +392,7 @@ openclaw skills remove dailybot
 - [Dailybot](https://www.dailybot.com)
 - [Dailybot CLI on PyPI](https://pypi.org/project/dailybot-cli/)
 - [Dailybot Agents feature](https://www.dailybot.com/features/agents)
-- [Dailybot API skill reference](https://api.dailybot.com/skill.md)
+- [Dailybot API skill reference](https://www.dailybot.com/skill.md)
 - [API documentation (Swagger)](https://api.dailybot.com/api/swagger/)
 - [Open Agent Skills standard (agentskills.io)](https://agentskills.io)
 - [skills.sh](https://skills.sh) — cross-agent skills directory

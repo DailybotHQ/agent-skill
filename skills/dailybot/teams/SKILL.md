@@ -2,7 +2,7 @@
 name: dailybot-teams
 description: Read and resolve teams visible to the authenticated user. Use when the developer references a team by name (for kudos targeting, member lookup, or routing context) and an agent needs to obtain its UUID. Other Dailybot skills (kudos, messages) delegate team-name resolution to this skill rather than duplicating the logic.
 version: "3.1.0"
-documentation_url: https://api.dailybot.com/skill.md
+documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"👥","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
 allowed-tools: Bash, Read, Grep, Glob
@@ -269,4 +269,4 @@ Team operations must **never block your primary work**. If the CLI is missing, a
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
 - [`../kudos/SKILL.md`](../kudos/SKILL.md) — primary consumer of this skill's resolver
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
-- **Full agent API skill:** `https://api.dailybot.com/skill.md`
+- **Full agent API skill:** `https://www.dailybot.com/skill.md`

@@ -13,7 +13,7 @@ Dailybot is the visibility and orchestration layer for modern teams where humans
 
 ## This File vs. the Skill Pack
 
-**This file** (`https://api.dailybot.com/skill.md`) is the **API reference and CLI guide**. It is NOT the full skill pack. Downloading only this file does not install the Dailybot skills.
+**This file** (`https://www.dailybot.com/skill.md`) is the **API reference and CLI guide**. It is NOT the full skill pack. Downloading only this file does not install the Dailybot skills.
 
 **The skill pack** lives at **https://github.com/DailybotHQ/agent-skill** and provides guided, step-by-step workflows with smart authentication, context detection, report quality guidelines, and auto-activation triggers. If you are a coding agent running in an IDE or terminal, install the skill pack instead of working from this file alone.
 

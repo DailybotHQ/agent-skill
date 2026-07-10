@@ -18,7 +18,7 @@ path. The other five exist for environments where it doesn't fit.
 |--------|-------------|-----------------|
 | 1. `npx skills add` (recommended) | Any agent, any OS, you have Node available | `npx skills add DailybotHQ/agent-skill` |
 | 2. OpenClaw native | You're on OpenClaw | `openclaw skills install dailybot` |
-| 3. Conversational | You want zero ceremony — just tell your agent | *"install this skill from `https://api.dailybot.com/skill.md`"* |
+| 3. Conversational | You want zero ceremony — just tell your agent | *"install this skill from `https://www.dailybot.com/skill.md`"* |
 | 4. Git clone + `setup.sh` | No Node available, you want explicit control | `git clone … && ./setup.sh` |
 | 5. Manual per-agent | You want one specific agent and no symlink layer | `git clone … ~/.<agent>/skills/dailybot` |
 | 6. HTTP-only (no install) | Sandboxed environment, CI, serverless — agent reads the API reference instead of installing | (no install — see below) |
@@ -112,7 +112,7 @@ The "no-tooling" path. If your agent has WebFetch capability (Claude
 Code, Cursor, Codex, Gemini, OpenClaw all do), you can install by
 asking:
 
-> "Please install this Dailybot skill from `https://api.dailybot.com/skill.md`"
+> "Please install this Dailybot skill from `https://www.dailybot.com/skill.md`"
 
 The agent fetches the markdown, sees the install instructions inside
 it, and clones this repo into the right place. This is how the very
@@ -220,7 +220,7 @@ agent at a time.
 Some environments cannot install anything: sandboxed CI runs,
 serverless functions, custom integrations. In that case, **the skill
 never installs** — the agent reads the public API reference at
-<https://api.dailybot.com/skill.md> on demand and uses the HTTP API
+<https://www.dailybot.com/skill.md> on demand and uses the HTTP API
 directly with `DAILYBOT_API_KEY`.
 
 ```bash

@@ -24,7 +24,7 @@ the same instructions other agents do.
 |----------|----------|
 | User-facing README | [README.md](README.md) |
 | Security policy | [SECURITY.md](SECURITY.md) |
-| Public CLI/HTTP API reference (mirrored at `api.dailybot.com/skill.md`) | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
+| Public CLI/HTTP API reference (mirrored at `www.dailybot.com/skill.md`) | [docs/API_REFERENCE.md](docs/API_REFERENCE.md) |
 | Full installation guide (six install methods, compare/update/uninstall) | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | OpenClaw notes | [docs/OPENCLAW.md](docs/OPENCLAW.md) |
 | Design decisions (why the layout is the way it is) | [docs/DESIGN.md](docs/DESIGN.md) |
@@ -79,7 +79,7 @@ agent-skill/
 │   ├── verify-cdn.sh                      ← checks install.sh + .sha256 are published
 │   └── validate-frontmatter.py            ← schema check on every SKILL.md
 ├── docs/                                  ← internal docs (NOT installed)
-│   ├── skill.md                           ← mirrored at api.dailybot.com/skill.md
+│   ├── skill.md                           ← mirrored at www.dailybot.com/skill.md
 │   └── openclaw.md
 └── skills/dailybot/                       ← THE INSTALLED ARTIFACT — only this ships
     ├── SKILL.md                           ← router (+ "Start here (first run)" self-contained setup)
@@ -93,6 +93,7 @@ agent-skill/
     ├── kudos/SKILL.md
     ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
     ├── forms/SKILL.md
+    ├── channels/SKILL.md                   ← report-channel discovery (UUIDs for --report-channel on forms/check-ins)
     └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest on PyPI)
 ```
 
@@ -182,7 +183,7 @@ Every `SKILL.md` MUST have YAML frontmatter with at least:
 name: dailybot-<thing>          # kebab-case, never snake_case (dailybot_thing) or camelCase
 description: <one paragraph>     # used by skills.sh + every agent harness for relevance scoring
 version: "1.0.0"                 # SemVer, quoted to keep it a string
-documentation_url: https://api.dailybot.com/skill.md  # NEVER use `homepage:` (legacy, dangerous)
+documentation_url: https://www.dailybot.com/skill.md  # NEVER use `homepage:` (legacy, dangerous)
 user-invocable: true|false       # whether `/<name>` becomes a slash command
 allowed-tools: Bash, Read, Grep, Glob
 ---

@@ -64,7 +64,7 @@ agent-skill/
 │   ├── verify-cdn.sh              ← probe cli.dailybot.com checksums
 │   └── validate-frontmatter.py    ← schema check on every SKILL.md
 ├── docs/                          ← contributor docs (NOT installed)
-│   ├── API_REFERENCE.md           ← public CLI/HTTP reference, mirrored at api.dailybot.com/skill.md
+│   ├── API_REFERENCE.md           ← public CLI/HTTP reference, mirrored at www.dailybot.com/skill.md
 │   ├── OPENCLAW.md                ← OpenClaw-specific notes
 │   ├── DESIGN.md                  ← why the layout is what it is (10 design decisions)
 │   └── SUB_SKILL_GUIDE.md         ← step-by-step for adding a new sub-skill
