@@ -54,6 +54,13 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 > All 2.0.0 features require **`dailybot-cli >= 2.0.0`**.
 
+## [1.8.6] — 2026-07-10
+
+### Changes
+
+- Merge pull request #25 from DailybotHQ/docs/durable-cli-version-reference
+- docs(skill): reference the latest CLI on PyPI instead of a hardcoded version
+
 
 ## [1.8.5] — 2026-07-08
 
