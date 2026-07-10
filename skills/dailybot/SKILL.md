@@ -30,8 +30,7 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    the `dailybot` CLI is the integration surface. If it is missing, follow
    [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
    installer and installs **only after the developer confirms**. Confirm with
-   `dailybot --version` (minimum `>= 1.10.0`; hooks in step 3 need `>= 1.12.0`,
-   and continuous mode in step 4 needs `>= 1.19.0`).
+   `dailybot --version` (minimum `>= 3.1.2` for the whole pack).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.
@@ -66,7 +65,7 @@ Twelve coordinated capabilities, with smart routing between them:
 | **Teams** | `dailybot-teams` | List teams, inspect members, resolve a team name → UUID (used as a resolver by other skills) — **plus account context**: `dailybot me` (who am I / role), `dailybot org` (which org), and `dailybot user get` (one user's profile) |
 | **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (list + responses now support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
 | **Workflows** | `dailybot-workflow` | Developer wants to **read** the org's workflows — `workflow list` (paginated/searchable) and `workflow get`. Read-only; writes are web-app only. Plan-gated |
-| **Report channels** | `dailybot-channels` | Discover report-channel UUIDs to attach to forms/check-ins with `--report-channel` (CLI ≥ 1.17.0) |
+| **Report channels** | `dailybot-channels` | Discover report-channel UUIDs to attach to forms/check-ins with `--report-channel` |
 
 ## Install
 
@@ -84,105 +83,34 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 
 ## Required Dailybot CLI version
 
-> **Minimum:** `dailybot-cli >= 1.10.0` (released **2026-05-26**, MIT-licensed,
-> [pypi.org/project/dailybot-cli/1.10.0/](https://pypi.org/project/dailybot-cli/1.10.0/)).
+> **Minimum: `dailybot-cli >= 3.1.2`.** This is the baseline for the entire skill
+> pack — every sub-skill assumes it. Install or upgrade to at least 3.1.2 before
+> using any command below.
 >
-> Requires **Python >= 3.10**. The 1.10.0 wheel is `py3-none-any` (pure Python).
+> Requires **Python >= 3.10**. The wheel is `py3-none-any` (pure Python), MIT-licensed.
 >
 > **Current published version:** the latest [`dailybot-cli`](https://pypi.org/project/dailybot-cli/)
 > release on PyPI — what `pip install --upgrade dailybot-cli` (or `dailybot
-> upgrade`) resolves to today; run `dailybot version --check` to see the exact
-> number. Everything below is additive on top of the 1.10.0 minimum; the
-> per-feature floors say which release first shipped each sub-skill.
->
-> **`1.11.0` enhancement (optional):** `dailybot agent update` echoes the
-> report's placement link as a `View:` line. Older CLIs still report fine —
-> the link is always in the API response body, just not printed — so this is
-> not a hard floor. See [`report/SKILL.md`](report/SKILL.md) Step 7.
->
-> **`1.12.0` enhancement (recommended):** the `dailybot hook` command group
-> (`session-start` / `post-commit` / `activity` / `stop` / `dismiss`) lets
-> the agent harness remind the model **deterministically** to report
-> unreported work — including non-commit work — via lifecycle hooks, backed
-> by a local per-repo ledger. This is what makes reporting fully autonomous.
-> Not a hard floor either: below 1.12.0 the prompt triggers still work. See
-> [`report/hooks.md`](report/hooks.md) and the
-> [CLI hook docs](https://github.com/DailybotHQ/cli/blob/main/docs/AGENT_HOOKS.md).
->
-> **`1.13.0` floor for `dailybot-chat`** ([release notes](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0),
-> released **2026-06-12**): the `dailybot chat send` / `chat update`
-> command group first ships in 1.13.0, together with login-Bearer auth on
-> `/v1/send-message/` (so the developer doesn't need an org API key to
-> send a chat message), report-style threads via `--thread-message`
-> (≤10 per call), and individually-editable thread reply ids. The
-> `dailybot-chat` sub-skill requires this minimum; the other sub-skills
-> are unaffected. Functionally identical across 1.13.x for chat purposes. See [`chat/SKILL.md`](chat/SKILL.md).
->
-> **`1.15.0` floor for `dailybot-ask` + full API-key parity** (paired with the
-> matching API server rollout): the `dailybot ask` command (headless one-shot AI
-> chat) first ships in 1.15.0, alongside **full auth parity** — every
-> authenticated command now accepts an org API key **or** a login session (only
-> `dailybot logout` stays Bearer-only). This is what lets an agent with only
-> `DAILYBOT_API_KEY` use every sub-skill, including the AI chat. Below 1.15.0 the
-> AI chat is interactive-only (`dailybot interactive`) and the user-scoped
-> commands require a Bearer login. The `dailybot-ask` sub-skill requires this
-> minimum. See [`ask/SKILL.md`](ask/SKILL.md) and [`shared/auth.md`](shared/auth.md) § 4.
->
-> 1.15.0 also expands **check-ins** to the full lifecycle — `dailybot checkin
-> status / show / history / edit / reset` plus backfill/future-dating — all
-> headless with `--json`. See [`checkin/SKILL.md`](checkin/SKILL.md) § "The full
-> check-in lifecycle". Below 1.15.0 only `checkin list` + `complete` exist.
->
-> **`2.0.0` floor for the browse/read surface** (paired with the matching API
-> server rollout): a cluster of new **read** capabilities first ships in
-> **2.0.0** —
->
-> - **Account context:** `dailybot me` (`GET /v1/me/`) and `dailybot org`
->   (`GET /v1/organization/`), plus `dailybot user get <uuid>` for one user's
->   profile — see [`teams/SKILL.md`](teams/SKILL.md) § Step 4.5.
-> - **Kudos browsing:** `dailybot kudos list` (filter received/given),
->   `dailybot kudos org` (**admin-only**), and `dailybot kudos wall-of-fame` —
->   see [`kudos/SKILL.md`](kudos/SKILL.md) § Browsing kudos.
-> - **Workflows (read-only):** `dailybot workflow list` / `workflow get` — the
->   new [`workflow/SKILL.md`](workflow/SKILL.md) sub-skill. Plan-gated; writes
->   are web-app only.
-> - **Shared list query flags** on `form list` / `kudos list` / `workflow list`
->   (and `--search` on `form responses` / `checkin history`): pagination
->   (`--page`/`--page-size`/`--all`/`--limit`), search (`--search`/`--grep`),
->   and date range (`--since`/`--until`/`--date`/`--last-week`/`--today`), with a
->   `{count, next, previous, results}` envelope and a `Showing X of N` footer.
-> - **Chat send-as-identity:** `dailybot chat send --send-as-user <uuid>` /
->   `--send-as-me` (Slack, admin-only) — see [`chat/SKILL.md`](chat/SKILL.md).
-> - **Machine-readable error codes** + API-key ↔ Bearer parity and free-plan
->   gating — all documented once in
->   [`shared/list-query-and-errors.md`](shared/list-query-and-errors.md).
->
-> These features are unavailable below 2.0.0. Each sub-skill notes the 2.0.0
-> floor where the feature is described; ask the developer to run
-> `dailybot upgrade` if `dailybot --version` is below 2.0.0.
+> upgrade`) installs today; run `dailybot version --check` to see the exact
+> number. Everything this pack documents — reporting, hooks, chat, the AI `ask`
+> command, check-in and form authoring, the browse/read surface (`me` / `org` /
+> `user get`, kudos browsing, workflows), the shared list query flags, and the
+> machine-readable error codes — is available at this floor.
 
 ### Why this minimum
 
-The `dailybot-forms`, `dailybot-teams`, and `dailybot-kudos` sub-skills depend on
-CLI surface that **first ships in 1.10.0**:
-
-- `dailybot form get` / `form responses` / `form response get` — inspect forms and prior responses.
-- `dailybot form update` / `form transition` / `form delete` — drive a response through its workflow.
-- `dailybot team list` / `team get [--with-members]` — role-scoped team reads.
-- `dailybot kudos give --team "<name>"` — team-targeted kudos (caller excluded from the expansion).
-- Standardized user-scoped exit codes (`0` / `2` / `3` / `4` / `5` / `6` / `7`).
-- `--json` 4xx errors include the structured `code` field (`form_response_change_state_forbidden`, `final_state_locked`, `no_valid_team`, …) so agents can pattern-match without parsing prose.
-
-CLI versions below 1.10.0 only expose `form list` + `form submit` and user-only
-kudos; the sub-skills detect the gap and fail cleanly (exit-code messaging will
-ask the developer to upgrade).
+`3.1.2` is the line in the sand: from this release on, the skill pack and the CLI
+move together, and the pack no longer tracks per-feature version floors. If
+`dailybot --version` reports below 3.1.2, the sub-skills may reference commands,
+flags, or error codes that don't exist yet — ask the developer to run
+`dailybot upgrade` (or `pip install --upgrade 'dailybot-cli>=3.1.2'`).
 
 ### Checking the installed version
 
 ```bash
 # Single-line, scriptable
 dailybot --version
-# → dailybot 1.10.0 (Python 3.12.4)
+# → dailybot 3.1.2 (Python 3.12.4)
 
 # Multi-line panel: version, Python runtime, install path, release notes link
 dailybot version
@@ -202,14 +130,14 @@ Homebrew / Linux binary / editable dev) and either runs the right command in a
 subprocess or prints the exact command for installs the CLI shouldn't drive.
 `dailybot upgrade --dry-run` previews without executing.
 
-If the developer is below 1.10.0, ask them to run `dailybot upgrade` once,
+If the developer is below 3.1.2, ask them to run `dailybot upgrade` once,
 then resume. Do not retry CLI commands in a loop while the upgrade is pending.
 
 ### Direct install commands
 
 | Channel | Command |
 |---------|---------|
-| pip      | `pip install 'dailybot-cli>=1.10.0'` |
+| pip      | `pip install 'dailybot-cli>=3.1.2'` |
 | Homebrew | `brew install dailybothq/tap/dailybot` |
 | Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -fsSL https://cli.dailybot.com/install.sh \| bash` |
 | Windows PowerShell (when WSL2 / Git Bash unavailable) | `irm https://cli.dailybot.com/install.ps1 \| iex` |
@@ -234,8 +162,8 @@ Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
 
 Every install method defaults to the latest release but can pin an exact
 version — useful when a developer needs to reproduce a known-good setup or
-match a floor a sub-skill requires (**since `dailybot-cli >= 1.16.0`** for the
-installer scripts; `pip` and Homebrew work on any version):
+pin the `3.1.2` baseline (the installer scripts, `pip`, and Homebrew all accept
+a version pin):
 
 | Channel | Pin a version |
 |---------|---------------|
@@ -364,7 +292,7 @@ common use case.
 - [`shared/list-query-and-errors.md`](shared/list-query-and-errors.md) —
   **shared list query flags** (pagination / search / date range), the response
   envelope + count footer, the machine-readable error-code table, and the
-  API-key ↔ Bearer parity + free-plan gating rules (CLI ≥ 2.0.0)
+  API-key ↔ Bearer parity + free-plan gating rules
 - [`shared/context.sh`](shared/context.sh) — automated repo / branch /
   agent context detection
 - [`shared/http-fallback.md`](shared/http-fallback.md) — HTTP API

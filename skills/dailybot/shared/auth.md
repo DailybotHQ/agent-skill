@@ -45,7 +45,7 @@ treat that as session-wide consent.
 
 > [!NOTE]
 > **Installing a specific version.** Both installers default to the latest
-> release but accept a pin (**`dailybot-cli >= 1.16.0`**):
+> release but accept a version pin (the skill-pack baseline is **`dailybot-cli >= 3.1.2`**):
 > - `install.sh` — set `DAILYBOT_VERSION=<version>` in the environment, or
 >   pass `bash -s -- --version <version>`. Example (drop it into the verified
 >   snippet below, right before `bash /tmp/install.sh`):
@@ -357,7 +357,7 @@ Dailybot → Settings → API Keys.
 
 ## 4. Auth model — API key *or* login, almost everywhere
 
-As of the CLI's full-parity release (`dailybot-cli >= 1.15.0`, paired with the
+As of the CLI's full-parity baseline (`dailybot-cli >= 3.1.2`, paired with the
 matching API server rollout), **every authenticated CLI command accepts either
 credential** — a Bearer login session **or** an org API key. The server resolves
 the acting user from the API key's `owner`, so the two paths behave identically.
@@ -374,11 +374,9 @@ Both credentials can coexist — the CLI stores them separately, and a developer
 can hold an API key and a Bearer session at the same time. The CLI prefers the
 login session when present and falls back to the API key.
 
-> **Older CLIs (< 1.15.0).** Before full parity, the user-scoped commands
-> (`checkin`, `form`, `kudos`, `user`) and the AI chat required a Bearer login
-> session and rejected API keys. If the developer is on an older CLI and an
-> API-key-only command exits `3` (not authenticated), either `dailybot upgrade`
-> or guide them through `dailybot login`.
+> **Parity.** All user-scoped commands (`checkin`, `form`, `kudos`, `user`) and
+> the AI chat accept an org API key **or** a Bearer login session. Only
+> `dailybot logout` is Bearer-only.
 
 ### Checking session status
 

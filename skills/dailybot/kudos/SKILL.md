@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Kudos
 
-> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26) for team-targeted kudos (`--team`). User-only kudos (`--to`) work on earlier versions, but the team-resolution path documented below assumes 1.10.0. The HTTP fallback payload also changed in 1.10.0 — see Step 7. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). Giving kudos to a user (`--to`) or a team (`--team`), and browsing kudos (`list` / `org` / `wall-of-fame`), are all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You help developers recognize teammates by sending kudos through Dailybot. Kudos are team-visible appreciation messages — the whole team sees them in Dailybot's recognition feed and in connected chat platforms (Slack, Teams, Discord).
 
@@ -23,18 +23,16 @@ Two recipient types are supported:
 
 ## Auth model — API key or login
 
-Kudos commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`) — as of `dailybot-cli >= 1.15.0`. Kudos are scoped to the acting identity (the server resolves the API key's owner), so they appear as coming from that user.
+Kudos commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`). Kudos are scoped to the acting identity (the server resolves the API key's owner), so they appear as coming from that user.
 
-If the developer has only an API key, kudos still work — the CLI falls back to `X-API-KEY`. Prefer `dailybot login` when they want the kudos attributed to their own human account. (On CLIs older than 1.15.0, kudos required a Bearer session — `dailybot upgrade` or `dailybot login`.)
+If the developer has only an API key, kudos still work — the CLI falls back to `X-API-KEY`. Prefer `dailybot login` when they want the kudos attributed to their own human account.
 
 ---
 
 ## Browsing kudos (read)
 
-> **Requires `dailybot-cli >= 2.0.0`.** The three read commands below
-> (`kudos list`, `kudos org`, `kudos wall-of-fame`) first ship in CLI **2.0.0**.
-> Below that only *giving* kudos exists. If `dailybot --version` is below 2.0.0,
-> ask the developer to run `dailybot upgrade`.
+> **Baseline:** the three read commands below (`kudos list`, `kudos org`,
+> `kudos wall-of-fame`) are part of the `dailybot-cli >= 3.1.2` baseline.
 
 Beyond *giving* kudos, an agent can **browse** the recognition feed and read
 org-wide stats. All three return the standard pagination envelope where
@@ -49,10 +47,10 @@ footer, error codes, and plan-gating rules live in
 dailybot kudos list --json
 
 # Only kudos you received, most recent page:
-dailybot kudos list --filter KUDOS_RECEIVED --page-size 20 --json
+dailybot kudos list --filter received --page-size 20 --json
 
 # Kudos you gave, this month, matching a term:
-dailybot kudos list --filter KUDOS_GIVEN --search release --since 2026-07-01 --json
+dailybot kudos list --filter given --search release --since 2026-07-01 --json
 ```
 
 `kudos list` accepts the **full shared list query flag set** — pagination
@@ -61,8 +59,8 @@ and date range (`--since`, `--until`, `--date`, `--last-week`, `--today`) — pl
 
 | Flag | Meaning |
 |------|---------|
-| `--filter KUDOS_RECEIVED` | Only kudos the caller **received**. |
-| `--filter KUDOS_GIVEN` | Only kudos the caller **gave**. |
+| `--filter received` | Only kudos the caller **received** (`KUDOS_RECEIVED` also accepted). |
+| `--filter given` | Only kudos the caller **gave** (`KUDOS_GIVEN` also accepted). |
 
 Omit `--filter` to see both directions.
 
@@ -380,7 +378,7 @@ curl -s -H "Authorization: Bearer $DAILYBOT_BEARER_TOKEN" \
 
 The response is paginated — follow the `next` URL until null (max 50 pages).
 
-> **Payload — canonical `receivers`:** the `POST /v1/kudos/` body now takes a single `receivers` list of UUIDs (users **and** teams merged — the server resolves each UUID's type and expands teams into their members, excluding the caller). The split `user_uuid_receivers` / `team_uuid_receivers` fields are **legacy** — still accepted during a deprecation window, but new callers should send `receivers`. The CLI (>= 1.15.0) sends `receivers` transparently; HTTP fallback callers should too. Either credential works (`X-API-KEY` or Bearer).
+> **Payload — canonical `receivers`:** the `POST /v1/kudos/` body now takes a single `receivers` list of UUIDs (users **and** teams merged — the server resolves each UUID's type and expands teams into their members, excluding the caller). The split `user_uuid_receivers` / `team_uuid_receivers` fields are **legacy** — still accepted during a deprecation window, but new callers should send `receivers`. The CLI sends `receivers` transparently; HTTP fallback callers should too. Either credential works (`X-API-KEY` or Bearer).
 
 ### Send kudos to a user
 
