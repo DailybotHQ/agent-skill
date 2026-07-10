@@ -1,7 +1,7 @@
 ---
 name: dailybot-teams
 description: Read and resolve teams visible to the authenticated user. Use when the developer references a team by name (for kudos targeting, member lookup, or routing context) and an agent needs to obtain its UUID. Other Dailybot skills (kudos, messages) delegate team-name resolution to this skill rather than duplicating the logic.
-version: "1.8.5"
+version: "2.0.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"👥","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -49,6 +49,7 @@ Never imply the team doesn't exist — only that it isn't visible to this caller
 - The developer asks "what teams am I in?", "list my teams", "show org teams".
 - The developer asks "who's in the Engineering team?", "members of QA".
 - Before any `dailybot kudos give --team ...` invocation, to resolve the team name → UUID.
+- The developer asks "who am I logged in as?", "what's my role?", "which org am I in?", or wants one user's profile by UUID → see **Step 4.5** (`dailybot me` / `dailybot org` / `dailybot user get`).
 
 Do **not** use this skill to enumerate org members when the goal is to recognize a single person — route that through `dailybot-kudos` (which uses the user directory). Use teams for *team-scoped* operations.
 
@@ -164,6 +165,46 @@ Returns the team plus its membership when `--with-members` is set. Useful when t
 | "How big is the Engineering team?" | Just `member_count`. |
 | "Who's in the Engineering team?" | The `members` list (names only). |
 | "Is Alice in QA?" | The `members` list, then answer based on it. |
+
+---
+
+## Step 4.5 — Read a single user, and your own account context
+
+> **Requires `dailybot-cli >= 2.0.0`** for `user get`, `me`, and `org`.
+
+The org directory has always been readable in bulk via `dailybot user list`
+(names + UUIDs; emails hidden as PII). As of CLI **2.0.0** you can also read
+**one** user and your **own** account/org context.
+
+### `user get` — one user's profile
+
+```bash
+dailybot user get <user_uuid> [--include-email] [--json]
+```
+
+Returns a single user's profile (`GET /v1/users/<uuid>/`) — complements
+`dailybot user list`. Emails stay hidden by default; pass `--include-email` only
+when the developer actually needs the address (it's PII — see the privacy note
+above). Use this when you already have a UUID and want that one person's details
+without listing the whole org.
+
+### `dailybot me` / `dailybot org` — account context
+
+```bash
+dailybot me  [--include-email] [--json]   # the authenticated user + org context
+dailybot org [--json]                       # the org the credential is scoped to
+```
+
+- **`dailybot me`** (`GET /v1/me/`) — who the current credential belongs to:
+  name, role, org, UUID, and timezone. The fastest way to answer "who am I
+  logged in as?" or "what's my role?". `--include-email` adds the email.
+- **`dailybot org`** (`GET /v1/organization/`) — the organization the API key
+  or login session is scoped to (name, UUID, etc.). Answers "which org am I
+  acting in?".
+
+Both are on the FREE-plan Bearer allowlist (along with `dailybot status`), so
+they work even where other reads are plan-gated — see
+[`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md) § 5.
 
 ---
 

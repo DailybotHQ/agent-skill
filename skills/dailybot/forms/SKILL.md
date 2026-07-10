@@ -1,7 +1,7 @@
 ---
 name: dailybot-forms
 description: List, inspect, submit, update, and transition form responses via Dailybot — including forms with workflow states and audience-scoped permissions. Also authors forms — create and configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions (types, report titles, variations, conditional logic). Use when the developer wants to see available forms, fill out a survey, continue an in-progress response, move a response between states, read prior responses, or create/configure a form. Do not use for daily check-ins — those go through dailybot-checkin.
-version: "1.8.5"
+version: "2.0.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"📋","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -137,6 +137,34 @@ Returns all forms visible to the logged-in user. The shape is stable and machine
 ```
 
 > The `slug` field is stable across environments (dev / staging / prod), while `id` rotates per environment. Prefer `slug` for any persistent mapping you keep across deployments. See the resolver in Step 7.
+
+### Pagination, search, and date filters (CLI ≥ 2.0.0)
+
+> **Requires `dailybot-cli >= 2.0.0`** for the query flags below. Older CLIs
+> return the full list with no filtering.
+
+`form list` accepts the **full shared list query flag set** — pagination
+(`--page`, `--page-size`, `--all`, `--limit`), search (`--search` / `--grep`),
+and date range (`--since`, `--until`, `--date`, `--last-week`, `--today`). With
+no flags it fetches everything. The complete flag table, the
+`{count, next, previous, results}` envelope, and the `Showing X of N` footer are
+documented once in [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
+
+```bash
+# Search forms by name, restricted to a date range:
+dailybot form list --search retro --since 2026-07-01 --json
+
+# Fetch every page explicitly (equivalent to the no-flag default):
+dailybot form list --all --json
+
+# One explicit page of 20:
+dailybot form list --page 2 --page-size 20 --json
+```
+
+> **`?paginated=true`.** The CLI always sends `?paginated=true` on
+> `GET /v1/forms/` (and on the responses endpoint below), so the response is the
+> envelope shape. HTTP-fallback callers hitting those two endpoints directly
+> should send it too — see the shared doc.
 
 ### Present forms to the developer
 
@@ -720,7 +748,15 @@ Useful flags:
 |------|-------------|
 | `--latest` | Return only the most recent response visible to the caller. |
 | `--state STATE` | Filter to responses in a specific workflow state (e.g. `--state draft`). |
+| `--search TEXT` | (alias `--grep`) Case-insensitive substring filter across responses. Max 256 chars (truncated client-side). CLI ≥ 2.0.0. |
 | `--json` | Machine-readable output (stable shape). |
+
+> **`form responses` search (CLI ≥ 2.0.0).** The `--search` / `--grep` flag
+> filters responses case-insensitively — handy for finding a past response by a
+> service name or keyword. Like `form list`, this endpoint
+> (`GET /v1/forms/<uuid>/responses/`) is sent with `?paginated=true` and returns
+> the `{count, next, previous, results}` envelope with a `Showing X of N` footer.
+> See [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
 
 ### JSON shape (single response)
 

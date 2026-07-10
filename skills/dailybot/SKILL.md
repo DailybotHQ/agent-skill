@@ -1,7 +1,7 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads), and ask the Dailybot AI a question headlessly. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
-version: "1.8.5"
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads and sending as a user's identity), ask the Dailybot AI a question headlessly, **and browse/read the workspace** — who am I / my org / a user's profile (`me` / `org` / `user get`), browse the kudos feed + org stats + wall of fame, and list/read workflows, all with shared pagination / search / date-range filters. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+version: "2.0.0"
 documentation_url: https://api.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"📡","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -51,7 +51,7 @@ machine — permissions, consent guarantees, and a self-audit you can run — is
 
 ## What it does
 
-Ten coordinated capabilities, with smart routing between them:
+Eleven coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
@@ -59,12 +59,13 @@ Ten coordinated capabilities, with smart routing between them:
 | **Ask the AI** | `dailybot-ask` | Developer or agent wants a one-shot, headless answer from the Dailybot AI assistant |
 | **Message polling** | `dailybot-messages` | Session start, idle moments, or when the developer asks "what should I work on?" |
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
-| **Chat** | `dailybot-chat` | Developer wants to send / edit a bot message on Slack, Teams, Discord, or Google Chat — to a channel, DMs, or whole team. Supports report-style threads (headline + replies in one call) and editing the parent or any reply afterward |
+| **Chat** | `dailybot-chat` | Developer wants to send / edit a bot message on Slack, Teams, Discord, or Google Chat — to a channel, DMs, or whole team. Supports report-style threads (headline + replies in one call), editing the parent or any reply afterward, and **sending as a user's identity** (`--send-as-user` / `--send-as-me`; Slack, admin-only) |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
-| **Check-ins** | `dailybot-checkin` | Full check-in lifecycle: list/status, complete, inspect questions, history, edit, reset, backfill/future-date — **plus authoring**: create/configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions |
-| **Kudos** | `dailybot-kudos` | Developer wants to recognize a teammate or a whole team's contribution |
-| **Teams** | `dailybot-teams` | List teams, inspect members, or resolve a team name → UUID (used as a resolver by other skills) |
-| **Forms** | `dailybot-forms` | Developer wants to list, submit, update, or transition forms — including workflow-state forms with audience permissions — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
+| **Check-ins** | `dailybot-checkin` | Full check-in lifecycle: list/status, complete, inspect questions, history (now `--search`-able), edit, reset, backfill/future-date — **plus authoring**: create/configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions |
+| **Kudos** | `dailybot-kudos` | Recognize a teammate or a whole team — **plus browsing (read)**: `kudos list` the recognition feed (filter received/given), `kudos org` stats (API-key-only), and `kudos wall-of-fame` leaderboard |
+| **Teams** | `dailybot-teams` | List teams, inspect members, resolve a team name → UUID (used as a resolver by other skills) — **plus account context**: `dailybot me` (who am I / role), `dailybot org` (which org), and `dailybot user get` (one user's profile) |
+| **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (list + responses now support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
+| **Workflows** | `dailybot-workflow` | Developer wants to **read** the org's workflows — `workflow list` (paginated/searchable) and `workflow get`. Read-only; writes are web-app only. Plan-gated |
 
 ## Install
 
@@ -130,6 +131,34 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 > status / show / history / edit / reset` plus backfill/future-dating — all
 > headless with `--json`. See [`checkin/SKILL.md`](checkin/SKILL.md) § "The full
 > check-in lifecycle". Below 1.15.0 only `checkin list` + `complete` exist.
+>
+> **`2.0.0` floor for the browse/read surface** (paired with the matching API
+> server rollout): a cluster of new **read** capabilities first ships in
+> **2.0.0** —
+>
+> - **Account context:** `dailybot me` (`GET /v1/me/`) and `dailybot org`
+>   (`GET /v1/organization/`), plus `dailybot user get <uuid>` for one user's
+>   profile — see [`teams/SKILL.md`](teams/SKILL.md) § Step 4.5.
+> - **Kudos browsing:** `dailybot kudos list` (filter received/given),
+>   `dailybot kudos org` (**API-key-only**), and `dailybot kudos wall-of-fame` —
+>   see [`kudos/SKILL.md`](kudos/SKILL.md) § Browsing kudos.
+> - **Workflows (read-only):** `dailybot workflow list` / `workflow get` — the
+>   new [`workflow/SKILL.md`](workflow/SKILL.md) sub-skill. Plan-gated; writes
+>   are web-app only.
+> - **Shared list query flags** on `form list` / `kudos list` / `workflow list`
+>   (and `--search` on `form responses` / `checkin history`): pagination
+>   (`--page`/`--page-size`/`--all`/`--limit`), search (`--search`/`--grep`),
+>   and date range (`--since`/`--until`/`--date`/`--last-week`/`--today`), with a
+>   `{count, next, previous, results}` envelope and a `Showing X of N` footer.
+> - **Chat send-as-identity:** `dailybot chat send --send-as-user <uuid>` /
+>   `--send-as-me` (Slack, admin-only) — see [`chat/SKILL.md`](chat/SKILL.md).
+> - **Machine-readable error codes** + API-key ↔ Bearer parity and free-plan
+>   gating — all documented once in
+>   [`shared/list-query-and-errors.md`](shared/list-query-and-errors.md).
+>
+> These features are unavailable below 2.0.0. Each sub-skill notes the 2.0.0
+> floor where the feature is described; ask the developer to run
+> `dailybot upgrade` if `dailybot --version` is below 2.0.0.
 
 ### Why this minimum
 
@@ -256,7 +285,12 @@ the full step-by-step workflow.
 | "give kudos to Jane", "recognize Alice", "kudos al equipo Engineering", "felicita al team de QA" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) |
 | "list my teams", "who's in QA?", "resolve the Engineering team", or another skill needs a team UUID | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) |
 | "list my forms", "submit the retro form", "continue my release-form draft", "transition the release to released", "show me the last form response" | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
+| "list / search / browse my forms (or kudos, or workflows) with pagination", "only the first N", "since last week", "grep for retro" | The matching sub-skill — all share [`shared/list-query-and-errors.md`](shared/list-query-and-errors.md) for the query flags |
+| "who am I?", "what's my role?", "which org am I in?", "show a user's profile" | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) § Step 4.5 (`me` / `org` / `user get`) |
+| "browse kudos", "kudos I received / gave", "org kudos stats", "who's on the wall of fame?" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) § Browsing kudos |
+| "list my workflows", "show workflows", "what's in workflow X?" | **Workflows** → read [`workflow/SKILL.md`](workflow/SKILL.md) |
 | "send a Slack message", "DM Sergio in chat", "post the deploy report to #releases (with a thread)", "edit that chat message I just sent", "ping the Engineering team in chat" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) |
+| "send this to #releases as me", "post as <user> in Slack", "send the message with Jane's identity" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) § Send as a user's identity (`--send-as-user` / `--send-as-me`) |
 
 ### Auto-activation (no explicit request)
 
@@ -314,6 +348,10 @@ common use case.
 - [`shared/repo-profile.md`](shared/repo-profile.md) — **mandatory pre-flight** for honouring `.dailybot/profile.json` (see above)
 - [`shared/auth.md`](shared/auth.md) — authentication (CLI login, API
   key, agent registration, profile setup)
+- [`shared/list-query-and-errors.md`](shared/list-query-and-errors.md) —
+  **shared list query flags** (pagination / search / date range), the response
+  envelope + count footer, the machine-readable error-code table, and the
+  API-key ↔ Bearer parity + free-plan gating rules (CLI ≥ 2.0.0)
 - [`shared/context.sh`](shared/context.sh) — automated repo / branch /
   agent context detection
 - [`shared/http-fallback.md`](shared/http-fallback.md) — HTTP API
