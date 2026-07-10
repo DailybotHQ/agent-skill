@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Chat
 
-> **Requires `dailybot-cli >= 1.13.0`** ([release notes](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0), released 2026-06-12). The `dailybot chat send` / `chat update` command group, the `--thread-message` flag (≤10 replies per call, each independently editable), and the login-Bearer auth path on `/v1/send-message/` (so the developer can send without an org API key) first shipped in **1.13.0**. The current published version is whatever [`dailybot-cli`](https://pypi.org/project/dailybot-cli/) resolves to on PyPI, which is what `pip install --upgrade dailybot-cli` installs today. Below 1.13.0, the `dailybot chat` group does not exist — ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The `dailybot chat send` / `chat update` command group, the `--thread-message` flag (≤10 replies per call, each independently editable), the login-Bearer auth path on `/v1/send-message/` (send without an org API key), and `--send-as-user` / `--send-as-me` (admin-only) are all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You send **Dailybot bot messages** on the developer's behalf to the organization's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams (expanded to member DMs server-side). This skill is the right surface for:
 
@@ -176,8 +176,8 @@ dailybot chat send -c C0123 -m "Build #421 ✅" \
 
 ### Send as a user's identity (Slack only, admin-only)
 
-> **Requires `dailybot-cli >= 2.0.0`.** The `--send-as-user` / `--send-as-me`
-> flags first ship in CLI **2.0.0**.
+> **Admin-only.** `--send-as-user` / `--send-as-me` require an org admin; a
+> member gets `403 org_admin_required`.
 
 Instead of a custom bot name/icon, an admin can post the message **with a real
 user's identity** — their name and profile picture — so it reads as if that
@@ -288,8 +288,8 @@ The chat platform keeps the message's original bot name/avatar on an edit, so id
 | `--bot-name` |  | Custom bot display name (Slack only) |
 | `--bot-icon-url` |  | Custom bot avatar URL, https (Slack only) |
 | `--bot-icon-emoji` |  | Custom bot avatar emoji (Slack only) |
-| `--send-as-user` |  | Send with a user's identity by UUID (Slack only, admin-only; excludes `--bot-*`) — CLI ≥ 2.0.0 |
-| `--send-as-me` |  | Send as the authenticated user (Slack only, admin-only) — CLI ≥ 2.0.0 |
+| `--send-as-user` |  | Send with a user's identity by UUID (Slack only, admin-only; excludes `--bot-*`) |
+| `--send-as-me` |  | Send as the authenticated user (Slack only, admin-only) |
 | `--ephemeral` |  | Send ephemerally — recipient-only (Slack; needs `--user`) |
 | `--skip-time-off` |  | Skip users currently flagged as away / on time-off |
 | `--metadata` | `-d` | JSON metadata to attach |

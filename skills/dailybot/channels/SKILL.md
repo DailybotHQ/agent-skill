@@ -10,9 +10,9 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Report Channels
 
-> **Requires `dailybot-cli >= 1.17.0`.** The `dailybot channels list` command first
-> ships in 1.17.0, alongside forms & check-ins authoring. If `dailybot --version`
-> reports below 1.17.0, ask the developer to run `dailybot upgrade`. See
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The `dailybot channels list`
+> command is available at this floor. If `dailybot --version` reports below
+> 3.1.2, ask the developer to run `dailybot upgrade`. See
 > [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
 
 Report channels are the Slack / Microsoft Teams / Discord / Google Chat

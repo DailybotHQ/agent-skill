@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Teams
 
-> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26). `dailybot team list` and `dailybot team get` ship in CLI 1.10.0 — earlier versions don't expose the team commands at all. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). `dailybot team list`, `dailybot team get`, and the account-context commands `dailybot me` / `org` / `user get` are all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You help agents resolve and read teams visible to the logged-in user. Teams are how Dailybot groups people inside an organization — they're the targets for team-scoped kudos, the routing context for some messages, and the source of truth for "who's in X?".
 
@@ -20,9 +20,9 @@ This skill is primarily a **resolver dependency** for other Dailybot skills (mos
 
 ## Auth model — API key or login
 
-Team-read commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`) — as of `dailybot-cli >= 1.15.0`. Results are scoped to the acting identity's permissions (the server resolves the API key's owner) — they only see teams the server allows them to see.
+Team-read commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`). Results are scoped to the acting identity's permissions (the server resolves the API key's owner) — they only see teams the server allows them to see.
 
-If the developer has only an API key, team commands still work — the CLI falls back to `X-API-KEY`. (On CLIs older than 1.15.0, these required a Bearer session — `dailybot upgrade` or `dailybot login`.)
+If the developer has only an API key, team commands still work — the CLI falls back to `X-API-KEY`.
 
 ---
 
@@ -170,10 +170,10 @@ Returns the team plus its membership when `--with-members` is set. Useful when t
 
 ## Step 4.5 — Read a single user, and your own account context
 
-> **Requires `dailybot-cli >= 2.0.0`** for `user get`, `me`, and `org`.
+> **Baseline:** `user get`, `me`, and `org` are part of the `dailybot-cli >= 3.1.2` baseline.
 
 The org directory has always been readable in bulk via `dailybot user list`
-(names + UUIDs; emails hidden as PII). As of CLI **2.0.0** you can also read
+(names + UUIDs; emails hidden as PII). You can also read
 **one** user and your **own** account/org context.
 
 ### `user get` — one user's profile

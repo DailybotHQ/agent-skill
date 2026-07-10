@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Forms
 
-> **Requires `dailybot-cli >= 1.10.0`** ([PyPI](https://pypi.org/project/dailybot-cli/1.10.0/), released 2026-05-26). The lifecycle commands (`form get`, `form responses`, `form response get`, `form update`, `form transition`, `form delete`) and the structured `--json` 4xx error shape ship in CLI 1.10.0 — earlier versions only expose `form list` and `form submit`. If `dailybot --version` reports below 1.10.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for the full rationale, install commands, and version-check tooling.
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The full forms lifecycle — `form list` / `submit` / `get` / `responses` / `response get` / `update` / `transition` / `delete` — plus the structured `--json` 4xx error shape are all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You help developers work with the full Dailybot forms lifecycle: list, inspect, submit, update, transition between workflow states, and read prior responses. Forms are custom questionnaires created by team leads — feedback surveys, retrospectives, release checklists, approval flows, or any structured data collection. Some forms are simple "fill once and done"; others have **workflow states** (e.g. `draft → review → released`) with audience-scoped permissions on who can edit and who can transition.
 
@@ -35,9 +35,9 @@ Customer-authored form skills live at `.agents/skills/dailybot-custom/<name>/SKI
 
 ## Auth model — API key or login
 
-All form commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`) — as of `dailybot-cli >= 1.15.0`. Access is scoped to the acting identity's permissions (the server resolves the API key's owner) — they only see forms (and responses) they have access to, and the server enforces every audience check on the API side.
+All form commands accept **either** a Bearer login session (`dailybot login`) **or** an org API key (`DAILYBOT_API_KEY`). Access is scoped to the acting identity's permissions (the server resolves the API key's owner) — they only see forms (and responses) they have access to, and the server enforces every audience check on the API side.
 
-If the developer has only an API key, form commands still work — the CLI falls back to `X-API-KEY`. (On CLIs older than 1.15.0, these required a Bearer session — `dailybot upgrade` or `dailybot login`.)
+If the developer has only an API key, form commands still work — the CLI falls back to `X-API-KEY`.
 
 ---
 
@@ -138,9 +138,9 @@ Returns all forms visible to the logged-in user. The shape is stable and machine
 
 > The `slug` field is stable across environments (dev / staging / prod), while `id` rotates per environment. Prefer `slug` for any persistent mapping you keep across deployments. See the resolver in Step 7.
 
-### Pagination, search, and date filters (CLI ≥ 2.0.0)
+### Pagination, search, and date filters
 
-> **Requires `dailybot-cli >= 2.0.0`** for the query flags below. Older CLIs
+> **Note:** the shared list query flags below are part of the `dailybot-cli >= 3.1.2` baseline. Older CLIs
 > return the full list with no filtering.
 
 `form list` accepts the **full shared list query flag set** — pagination
@@ -250,7 +250,7 @@ When the form has a workflow (`workflow.enabled: true`), the agent must understa
 
 ## Step 5.5 — Authoring forms (create / configure / questions)
 
-> **Requires `dailybot-cli >= 1.17.1`.** The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — ships in CLI **1.17.1** (current published release: the latest on PyPI). Steps 1–5 and 6–16 (the response lifecycle) still work on older CLIs — only authoring needs 1.17.1. If `dailybot --version` is below that, ask the developer to run `dailybot upgrade`.
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — is all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`.
 
 Everything above this point *reads* and *responds to* forms. This section *builds and reshapes* them. An agent with the right permissions can now create a form, wire up its workflow states, permission audiences, approval flow, and ChatOps command, and manage its questions — all end-to-end from the CLI, without opening the Dailybot webapp.
 
@@ -747,10 +747,10 @@ Useful flags:
 |------|-------------|
 | `--latest` | Return only the most recent response visible to the caller. |
 | `--state STATE` | Filter to responses in a specific workflow state. Pass the **state key** (`draft`), not the label (`Draft`) — read the keys from `workflow.states[].key` on `form get`. Filtering is server-side. On a form with no workflow the API returns `400 invalid_workflow_state`. |
-| `--search TEXT` | (alias `--grep`) Case-insensitive substring filter across responses. Max 256 chars (truncated client-side). CLI ≥ 2.0.0. |
+| `--search TEXT` | (alias `--grep`) Case-insensitive substring filter across responses. Max 256 chars (truncated client-side). |
 | `--json` | Machine-readable output (stable shape). |
 
-> **`form responses` search (CLI ≥ 2.0.0).** The `--search` / `--grep` flag
+> **`form responses` search.** The `--search` / `--grep` flag
 > filters responses case-insensitively — handy for finding a past response by a
 > service name or keyword. Like `form list`, this endpoint
 > (`GET /v1/forms/<uuid>/responses/`) returns the `{count, next, previous,

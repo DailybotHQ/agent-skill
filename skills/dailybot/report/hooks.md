@@ -12,8 +12,8 @@ in once, and from then on the harness re-arms the reminders in every future
 session, container, and repo. No human reminders, no reliance on the model's
 memory.
 
-> **Requires `dailybot-cli >= 1.12.0`** (the `dailybot hook` command group
-> first ships in 1.12.0 — [release notes](https://github.com/DailybotHQ/cli/releases/tag/v1.12.0)).
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The `dailybot hook` command group
+> is available at this floor.
 > Check with `dailybot --version`; if older, ask the developer to run
 > `dailybot upgrade` once. Hooks installed against an older CLI fail
 > gracefully (the harness ignores a missing command), but install-time is
@@ -163,8 +163,8 @@ the only remaining per-person step is `dailybot login`, and the
   | `soft_turn_threshold` | `8` (`5` in `continuous` mode when omitted) | Agent turns without a report before a soft nudge is eligible |
 
   Invalid `mode` values fall back to `"balanced"`; invalid `soft_turn_threshold`
-  values fall back to the mode default. Requires Dailybot CLI >= 1.19.0 — older
-  CLIs ignore `mode`/`soft_turn_threshold` harmlessly and stay on the balanced
+  values fall back to the mode default. (Part of the `dailybot-cli >= 3.1.2`
+  baseline; much older CLIs ignore `mode`/`soft_turn_threshold` and stay on the balanced
   defaults.
 
   **Continuous mode** — for repos where a lot of valuable work never lands as a
@@ -182,7 +182,7 @@ the only remaining per-person step is `dailybot login`, and the
 
 | Symptom | Check |
 |---------|-------|
-| Reminders never fire | Run `dailybot hook stop` manually after a commit — any output? Then check `dailybot --version` (>= 1.12.0), `.dailybot/disabled`, and the harness config actually contains the `dailybot hook` entries |
+| Reminders never fire | Run `dailybot hook stop` manually after a commit — any output? Then check `dailybot --version` (>= 3.1.2), `.dailybot/disabled`, and the harness config actually contains the `dailybot hook` entries |
 | Reminder fires but mentions old history | Delete the repo's file under `~/.config/dailybot/ledger/` — the baseline re-anchors silently |
 | Too noisy | Raise `min_interval_minutes` in `.dailybot/profile.json`, or use `dailybot hook dismiss --minutes <n>` |
 | Not reminded often enough (research-heavy repo) | Set `"mode": "continuous"` (or lower `soft_turn_threshold` / `min_interval_minutes`) in `.dailybot/profile.json` |

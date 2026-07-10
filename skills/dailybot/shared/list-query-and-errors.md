@@ -1,20 +1,11 @@
 # Shared reference — list query flags, pagination, and machine-readable errors
 
-> **Requires `dailybot-cli >= 2.0.0`.** Everything on this page — the shared
+> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). Everything on this page — the shared
 > list query flags, the `{count, next, previous, results}` pagination envelope,
 > the `Showing X of N` footer, the machine-readable error `code` dispatch, and
-> the API-key / Bearer parity + free-plan gating rules — ships in CLI **2.0.0**.
-> Below that, list commands take no query flags and the CLI matches on the human
-> `detail` prose rather than the stable `code` field. Ask the developer to run
-> `dailybot upgrade` if `dailybot --version` reports below 2.0.0.
->
-> Four behaviours on this page arrived later, with the CLI release that migrated
-> to the uuid-keyed API: `uuid` as the identifier on forms and form responses
-> (§ 4), the envelope with no opt-in parameter (§ 2), `--page` / `--page-size` /
-> `--limit` on `form responses` and `checkin history` (§ 1), and
-> `invalid_user_identifier` (§ 5). If a developer is on an older CLI, those
-> commands still work — they simply return every page and key forms on `id`.
-> `dailybot upgrade` gets them current.
+> the API-key / Bearer parity + free-plan gating rules — is available at this
+> floor. If `dailybot --version` is below 3.1.2, ask the developer to run
+> `dailybot upgrade`.
 
 This is the **single source of truth** for behavior shared across every
 list-style Dailybot command. The sub-skills (`forms`, `kudos`, `workflow`,
@@ -132,7 +123,7 @@ interpolated into a URL as a literal `null`.
 
 ## 5. Machine-readable error codes
 
-Since 2.0.0 the CLI dispatches on a stable `code` field in the error body and
+The CLI dispatches on a stable `code` field in the error body and
 prints a friendly, actionable message. **Always match on `code`, never on the
 human `detail` prose** — `detail` is display text and may change wording.
 
@@ -153,7 +144,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `api_key_owner_inactive` | The API key's owning user is deactivated. | The key is unusable — have an admin reactivate the owner or issue a new key. |
 | `insufficient_role` | The caller's role is below what the action requires. Carries the required and current role. | Name the required role; suggest an admin/manager runs it. |
 | `member_in_scope_required` | The caller must be a member of the targeted scope (team/check-in/form). | Pick a scope the caller belongs to. |
-| `org_admin_required` | The action is org-admin only. | Only an org admin can run it. |
+| `org_admin_required` | The endpoint is org-admin only (e.g. `kudos org`, `chat send --send-as-user`, webhook/team-member management). | Only an org admin can run it — a member must ask an admin or use an admin API key. Not a session problem. |
 
 ### 400 — bad input
 
@@ -167,6 +158,8 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `send_as_user_conflict` | `--send-as-user`/`--send-as-me` combined with `--bot-name`/`--bot-icon-*`. | Drop the custom-identity flags; the two are mutually exclusive. |
 | `send_as_user_invalid_uuid` | `--send-as-user` value isn't a valid UUID. | Fix the UUID. (Caught client-side before the request.) |
 | `send_as_user_not_found` | The `--send-as-user` UUID doesn't resolve to a user. | Confirm the user exists (`dailybot user list`). |
+| `invalid_kudos_filter` | `kudos list --filter` got an unrecognized value. | Use `received` or `given` (the CLI also accepts `KUDOS_RECEIVED` / `KUDOS_GIVEN`). |
+| `send_message_validation_error` | `chat send` payload is missing content or otherwise invalid. | Read the `detail` — it names the problem (e.g. no message/buttons/image). |
 
 ### 429 — rate limit
 
