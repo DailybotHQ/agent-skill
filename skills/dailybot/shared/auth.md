@@ -59,6 +59,35 @@ treat that as session-wide consent.
 > is the simplest pin and works on every release. See
 > [`../SKILL.md` § Pinning a specific version](../SKILL.md#pinning-a-specific-version).
 
+#### curl flags: always `-fsSL`
+
+Every command in this skill fetches over HTTPS with `curl -fsSL`:
+
+| Flag | Why |
+|------|-----|
+| `-f` | **Fail on HTTP errors.** Without it, a `404`/`500` response body is written to stdout **with exit status `0`** — and in a pipe, `bash` executes that error page. With `-f`, curl emits nothing and exits non-zero. |
+| `-s` | Silent — no progress meter cluttering agent output. |
+| `-S` | But still show the error message on stderr when it does fail. |
+| `-L` | Follow redirects (`cli.dailybot.com` redirects to the CDN origin). |
+
+#### Why an agent must never pipe the installer straight into bash
+
+A `curl … | bash` one-liner is what a **human** types and watches. An agent runs
+unattended, where two failure modes are invisible:
+
+1. **Partial execution.** The pipeline *streams* — bash starts executing before the
+   download finishes, so a connection truncated mid-transfer runs **half a script**.
+   Neither `-f` nor `set -o pipefail` prevents this; they only change the exit status
+   *after the fact*.
+2. **Silent no-op.** In a shell without `pipefail` (Docker's default `sh -c`, most CI
+   `run:` steps), the pipeline's exit status is **bash's**, not curl's. A failing curl
+   writes nothing to stdout, bash reads an empty script and exits `0` — the step
+   "succeeds" with **nothing installed**, surfacing later as `command not found`.
+
+Both disappear when you download the file, verify it, and *then* execute it — which is
+what the primary path below does. Use it for every automated context (agents, CI,
+Dockerfiles, provisioning scripts).
+
 #### Primary path: defense-in-depth verified install (Linux, macOS, WSL2, Git Bash, Docker, CI)
 
 Show the developer this prompt the first time:
