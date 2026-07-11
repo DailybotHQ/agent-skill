@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads and sending as a user's identity), ask the Dailybot AI a question headlessly, **and browse/read the workspace** — who am I / my org / a user's profile (`me` / `org` / `user get`), browse the kudos feed + the org-wide feed + wall of fame, and list/read workflows, all with shared pagination / search / date-range filters. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads and sending as a user's identity), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **and browse/read the workspace** — who am I / my org / a user's profile (`me` / `org` / `user get`), browse the kudos feed + the org-wide feed + wall of fame, and list/read workflows, all with shared pagination / search / date-range filters. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "3.3.0"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
@@ -50,7 +50,7 @@ machine — permissions, consent guarantees, and a self-audit you can run — is
 
 ## What it does
 
-Twelve coordinated capabilities, with smart routing between them:
+Thirteen coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
@@ -59,11 +59,12 @@ Twelve coordinated capabilities, with smart routing between them:
 | **Message polling** | `dailybot-messages` | Session start, idle moments, or when the developer asks "what should I work on?" |
 | **Email** | `dailybot-email` | Explicit user request, with mandatory pre-send safety checks |
 | **Chat** | `dailybot-chat` | Developer wants to send / edit a bot message on Slack, Teams, Discord, or Google Chat — to a channel, DMs, or whole team. Supports report-style threads (headline + replies in one call), editing the parent or any reply afterward, and **sending as a user's identity** (`--send-as-user` / `--send-as-me`; Slack, admin-only) |
+| **Conversations** | `dailybot-conversation` | Developer wants to **open (or reuse) a Slack group DM** that includes the Dailybot bot plus named teammates — then optionally post a report to it in the same call (`conversation open -u … -m …`). Idempotent (same people → same channel). Slack only, org-admin only |
 | **Health & status** | `dailybot-health` | Long-running sessions; periodic heartbeats |
 | **Check-ins** | `dailybot-checkin` | Full check-in lifecycle: list/status, complete, inspect questions, history (now `--search`-able), edit, reset, backfill/future-date — **plus authoring**: create/configure a check-in (schedule, participants, reminders, privacy, smart/AI) and manage its questions |
 | **Kudos** | `dailybot-kudos` | Recognize a teammate or a whole team — **plus browsing (read)**: `kudos list` the recognition feed (filter received/given), `kudos org` the whole org's feed (admin-only), and `kudos wall-of-fame` leaderboard |
 | **Teams** | `dailybot-teams` | List teams, inspect members, resolve a team name → UUID (used as a resolver by other skills) — **plus account context**: `dailybot me` (who am I / role), `dailybot org` (which org), and `dailybot user get` (one user's profile) |
-| **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (list + responses now support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
+| **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (`form list` is now **org-scoped** by default, with `--mine` to narrow to your own; list + responses support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
 | **Workflows** | `dailybot-workflow` | Developer wants to **read** the org's workflows — `workflow list` (paginated/searchable) and `workflow get`. Read-only; writes are web-app only. Plan-gated |
 | **Report channels** | `dailybot-channels` | Discover report-channel UUIDs to attach to forms/check-ins with `--report-channel` |
 
@@ -230,8 +231,10 @@ the full step-by-step workflow.
 | "browse kudos", "kudos I received / gave", "org kudos stats", "who's on the wall of fame?" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) § Browsing kudos |
 | "list my workflows", "show workflows", "what's in workflow X?" | **Workflows** → read [`workflow/SKILL.md`](workflow/SKILL.md) |
 | "which channels can Dailybot post to?", "list report channels", "I need a channel UUID for the form / check-in" | **Channels** → read [`channels/SKILL.md`](channels/SKILL.md) |
-| "send a Slack message", "DM Sergio in chat", "post the deploy report to #releases (with a thread)", "edit that chat message I just sent", "ping the Engineering team in chat" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) |
-| "send this to #releases as me", "post as <user> in Slack", "send the message with Jane's identity" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) § Send as a user's identity (`--send-as-user` / `--send-as-me`) |
+| "send a Slack message", "DM someone in chat", "post the deploy report to a channel (with a thread)", "edit that chat message I just sent", "ping the Engineering team in chat" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) |
+| "send this to a channel as me", "post as `<user>` in Slack", "send the message with someone's identity" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) § Send as a user's identity (`--send-as-user` / `--send-as-me`) |
+| "open a group DM with Jane and Bob", "start a Slack group with the release team and the bot", "open a group with `<user>` and send them this report", "get me a channel with these people" | **Conversations** → read [`conversation/SKILL.md`](conversation/SKILL.md) |
+| "list my forms", "which forms does the org have?", "only my own forms" (`--mine`) | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
 
 ### Auto-activation (no explicit request)
 
@@ -257,6 +260,14 @@ answer back (input → the agent). **Chat** and **Report** *send* something
 outward (the agent → a chat platform / the dashboard). If the developer wants an
 *answer from* Dailybot, route to **Ask**; if they want to *tell* the team
 something, route to **Report** (default) or **Chat**.
+
+**Chat vs Conversations.** Route to **Chat** when the developer already has a
+target (a channel id, a known DM, a team) and just wants to *post/edit*. Route to
+**Conversations** when they want to *create or obtain a Slack group of specific
+people* (with the bot) before posting — `conversation open` returns the group's
+channel id (idempotently) and can post the first message itself. A common combo:
+**Conversations** to open the group + capture the id, then **Chat** with
+`--channel-type group_chat` for any richer follow-up (threads, buttons).
 
 If the intent is ambiguous, default to **Report** — it's the most
 common use case.
