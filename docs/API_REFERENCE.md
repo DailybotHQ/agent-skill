@@ -698,10 +698,14 @@ dailybot checkin complete <followup_uuid> -a 0="Done" --response-date 2026-05-20
 
 ### `dailybot form list`
 
-Lists all forms visible to the logged-in user.
+Lists all forms visible to the logged-in user. Since `dailybot-cli >= 3.2.0` the
+default is **org-scoped** (an admin sees every org form; a member sees list-view
+forms plus their own). Pass `--mine` to narrow to only the forms you own
+(`owner=me`).
 
 ```bash
 dailybot form list
+dailybot form list --mine        # only the forms you own (CLI >= 3.2.0)
 dailybot form list --json
 ```
 
@@ -847,6 +851,7 @@ Beyond agent-specific endpoints, your API key gives you access to the full Daily
 | `GET /v1/teams/` | List teams |
 | `GET /v1/organization/` | Get organization info |
 | `POST /v1/send-message/` | Send a bot message to a chat platform (Slack, Teams, Discord, Google Chat). Accepts `X-API-KEY` **or** `Authorization: Bearer` (login session, role-scoped). Targets `target_users` / `target_channels` / `target_teams`; optional `thread_responses[]` (≤10) posts replies inside the parent's thread in the same call; passing `bot_message_id` edits that message (parent or reply). Exposed in the CLI as `dailybot chat send` / `dailybot chat update` (introduced in [`1.13.0`](https://github.com/DailybotHQ/cli/releases/tag/v1.13.0); current published version [`1.16.0`](https://pypi.org/project/dailybot-cli/)) and in the `dailybot-chat` sub-skill. |
+| `POST /v1/open-conversation/` | Open (or idempotently reuse) a private **Slack group DM** (MPIM) that includes the Dailybot bot plus the given users. Body `{ users_uuids: [...] }` → `{ channel }`. Accepts `X-API-KEY` **or** `Authorization: Bearer`. **Slack only** (`406 open_conversation_not_supported` otherwise), **org-admin only** (`403`). Exposed in the CLI as `dailybot conversation open` (introduced in [`3.2.0`](https://github.com/DailybotHQ/cli/releases/tag/v3.2.0)) and in the `dailybot-conversation` sub-skill; `-m/--message` chains a `group_chat` `send-message`. |
 | `POST /v1/send-email/` | Send an email |
 | `GET /v1/followups/` | List daily standups |
 | `GET /v1/checkins/` | List standup check-ins |

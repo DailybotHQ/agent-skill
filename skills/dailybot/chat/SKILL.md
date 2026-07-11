@@ -47,6 +47,13 @@ Trigger phrases the agent should recognize:
 
 **Do not** send chat messages autonomously without the developer's explicit request — chat messages are visible to other people and carry the developer's own identity (with a login session) or the bot identity (with an API key). Always confirm before sending unless the developer pre-approved a flow (`--yes`-style intent).
 
+> **Need to create a Slack group of people first?** This sub-skill posts to an
+> *already-known* target (channel id, DM, or team). To **open (or reuse) a Slack
+> group DM with specific teammates + the bot** and get its channel id, use
+> [`../conversation/SKILL.md`](../conversation/SKILL.md) (`dailybot conversation
+> open`) — then come back here with `--channel <id> --channel-type group_chat` for
+> any richer follow-up (threads, buttons, custom identity).
+
 ---
 
 ## Auth model — both login Bearer and org API key are supported
