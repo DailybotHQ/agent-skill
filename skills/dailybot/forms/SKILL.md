@@ -1012,11 +1012,12 @@ When the form is workflow-enabled and `allowed_transitions` is non-empty:
 dailybot form transition <form_uuid> <response_uuid> <to_state> --yes
 ```
 
-> **Pass `to_state`, never `label`.** In `allowed_transitions`, `to_state` is the
-> machine key (`released`) and `label` is display text (`Mark released`). The API
-> matches on the key and answers `Unknown workflow state: 'Mark released'`
-> otherwise. Read the key from the response payload rather than typing the state
-> name you saw in the panel.
+> **You can pass either `to_state` (machine key) or `label` (display text).**
+> Since CLI `>= 3.3.0`, the CLI resolves labels to keys automatically — e.g.
+> `"Mark released"` → `released`. In `allowed_transitions`, `to_state` is the
+> machine key (`released`) and `label` is display text (`Mark released`). Both
+> are accepted; the CLI performs a case-insensitive lookup and translates labels
+> to keys before calling the API. On older CLIs, only the machine key works.
 
 Confirm with the developer before transitioning:
 
@@ -1217,6 +1218,7 @@ Form operations must **never block your primary work**. If the CLI is missing, a
 
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
+- [`../shared/dashboard-urls.md`](../shared/dashboard-urls.md) — full dashboard URL catalog (forms, check-ins, kudos, agents)
 - [`_custom-template/SKILL.md`](_custom-template/SKILL.md) — starter template for authoring a custom per-form skill (copy into `.agents/skills/dailybot-custom/<your-name>/` in your own repo)
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
 - **Full agent API skill:** `https://www.dailybot.com/skill.md`

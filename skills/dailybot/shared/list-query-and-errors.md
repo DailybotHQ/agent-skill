@@ -27,7 +27,7 @@ that flag already means "every author's responses", not "every page").
 | `--page-size N` | | Items per page. **Max 100** — larger values are clamped client-side. Passing it alone returns that one page, not the whole list. |
 | `--all` | | Fetch **every** page and concatenate the results. Mutually exclusive with `--limit`. |
 | `--limit N` | | Stop after the first `N` items (across pages). Mutually exclusive with `--all`. |
-| `--search TEXT` | `--grep TEXT` | Case-insensitive substring filter. **Max 256 chars** — longer queries are truncated client-side before the request. |
+| `--search TEXT` | `--grep TEXT` | Case-insensitive substring filter. **Max 256 chars** — longer queries are rejected client-side with an error before the request is made (`CLI >= 3.3.0`; earlier versions truncated silently). |
 | `--since YYYY-MM-DD` | | Start of a date range (inclusive). |
 | `--until YYYY-MM-DD` | | End of a date range (inclusive). |
 | `--date YYYY-MM-DD` | | A single day (shorthand for `--since D --until D`). |
@@ -151,7 +151,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `code` | Meaning | What to do |
 |--------|---------|------------|
 | `target_user_inactive` | The targeted user is deactivated. | Pick an active user. |
-| `search_query_too_long` | `--search` exceeded the limit. | The CLI truncates to 256 chars client-side; if you see this, shorten the query. |
+| `search_query_too_long` | `--search` exceeded the 256-char limit. | Since CLI `>= 3.3.0` the query is rejected client-side before the request. If you hit this server-side, shorten the query. |
 | `invalid_date_range` | `--since`/`--until` are malformed or reversed. | Fix the dates (`YYYY-MM-DD`, since ≤ until). |
 | `invalid_user_identifier` | `--user` was given an email or a name. | `--user` takes **only a UUID**. Get it from `dailybot user list --json`. (Caught client-side before the request.) |
 | `invalid_workflow_state` | On `form responses --state`: the form has no workflow. On `form create` / `form config --state`: the `"Label:#color"` spec is malformed. | Two meanings, one code — read which command you ran. For the filter, drop `--state` (or pick a workflow form). |

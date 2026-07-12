@@ -98,6 +98,14 @@ Participants can be named three ways — the CLI resolves them for you:
 > The bot is added automatically — you do **not** pass the bot as a participant.
 > One human participant already makes a valid group with the bot.
 
+### Participant limit
+
+Slack group DMs (MPIMs) support **at most 8 total members**. The Dailybot bot
+always occupies one slot, so you can pass **at most 7 user UUIDs / emails /
+names**. The CLI rejects more than 7 before making the API call; the server also
+validates and returns `400 conversation_too_many_participants` if the limit is
+exceeded.
+
 ---
 
 ## Step 3 — Open the Conversation (idempotent)
@@ -170,6 +178,7 @@ Match on the machine-readable `code` (with `--json`), never the prose `detail`.
 |------|--------|------------------------|
 | 406 | `open_conversation_not_supported` | Org is not on Slack. Tell the developer group DMs are Slack-only; stop. |
 | 403 | — | Caller is not an org admin. Explain the command needs admin rights. |
+| 400 | `conversation_too_many_participants` | More than 7 users passed (8 total including the bot). Reduce the list. |
 | 400 | `one_or_more_users_not_found` | A participant isn't an active org user. Re-check the names/UUIDs. |
 | 400 | `no_valid_users` | The list contained invalid UUIDs. Fix the identifiers. |
 | 400 | `params_validation_error` | `users_uuids` wasn't a list — a CLI usage error; re-run with `-u`. |
@@ -231,4 +240,5 @@ automatically, and do not enter a diagnostic loop.
 - [`../teams/SKILL.md`](../teams/SKILL.md) — resolve a person's UUID by name
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
+- [`../shared/dashboard-urls.md`](../shared/dashboard-urls.md) — full dashboard URL catalog
 - **Full agent API skill:** `https://www.dailybot.com/skill.md`

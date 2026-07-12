@@ -530,5 +530,6 @@ Reporting must **never block your primary work**. If the CLI is missing, auth fa
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup (CLI login, API key, agent register)
 - [`../shared/context.sh`](../shared/context.sh) — automated context detection
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
+- [`../shared/dashboard-urls.md`](../shared/dashboard-urls.md) — dashboard URL catalog (report detail pages, agent analytics, etc.)
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
 - **Full agent API skill:** `https://www.dailybot.com/skill.md`
