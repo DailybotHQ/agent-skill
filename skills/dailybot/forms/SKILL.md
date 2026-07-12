@@ -172,6 +172,33 @@ wants their personal forms out of the full org list.
 dailybot form list --mine --json
 ```
 
+### Server-side filtering, sorting, and archived forms (CLI >= 3.5.0)
+
+| Flag | Values | Description |
+|------|--------|-------------|
+| `--filter` | `all`, `me`, `public`, `approval`, `workflow`, `archived` | Scope filter (server-side). |
+| `--order` | `alphabetical`, `recent`, `total` | Sort field (`total` = total response count). |
+| `--ascending` / `--asc` | flag | Sort ascending (default: descending). |
+| `--include-questions` | flag | Include question definitions in each form. |
+| `--include-archived` | flag | Include archived forms (hidden by default). |
+
+```bash
+# Workflow-enabled forms, sorted alphabetically ascending:
+dailybot form list --filter workflow --order alphabetical --asc --json
+
+# Only forms with approval flow:
+dailybot form list --filter approval --json
+
+# Public forms sorted by total responses:
+dailybot form list --filter public --order total --json
+
+# Archived forms:
+dailybot form list --filter archived --json
+
+# Include question definitions:
+dailybot form list --include-questions --json
+```
+
 > **The envelope is unconditional.** `GET /v1/forms/` and the responses endpoint
 > below always return `{count, next, previous, results}`; no query parameter is
 > needed. See the shared doc.
@@ -758,7 +785,8 @@ Useful flags:
 |------|-------------|
 | `--latest` | Return only the most recent response visible to the caller. |
 | `--state STATE` | Filter to responses in a specific workflow state. Pass the **state key** (`draft`), not the label (`Draft`) — read the keys from `workflow.states[].key` on `form get`. Filtering is server-side. On a form with no workflow the API returns `400 invalid_workflow_state`. |
-| `--search TEXT` | (alias `--grep`) Case-insensitive substring filter across responses. Max 256 chars (truncated client-side). |
+| `--all` | List everyone's responses (requires VIEW_REPORTS permission — admin/owner only; a member receives 403). |
+| `--search TEXT` | Search response content and submitter name/email. Max 256 chars. Does **not** search anonymous member identities (privacy preserved). |
 | `--json` | Machine-readable output (stable shape). |
 
 > **`form responses` search.** The `--search` / `--grep` flag
@@ -769,6 +797,48 @@ Useful flags:
 > `--page-size` / `--limit`. Careful: `--all` here means **every author's**
 > responses (admin/owner only), not every page.
 > See [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
+
+### Advanced response filters (CLI >= 3.5.0)
+
+| Flag | Values | Description |
+|------|--------|-------------|
+| `--source` | CSV: `member`, `anonymous`, `automation`, `public` | Filter by submission origin (OR semantics within the group). |
+| `--submitter` | CSV of UUIDs (max 50) | Filter by specific submitter user UUIDs. |
+| `--flow-status` | `pending`, `approved`, `denied` | Approval flow status filter. Silently ignored if the form has no approval flow. |
+| `--order` | `recent`, `oldest` | Sort by creation time. |
+| `--ascending` / `--asc` | flag | Sort ascending (alias for `--order oldest`). |
+| `--user UUID` | single UUID | Filter to one user's responses (admin/owner only). |
+| `--from DATE` | YYYY-MM-DD | Responses on/after this date. |
+| `--to DATE` | YYYY-MM-DD | Responses on/before this date. |
+
+**Submission sources** — every response belongs to exactly one bucket:
+
+| Source | Meaning |
+|--------|---------|
+| `member` | Identified org member submitted normally. |
+| `anonymous` | Org member submitted anonymously (`collect_responses_anonymously=true`). |
+| `automation` | Submitted via API/CLI with `--automation` (`is_dailybot_bot=true`). |
+| `public` | Submitted via the public form URL by an external guest. |
+
+All filters compose with **AND** across groups and **OR** within each group:
+`--source "member,automation" --flow-status pending --search "deploy"` → responses that are `(member OR automation) AND pending AND contain "deploy"`.
+
+```bash
+# All automation submissions:
+dailybot form responses <form_uuid> --all --source automation --json
+
+# Multiple sources (OR): automation OR public:
+dailybot form responses <form_uuid> --all --source "automation,public" --json
+
+# Approval: only pending:
+dailybot form responses <form_uuid> --all --flow-status pending --json
+
+# Combined: member responses, approved, containing "sprint":
+dailybot form responses <form_uuid> --all --source member --flow-status approved --search "sprint" --json
+
+# Sorted oldest first in a date range:
+dailybot form responses <form_uuid> --all --order oldest --from 2026-07-01 --to 2026-07-10 --json
+```
 
 ### JSON shape (single response)
 
@@ -971,6 +1041,36 @@ Always show the complete answer set before sending:
 | `--state` | `-s` | Optional initial state (workflow forms only). Defaults to the form's initial state. |
 | `--yes` | `-y` | Skip confirmation. |
 | `--json` |     | Machine-readable JSON output. |
+| `--automation` | | Submit as an automation — channel notifications show no submitter name. (`CLI >= 3.4.0`) |
+| `--anonymous` | | Submit anonymously — channel notifications show a random generated name. (`CLI >= 3.4.0`) |
+| `--guest-name` | | Guest submitter full name (used with `--automation` for third-party submissions). (`CLI >= 3.5.0`) |
+| `--guest-email` | | Guest submitter email (validated client-side). (`CLI >= 3.5.0`) |
+| `--source` | | Provenance label, max 512 chars (e.g. `workflow:release-pipeline`). Works with any mode. (`CLI >= 3.5.0`) |
+
+> **`--automation` vs `--anonymous`:** Both are independent booleans. `--automation` hides the submitter entirely; `--anonymous` replaces them with a random name. When combined, `automation` takes precedence for the channel display. Neither flag affects who owns the response in the dashboard — it only controls the notification appearance.
+
+### Submission modes (CLI >= 3.5.0)
+
+| Mode | Flags | Channel notification |
+|------|-------|---------------------|
+| Normal | (none) | Shows your name + avatar |
+| Anonymous | `--anonymous` | Random generated name (e.g. "Purple Elephant") |
+| Automation | `--automation` | No submitter shown |
+| Automation + Guest | `--automation --guest-name "X" --guest-email "x@y"` | Guest name/email in body, no submitter avatar |
+| Any + Source | `--source "label"` | Provenance label attached (works with any mode) |
+
+```bash
+# Automation with guest identity and source tracking:
+dailybot form submit <form_uuid> \
+  --content '{"<q_uuid>":"done"}' --yes --automation \
+  --guest-name "Release Bot" --guest-email "releases@example.com" \
+  --source "workflow:production-deploy"
+```
+
+**Validation rules:**
+- If the form has `require_email_and_name` enabled and you use `--automation`, both `--guest-name` and `--guest-email` are required (API returns `guest_user_required`).
+- `--guest-email` is validated client-side for format.
+- `--source` max length: 512 characters.
 
 After submit, **re-read `current_state` and `allowed_transitions` on the returned payload** to decide the next step.
 
