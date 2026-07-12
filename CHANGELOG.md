@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] — 2026-07-12
+
+### Changes
+
+- Merge pull request #33 from DailybotHQ/feat/dashboard-urls-and-3.3.0-sync
+- feat(skill): add dashboard URL catalog and sync with CLI 3.3.0
+
+
 ## [3.4.0] — 2026-07-11
 
 ### Changes
