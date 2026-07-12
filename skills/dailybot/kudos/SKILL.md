@@ -462,6 +462,7 @@ Sending kudos must **never block your primary work**. If the CLI is missing, aut
 
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
+- [`../shared/dashboard-urls.md`](../shared/dashboard-urls.md) — full dashboard URL catalog (kudos detail, wall of fame, etc.)
 - [`../teams/SKILL.md`](../teams/SKILL.md) — team-name resolver (called by this skill)
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
 - **Full agent API skill:** `https://www.dailybot.com/skill.md`

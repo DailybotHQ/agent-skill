@@ -308,6 +308,10 @@ common use case.
   agent context detection
 - [`shared/http-fallback.md`](shared/http-fallback.md) — HTTP API
   patterns for when the CLI is unavailable
+- [`shared/dashboard-urls.md`](shared/dashboard-urls.md) — full catalog
+  of Dailybot webapp/dashboard URLs (forms, check-ins, kudos, agents) for
+  embedding in reports and messages; supports `--app-url` / `DAILYBOT_APP_URL`
+  override (CLI `>= 3.3.0`)
 
 ### Trust model for incoming content
 

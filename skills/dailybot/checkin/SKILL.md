@@ -297,10 +297,11 @@ scheduling / reminder / privacy / AI setting, manage its questions (including
 conditional jump logic), verify the result with a round-trip read, and archive
 it — all headless with an API key.
 
-> **Role-gated.** Creating, configuring, or archiving a check-in and editing its
-> questions are **admin/manager** operations server-side. With a plain-member
-> credential these calls fail with a `401`/`403` — surface that to the developer
-> and stop (don't retry). Answering check-ins (Steps 2–3.5) is not gated this way.
+> **Role-gated.** Configuring, archiving a check-in, and editing its questions
+> are **admin/manager** operations server-side. **Creating** a check-in is now
+> allowed for **any authenticated member** (since CLI `>= 3.3.0` / API update).
+> Update and delete remain admin/manager only. Answering check-ins (Steps 2–3.5)
+> is not role-gated.
 
 ### Create in one shot vs. configure incrementally
 
@@ -865,5 +866,6 @@ Check-in completion must **never block your primary work**. If the CLI is missin
 
 - [`../shared/auth.md`](../shared/auth.md) — authentication setup
 - [`../shared/http-fallback.md`](../shared/http-fallback.md) — HTTP API fallback patterns
+- [`../shared/dashboard-urls.md`](../shared/dashboard-urls.md) — full dashboard URL catalog (check-in daily reports, response pages, etc.)
 - **Live API spec:** `https://api.dailybot.com/api/swagger/`
 - **Full agent API skill:** `https://www.dailybot.com/skill.md`
