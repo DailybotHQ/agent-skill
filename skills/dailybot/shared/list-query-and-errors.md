@@ -160,6 +160,8 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `send_as_user_not_found` | The `--send-as-user` UUID doesn't resolve to a user. | Confirm the user exists (`dailybot user list`). |
 | `invalid_kudos_filter` | `kudos list --filter` got an unrecognized value. | Use `received` or `given` (the CLI also accepts `KUDOS_RECEIVED` / `KUDOS_GIVEN`). |
 | `send_message_validation_error` | `chat send` payload is missing content or otherwise invalid. | Read the `detail` — it names the problem (e.g. no message/buttons/image). |
+| `invalid_owner_user_id` | `--owner` value isn't a valid UUID (after resolution). | Fix the UUID or name. (`CLI >= 3.6.0`) |
+| `too_many_owner_user_ids` | More than 50 `--owner` values. | Narrow the filter — max 50 owners per request. (`CLI >= 3.6.0`) |
 
 ### 429 — rate limit
 
