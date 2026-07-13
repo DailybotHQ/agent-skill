@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.1] — 2026-07-13
+
+### Changes
+
+- Merge pull request #35 from DailybotHQ/feat/cli-3.5.1-auth-unification
+- docs(auth): document unified Bearer-first auth priority and auto-retry (CLI 3.5.1)
+
+
 ## [3.6.0] — 2026-07-12
 
 ### Changes
