@@ -120,9 +120,12 @@ returned.
 
 `dna_distribution` breaks the kudos down by the org's company values.
 
-> **Version note:** on `dailybot-cli >= 3.7.2` the human (non-`--json`) output
-> renders the full wall of fame — top receiver/giver, your position, the
-> company-values distribution, and the ranked leaderboard table. Older CLI
+> **Version note:** the human (non-`--json`) rendering of this command was
+> fixed in [`dailybot-cli` v3.7.2](https://github.com/DailybotHQ/cli/releases/tag/v3.7.2)
+> ([DailybotHQ/cli#71](https://github.com/DailybotHQ/cli/pull/71), on
+> [PyPI](https://pypi.org/project/dailybot-cli/)) — since that release it shows
+> the full wall of fame: top receiver/giver with counts, the caller's position,
+> the company-values distribution, and the ranked leaderboard table. Older CLI
 > versions render an incomplete summary panel (dashes instead of names), so
 > always prefer `--json` when parsing, and suggest `dailybot upgrade` if the
 > developer sees dashes.
