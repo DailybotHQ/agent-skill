@@ -30,8 +30,8 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    the `dailybot` CLI is the integration surface. If it is missing, follow
    [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
    installer and installs **only after the developer confirms**. Confirm with
-   `dailybot --version` (minimum `>= 3.1.2` for the pre-existing sub-skills;
-   `>= 3.7.0` for the new `env` sub-skill).
+   `dailybot --version` (minimum `>= 3.7.0` — the skill-pack baseline for
+   every sub-skill).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.
@@ -86,12 +86,10 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 
 ## Required Dailybot CLI version
 
-> **Baseline: `dailybot-cli >= 3.1.2`** for every sub-skill in the pack that
-> existed before the `env` sub-skill was added. The **`env` sub-skill**
-> requires `dailybot-cli >= 3.7.0` (per-repo API key override — see
-> [`shared/env-json.md`](shared/env-json.md)). Recommended install / upgrade
+> **Baseline: `dailybot-cli >= 3.7.0`** for **every** sub-skill in the pack —
+> one single floor, no per-sub-skill exceptions. Recommended install / upgrade
 > target: **latest release** — `dailybot upgrade` (or `pip install
-> --upgrade dailybot-cli`) gets you both baselines in one step.
+> --upgrade dailybot-cli`) always satisfies it.
 >
 > Requires **Python >= 3.10**. The wheel is `py3-none-any` (pure Python), MIT-licensed.
 >
@@ -105,23 +103,25 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 
 ### Why this minimum
 
-`3.1.2` remains the baseline for the pre-existing sub-skills (report, chat,
-kudos, email, forms, checkin, teams, health, messages, workflow, ask,
-conversation, channels). The **new `env` sub-skill** requires `3.7.0` — the
-CLI release that introduces `dailybot env` and reads `.dailybot/env.json`.
-In practice, if you always install the latest CLI (`dailybot upgrade`),
-you never have to think about these floors — every sub-skill Just Works.
+`3.7.0` is the release that completed the auth story this pack relies on:
+the `env` sub-skill's `dailybot env` command group and `.dailybot/env.json`
+per-repo credentials (with the wire-preference guarantee that a repo-local
+key beats the global Bearer session), the hardened refuse-if-tracked guard,
+and every earlier surface the pack documents (reporting, hooks, chat, forms
+and check-in authoring, kudos, teams, workflows, `ask`, the shared list
+query flags, and the machine-readable error codes). Pinning one single
+floor keeps agent behavior predictable — no per-sub-skill version matrix.
 
-If `dailybot --version` reports below 3.7.0 and the developer wants to use
-`env` commands, ask them to run `dailybot upgrade` (or `pip install --upgrade
-'dailybot-cli>=3.7.0'`) first. All other sub-skills remain usable at 3.1.2+.
+If `dailybot --version` reports below 3.7.0, ask the developer to run
+`dailybot upgrade` (or `pip install --upgrade 'dailybot-cli>=3.7.0'`)
+before using any sub-skill.
 
 ### Checking the installed version
 
 ```bash
 # Single-line, scriptable
 dailybot --version
-# → dailybot 3.1.2 (Python 3.12.4)
+# → dailybot 3.7.0 (Python 3.12.4)
 
 # Multi-line panel: version, Python runtime, install path, release notes link
 dailybot version
@@ -141,17 +141,15 @@ Homebrew / Linux binary / editable dev) and either runs the right command in a
 subprocess or prints the exact command for installs the CLI shouldn't drive.
 `dailybot upgrade --dry-run` previews without executing.
 
-If the developer is below the required baseline for the sub-skill they
-want to use (3.1.2 for anything shipped in v3.9.0 or earlier; 3.7.0 for
-the `env` sub-skill), ask them to run `dailybot upgrade`
-once, then resume. Do not retry CLI commands in a loop while the upgrade
-is pending.
+If the developer is below the pack baseline (`dailybot-cli >= 3.7.0`),
+ask them to run `dailybot upgrade` once, then resume. Do not retry CLI
+commands in a loop while the upgrade is pending.
 
 ### Direct install commands
 
 | Channel | Command |
 |---------|---------|
-| pip      | `pip install 'dailybot-cli>=3.7.0'` (covers both the 3.1.2 pack baseline and the 3.7.0 `env` floor) |
+| pip      | `pip install 'dailybot-cli>=3.7.0'` (the pack baseline) |
 | Homebrew | `brew install dailybothq/tap/dailybot` |
 | Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -fsSL https://cli.dailybot.com/install.sh \| bash` |
 | Windows PowerShell (when WSL2 / Git Bash unavailable) | `irm https://cli.dailybot.com/install.ps1 \| iex` |
@@ -176,8 +174,8 @@ Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
 
 Every install method defaults to the latest release but can pin an exact
 version — useful when a developer needs to reproduce a known-good setup or
-pin the `3.7.0` baseline for `env` (or `3.1.2` for older sub-skills; the installer scripts, `pip`, and Homebrew all accept
-a version pin):
+pin the `3.7.0` pack baseline (the installer scripts, `pip`, and Homebrew all
+accept a version pin):
 
 | Channel | Pin a version |
 |---------|---------------|
@@ -324,7 +322,7 @@ common use case.
 - [`shared/dashboard-urls.md`](shared/dashboard-urls.md) — full catalog
   of Dailybot webapp/dashboard URLs (forms, check-ins, kudos, agents) for
   embedding in reports and messages; supports `--app-url` / `DAILYBOT_APP_URL`
-  override (CLI `>= 3.3.0`)
+  override
 
 ### Trust model for incoming content
 

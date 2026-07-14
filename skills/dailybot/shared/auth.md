@@ -45,7 +45,7 @@ treat that as session-wide consent.
 
 > [!NOTE]
 > **Installing a specific version.** Both installers default to the latest
-> release but accept a version pin (the skill-pack baseline is **`dailybot-cli >= 3.1.2`**):
+> release but accept a version pin (the skill-pack baseline is **`dailybot-cli >= 3.7.0`**):
 > - `install.sh` — set `DAILYBOT_VERSION=<version>` in the environment, or
 >   pass `bash -s -- --version <version>`. Example (drop it into the verified
 >   snippet below, right before `bash /tmp/install.sh`):
@@ -357,8 +357,8 @@ Dailybot → Settings → API Keys.
 
 ## 4. Auth model — unified Bearer-first priority everywhere
 
-As of `dailybot-cli >= 3.5.1`, **all endpoints use the same auth priority:
-Bearer token first, API key second.** There is no longer a split where agent
+**All endpoints use the same auth priority: Bearer token first, API key
+second** (unified in CLI 3.5.1). There is no longer a split where agent
 endpoints preferred API key and user endpoints preferred Bearer — the CLI
 now behaves consistently everywhere. The server accepts both credentials on
 every `/v1/` endpoint, so the two paths are functionally identical.
@@ -370,7 +370,7 @@ a server that would accept the Bearer, and the session token must never be
 transmitted to the env.json server. The 401/403 alt-credential retry covers
 the reverse direction. See [`env-json.md`](env-json.md).
 
-| Scope | Auth priority (since CLI 3.5.1) | Used by |
+| Scope | Auth priority | Used by |
 |-------|--------------------------------|---------|
 | **All endpoints** | Bearer preferred → API key fallback | Every command: `agent update`, `form submit`, `kudos`, `chat send`, `ask`, etc. |
 | **Login lifecycle** | OTP / Bearer only | `dailybot login`, `dailybot logout` (revokes the session token) |

@@ -10,11 +10,10 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Conversations
 
-> **Requires `dailybot-cli >= 3.2.0`** — the release that introduced the
-> `dailybot conversation open` command (and `form list --mine`). The rest of the
-> pack works from the `>= 3.1.2` baseline, but this sub-skill's command does not
-> exist below 3.2.0: if `dailybot --version` reports lower, ask the developer to
-> run `dailybot upgrade` and continue with your primary task meanwhile. See
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline; the
+> `dailybot conversation open` command itself shipped in 3.2.0). If
+> `dailybot --version` reports lower, ask the developer to run
+> `dailybot upgrade` and continue with your primary task meanwhile. See
 > [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
 
 You help developers **open a private Slack group DM (MPIM)** that includes the

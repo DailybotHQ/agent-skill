@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 You send emails on behalf of the developer's agent through Dailybot. Useful for notifications, summaries, follow-ups, weekly reports, or any communication that should be delivered as email.
 
-> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
 
 ---
 

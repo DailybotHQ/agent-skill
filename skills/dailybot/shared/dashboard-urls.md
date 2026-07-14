@@ -1,8 +1,9 @@
 # Shared reference — Dailybot dashboard URLs
 
-> **Requires `dailybot-cli >= 3.3.0`** — the release that introduced the
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The
 > `--app-url` flag and `DAILYBOT_APP_URL` env var for configuring the dashboard
-> base URL. Earlier versions hardcode the production URL.
+> base URL are available at this floor, as is the per-profile `app_url` in
+> [`env-json.md`](env-json.md).
 
 This is the **single source of truth** for all dashboard (webapp) URLs that
 agents can embed in reports, messages, or surface to the developer. Sub-skills

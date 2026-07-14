@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Forms
 
-> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The full forms lifecycle — `form list` / `submit` / `get` / `responses` / `response get` / `update` / `transition` / `delete` — plus the structured `--json` 4xx error shape are all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The full forms lifecycle — `form list` / `submit` / `get` / `responses` / `response get` / `update` / `transition` / `delete` — plus the structured `--json` 4xx error shape are all available. If `dailybot --version` is below 3.7.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You help developers work with the full Dailybot forms lifecycle: list, inspect, submit, update, transition between workflow states, and read prior responses. Forms are custom questionnaires created by team leads — feedback surveys, retrospectives, release checklists, approval flows, or any structured data collection. Some forms are simple "fill once and done"; others have **workflow states** (e.g. `draft → review → released`) with audience-scoped permissions on who can edit and who can transition.
 
@@ -140,7 +140,7 @@ Returns all forms in the caller's organization. Every org member sees every org 
 
 ### Pagination, search, and date filters
 
-> **Note:** the shared list query flags below are part of the `dailybot-cli >= 3.1.2` baseline. Older CLIs
+> **Note:** the shared list query flags below are part of the `dailybot-cli >= 3.7.0` baseline. Older CLIs
 > return the full list with no filtering.
 
 `form list` accepts the **full shared list query flag set** — pagination
@@ -161,7 +161,7 @@ dailybot form list --all --json
 dailybot form list --page 2 --page-size 20 --json
 ```
 
-### Filter by owner — `--mine` and `--owner` (CLI >= 3.6.0)
+### Filter by owner — `--mine` and `--owner`
 
 Pass **`--mine`** to narrow the result to only the forms **you own**, or
 **`--owner`** (repeatable) to filter by specific owners. `--owner` accepts
@@ -183,7 +183,7 @@ dailybot form list --owner <uuid-1> --owner <uuid-2> --json
 > `--mine` or `--owner` instead — `--filter me` still works but maps to
 > the legacy `filter=me` parameter.
 
-### Form owners picker — `form owners` (CLI >= 3.6.0)
+### Form owners picker — `form owners`
 
 A lightweight endpoint to discover which org members own at least one form,
 without pulling the full member directory.
@@ -197,12 +197,12 @@ dailybot form owners --json              # machine-readable
 Each result has `uuid`, `full_name`, `image`, `role`, and optionally `email`
 (email is only visible to admins/managers — the CLI must not assume it exists).
 
-### Server-side filtering, sorting, and archived forms (CLI >= 3.5.0)
+### Server-side filtering, sorting, and archived forms
 
 | Flag | Values | Description |
 |------|--------|-------------|
 | `--filter` | `all`, `public`, `approval`, `workflow`, `archived` | Scope filter (server-side). `me` still works but is deprecated. |
-| `--owner` | UUID, email, or name (repeatable) | Filter by form owner(s). Max 50. (`CLI >= 3.6.0`) |
+| `--owner` | UUID, email, or name (repeatable) | Filter by form owner(s). Max 50. |
 | `--order` | `alphabetical`, `recent`, `total` | Sort field (`total` = total response count). |
 | `--ascending` / `--asc` | flag | Sort ascending (default: descending). |
 | `--include-questions` | flag | Include question definitions in each form. |
@@ -314,7 +314,7 @@ When the form has a workflow (`workflow.enabled: true`), the agent must understa
 
 ## Step 5.5 — Authoring forms (create / configure / questions)
 
-> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — is all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`.
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — is all available. If `dailybot --version` is below 3.7.0, ask the developer to run `dailybot upgrade`.
 
 Everything above this point *reads* and *responds to* forms. This section *builds and reshapes* them. An agent with the right permissions can now create a form, wire up its workflow states, permission audiences, approval flow, and ChatOps command, and manage its questions — all end-to-end from the CLI, without opening the Dailybot webapp.
 
@@ -824,7 +824,7 @@ Useful flags:
 > responses (admin/owner only), not every page.
 > See [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
 
-### Advanced response filters (CLI >= 3.5.0)
+### Advanced response filters
 
 | Flag | Values | Description |
 |------|--------|-------------|
@@ -1067,15 +1067,15 @@ Always show the complete answer set before sending:
 | `--state` | `-s` | Optional initial state (workflow forms only). Defaults to the form's initial state. |
 | `--yes` | `-y` | Skip confirmation. |
 | `--json` |     | Machine-readable JSON output. |
-| `--automation` | | Submit as an automation — channel notifications show no submitter name. (`CLI >= 3.4.0`) |
-| `--anonymous` | | Submit anonymously — channel notifications show a random generated name. (`CLI >= 3.4.0`) |
-| `--guest-name` | | Guest submitter full name (used with `--automation` for third-party submissions). (`CLI >= 3.5.0`) |
-| `--guest-email` | | Guest submitter email (validated client-side). (`CLI >= 3.5.0`) |
-| `--source` | | Provenance label, max 512 chars (e.g. `workflow:release-pipeline`). Works with any mode. (`CLI >= 3.5.0`) |
+| `--automation` | | Submit as an automation — channel notifications show no submitter name. |
+| `--anonymous` | | Submit anonymously — channel notifications show a random generated name. |
+| `--guest-name` | | Guest submitter full name (used with `--automation` for third-party submissions). |
+| `--guest-email` | | Guest submitter email (validated client-side). |
+| `--source` | | Provenance label, max 512 chars (e.g. `workflow:release-pipeline`). Works with any mode. |
 
 > **`--automation` vs `--anonymous`:** Both are independent booleans. `--automation` hides the submitter entirely; `--anonymous` replaces them with a random name. When combined, `automation` takes precedence for the channel display. Neither flag affects who owns the response in the dashboard — it only controls the notification appearance.
 
-### Submission modes (CLI >= 3.5.0)
+### Submission modes
 
 | Mode | Flags | Channel notification |
 |------|-------|---------------------|
@@ -1139,7 +1139,7 @@ dailybot form transition <form_uuid> <response_uuid> <to_state> --yes
 ```
 
 > **You can pass either `to_state` (machine key) or `label` (display text).**
-> Since CLI `>= 3.3.0`, the CLI resolves labels to keys automatically — e.g.
+> The CLI resolves labels to keys automatically — e.g.
 > `"Mark released"` → `released`. In `allowed_transitions`, `to_state` is the
 > machine key (`released`) and `label` is display text (`Mark released`). Both
 > are accepted; the CLI performs a case-insensitive lookup and translates labels
