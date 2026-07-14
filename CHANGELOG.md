@@ -4,6 +4,17 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0] — 2026-07-14
+
+### Changes
+
+- Merge pull request #37 from DailybotHQ/docs/cli-env-json-per-repo-auth
+- docs(env-json,auth): align with CLI wire-preference fix + guard carve-outs
+- docs(env-json): strict never-commit rule + agent-visible full audit
+- docs(env-json,auth): document transparent Bearer→API-key retry on 401/403
+- feat(skill): add dailybot-env sub-skill for .dailybot/env.json per-repo auth
+
+
 ## [3.9.0] — 2026-07-13
 
 ### Changes
