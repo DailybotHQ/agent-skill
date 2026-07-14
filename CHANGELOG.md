@@ -4,6 +4,15 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.3] — 2026-07-14
+
+### Changes
+
+- Merge pull request #40 from DailybotHQ/docs/kudos-wall-of-fame-payload
+- docs(kudos): reference the released dailybot-cli v3.7.2 in the wall-of-fame version note
+- docs(kudos): document the real wall-of-fame JSON payload shape
+
+
 ## [3.10.2] — 2026-07-14
 
 ### Changes
