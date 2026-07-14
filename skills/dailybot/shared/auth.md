@@ -363,26 +363,76 @@ endpoints preferred API key and user endpoints preferred Bearer — the CLI
 now behaves consistently everywhere. The server accepts both credentials on
 every `/v1/` endpoint, so the two paths are functionally identical.
 
+One deliberate exception (CLI >= 3.7.0): when the API key resolves from a
+repo's `.dailybot/env.json` active profile, the client sends `X-API-KEY`
+**first** — the per-repo key must beat the global Bearer session even against
+a server that would accept the Bearer, and the session token must never be
+transmitted to the env.json server. The 401/403 alt-credential retry covers
+the reverse direction. See [`env-json.md`](env-json.md).
+
 | Scope | Auth priority (since CLI 3.5.1) | Used by |
 |-------|--------------------------------|---------|
 | **All endpoints** | Bearer preferred → API key fallback | Every command: `agent update`, `form submit`, `kudos`, `chat send`, `ask`, etc. |
 | **Login lifecycle** | OTP / Bearer only | `dailybot login`, `dailybot logout` (revokes the session token) |
 
+### Per-repo API key override (`.dailybot/env.json`) — CLI >= 3.7.0
+
+Since `dailybot-cli >= 3.7.0`, the CLI also honours an **opt-in, gitignored**
+per-repo file at `<repo>/.dailybot/env.json` that carries API keys + optional
+URL overrides for one or more environments. When present with an *active*
+profile, it sits **just below** explicit `--profile` / `--api-url` flags in
+the auth-resolution order — above `agents.json`, above `DAILYBOT_API_KEY`,
+above `config.json`, above the login Bearer.
+
+If the developer asks about "per-repo API keys", "staging vs prod",
+"different orgs per project", or wants to override auth without touching
+env vars, route them to [`shared/env-json.md`](env-json.md) — it has the
+full schema, CLI commands (`dailybot env add / use / show / list / remove /
+off / on`), security posture, and worked examples.
+
+`env.json` is orthogonal to `profile.json`:
+
+- `profile.json` = identity (tracked in git, team-shared).
+- `env.json` = auth context (gitignored, per-developer).
+
+Neither field overlaps. Both can be present.
+
 Both credentials can coexist — the CLI stores them separately, and a developer
 can hold an API key and a Bearer session at the same time.
 
-### Automatic fallback on 401 (CLI >= 3.5.1)
+### Automatic fallback on 401 or 403
 
-When the primary credential is rejected (HTTP 401), the CLI automatically
-retries once with the alternative credential if available. This is
-bidirectional:
+When the primary credential is rejected (HTTP **401 or 403**), the CLI
+automatically retries once with the alternative credential if available.
+This is bidirectional:
 
 - **Bearer expired** → retries with API key
 - **API key stale/revoked** → retries with Bearer session
 
-This prevents users from being blocked when one credential goes stale while
-the other is still valid (e.g., a revoked API key in `agents.json` while a
-valid login session exists).
+Both `_agent_request()` (agent-scoped endpoints) and `_request()` (all
+user-scoped endpoints — `auth_status`, `checkin`, `form`, `kudos`, `chat`,
+`ask`, `user`, `team`, ...) implement identical retry semantics. Login-
+lifecycle endpoints (`request_code`, `verify_code`, `logout`, agent
+registration) never retry because the credential IS the thing being
+negotiated or invalidated.
+
+The retry covers three real-world cases at zero UX cost:
+
+1. **`env.json` active + stale Bearer.** Prod OTP session on disk, `cd` into
+   a repo whose `env.json` points at `http://localhost:8000` — the local
+   API rejects the Bearer (403), the retry uses the `env.json` API key,
+   the command succeeds. `dailybot status --auth` then reports
+   `Authenticated via API key` (not `login (OTP)`) — the report reflects
+   what actually worked, not what was tried first.
+2. **Bearer expired** in normal single-org use → falls back to a locally
+   configured API key without a login prompt.
+3. **API key revoked** while a valid login session exists → falls back to
+   the Bearer.
+
+Retrying on **403** in addition to 401 is required because Django/DRF
+frequently returns 403 for rejected credentials (see
+[DRF authentication docs](https://www.django-rest-framework.org/api-guide/authentication/#unauthorized-and-forbidden-responses)).
+Relying on 401 alone leaves the local-Django + `env.json` case broken.
 
 > **Parity.** All commands — user-scoped (`checkin`, `form`, `kudos`, `user`),
 > agent-scoped (`agent update`, `agent health`), and the AI chat (`ask`) —

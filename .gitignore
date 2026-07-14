@@ -33,6 +33,11 @@ env/
 ENV/
 .python-version
 
+# But do NOT ignore the `env` Dailybot sub-skill directory — the `env/`
+# rule above is meant to catch Python virtualenvs, not our shipped skill.
+!skills/dailybot/env/
+!skills/dailybot/env/**
+
 # Node (some contributors may run `npx skills` locally for testing)
 node_modules/
 npm-debug.log*
