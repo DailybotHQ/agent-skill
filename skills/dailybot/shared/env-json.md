@@ -8,6 +8,25 @@ The Dailybot CLI (>= **3.7.0**) supports a per-repository file at `<repo>/.daily
 
 ---
 
+## STOP — the one thing you MUST enforce as an agent
+
+**`.dailybot/env.json` must NEVER be committed to git. Ever. Under any circumstance.**
+
+If the developer's request involves creating, editing, sharing, moving, or explaining `env.json`, you must treat "keep it gitignored" as a non-negotiable invariant. Concretely, that means:
+
+- **NEVER** run or suggest `git add .dailybot/env.json` (or `git add -A` / `git add .` from a place that would sweep it in). The CLI's `add` command writes the file to disk — that is the *only* place it should ever exist.
+- **NEVER** `cat`, `head`, `tail`, or otherwise print the raw file contents into the chat, into a report, into a PR body, or into any other artifact — API keys live inside. Use `dailybot env show` / `dailybot env list` which mask them.
+- **NEVER** copy the file into `tmp/`, into a docs example, into a test fixture, or into any other tracked location. If you need to reference structure, use the placeholder schema shown in this doc (with `sk_local_xxxx`-style dummy keys).
+- **NEVER** try to work around the CLI's fatal refuse-if-tracked guard (see § "Security — non-negotiable rules" below). If the CLI is blocking a command because `env.json` is tracked, the *only* correct answer is `git rm --cached .dailybot/env.json` + rotate the exposed keys — not `--no-verify`, not "temporarily untrack", not editing the guard away.
+- **ALWAYS** verify the repo's `.gitignore` contains `.dailybot/*` before the developer's first `dailybot env add`. If it doesn't, add it (and commit that change) *first*.
+- **ALWAYS** treat "the file was committed at some point in history" as a compromise: rotate every key in it via the Dailybot dashboard immediately, then follow the recovery recipe below.
+
+The rule is absolute because git history is forever. On a public repo the keys are burned the instant the push lands; on a private repo they still leak to every collaborator, every past fork, every CI cache, and every backup. `git revert` does not undo the exposure. **Rotate, don't revert.**
+
+The CLI enforces this same rule with three independent layers (gitignore convention, `0o600` permissions, and a fatal load-time guard in the root `cli()` callback). All three must be in place. If any of them looks broken on the developer's machine, treat it as a bug worth reporting — do NOT paper over it.
+
+---
+
 ## When to reach for `env.json`
 
 Suggest it when the developer says any of:
@@ -137,7 +156,7 @@ When `env.json::disabled` is `true`, or `active` is empty/null/unknown, the file
 
 ## Security — non-negotiable rules
 
-`env.json` is one of two files (the other being `credentials.json` in the global config dir) where the CLI stores API keys in plain text. Inside a repo, extra care is required.
+`env.json` is one of two files (the other being `credentials.json` in the global config dir) where the CLI stores API keys in plain text. Inside a repo, extra care is required — four independent layers of protection back the "never commit" rule.
 
 ### 1. Gitignore is mandatory (and automatic in most setups)
 
@@ -148,17 +167,21 @@ Every Dailybot-aware repo should have this in its root `.gitignore`:
 !.dailybot/profile.json
 ```
 
-The broad ignore covers `env.json` automatically. **`env.json` is NEVER excepted** — only `profile.json` is. The Dailybot CLI's own `.gitignore` uses this exact pattern.
+The broad ignore covers `env.json` automatically. **`env.json` is NEVER excepted** — only `profile.json` is. The Dailybot CLI's own `.gitignore` uses this exact pattern. There is no legitimate reason to un-ignore `env.json` — not with `!.dailybot/env.json`, not with a per-machine dot-file trick, not with `git update-index --assume-unchanged` (that only defers the leak).
 
-### 2. Fatal refuse-if-tracked guard
+### 2. Owner-only permissions (`0o600`)
 
-On every load (including from `get_api_key()`, `get_api_url()`, `get_app_url()` — meaning every `DailyBotClient` construction), the CLI runs:
+Every write and every load enforces mode `0o600` — even if the file was created by an editor with a lax umask, the CLI tightens it defensively on read.
+
+### 3. Fatal refuse-if-tracked guard — fires at the ROOT of every CLI invocation
+
+The root `cli()` callback in `dailybot_cli/main.py` calls `load_repo_env()` on **every command invocation**. That function runs:
 
 ```bash
 git ls-files --error-unmatch .dailybot/env.json
 ```
 
-If the file is tracked, `RepoEnvError` fires and the CLI exits non-zero with an actionable message:
+If the file is tracked, `RepoEnvError` fires, `print_error()` writes to stderr, and `SystemExit(1)` aborts the process **before any subcommand runs**. Sample stderr:
 
 ```
 Error: /path/.dailybot/env.json is tracked by git. This file contains API keys and
@@ -169,9 +192,9 @@ must never be committed. Fix with:
 The CLI refuses to load env.json while it is tracked.
 ```
 
-Every `env` subcommand — and every command that would consume env.json auth — inherits this guard. **The CLI refuses to operate until the file is untracked.**
+**No command bypasses this** — `dailybot status`, `dailybot user list`, `dailybot form list`, `dailybot agent update`, `dailybot env show`, `dailybot login`, `dailybot upgrade`, `dailybot uninstall`, everything is blocked. The only exempt paths are `dailybot --help` and `dailybot --version` (Click short-circuits them before the callback runs), so the developer can always read instructions. There is no silent fallback to global auth — the CLI refuses to operate until `env.json` is untracked.
 
-### 3. Write-time gitignore warning
+### 4. Write-time gitignore warning
 
 `dailybot env add` also runs `git check-ignore` after writing. If `env.json` is **not** covered by any ignore rule, a warning fires on stderr — non-fatal (a brand-new repo might not have a `.gitignore` yet) but very visible:
 
@@ -181,20 +204,46 @@ and must never be committed. Add `.dailybot/*` (except `!.dailybot/profile.json`
 to your .gitignore before committing.
 ```
 
-### 4. Owner-only permissions
-
-Every write and every load enforces mode `0o600` — even if the file was created by an editor with a lax umask, the CLI tightens it defensively on read.
-
 ### If the developer accidentally committed `env.json`
 
-They must **rotate the leaked API keys immediately** (assume the world has seen them: git history is forever, especially on a public repo). Then:
+Treat it as a compromise — the world has seen the keys the instant the push landed. Recovery:
 
-1. Rotate every key in the file at Dailybot → Settings → API Keys.
-2. `git rm --cached .dailybot/env.json && git commit -m 'chore: untrack .dailybot/env.json'`.
-3. Rewrite the API keys in the local `env.json` with the newly generated ones.
-4. Verify `.gitignore` covers `.dailybot/*`.
+1. **Rotate every key in the file immediately** at Dailybot → Settings → API Keys. The old keys must be considered burned.
+2. `git rm --cached .dailybot/env.json && git commit -m 'chore: untrack .dailybot/env.json'`
+3. Verify `.gitignore` covers `.dailybot/*` (add it if missing) — otherwise the very next `dailybot env add` will re-stage the file.
+4. Rewrite `env.json` locally with the freshly rotated keys via `dailybot env add ...`.
+5. If the repo has been pushed anywhere (public or private), follow [GitHub's guide to removing sensitive data](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository) — but do NOT skip step 1. Rotation is what actually contains the exposure; history rewrite is cosmetic and does not undo the leak.
 
-Do NOT try to `git filter-repo` the leaked file out — assume compromise and rotate.
+Do NOT try to `git filter-repo` the leaked file out and call it done — assume compromise and rotate first, rewrite history second.
+
+### Quick full audit an agent can run on demand
+
+If the developer asks "is my env.json really safe?", run this end-to-end check:
+
+```bash
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+ENV_FILE="$ROOT/.dailybot/env.json"
+
+echo "--- 1) Does the file exist? ---"
+[ -f "$ENV_FILE" ] && echo "yes: $ENV_FILE" || echo "no (nothing to audit)"
+
+echo "--- 2) Is it gitignored? ---"
+(cd "$ROOT" && git check-ignore -v .dailybot/env.json) || echo "NOT IGNORED (fix .gitignore)"
+
+echo "--- 3) Is it accidentally tracked? ---"
+(cd "$ROOT" && git ls-files --error-unmatch .dailybot/env.json 2>/dev/null) \
+  && echo "TRACKED (SECURITY VIOLATION — rotate keys + git rm --cached)" \
+  || echo "not tracked (good)"
+
+echo "--- 4) File permissions ---"
+[ -f "$ENV_FILE" ] && stat -c '%a %n' "$ENV_FILE" 2>/dev/null || stat -f '%A %N' "$ENV_FILE"
+# Expect 600.
+
+echo "--- 5) CLI resolution ---"
+dailybot env show   # masks API keys; confirms the CLI is reading the file
+```
+
+Any of 2/3/4 tripping = actionable finding.
 
 ---
 
@@ -289,6 +338,23 @@ dailybot env on         # restores the previously active profile
 ```
 
 `env off` sets `disabled: true` at the top level — the `active` selection is preserved so `env on` restores it instantly.
+
+Verification pattern the developer can run to prove the toggle actually works:
+
+```bash
+dailybot env show                # Active env.json Profile: local
+dailybot status --auth           # → Authenticated via API key (local org)
+
+dailybot env off
+dailybot env show                # env.json is disabled (active would be: local)
+dailybot status --auth           # → Authenticated via login (OTP)  (falls back to Bearer)
+
+dailybot env on
+dailybot env show                # Active env.json Profile: local  (restored)
+dailybot status --auth           # → Authenticated via API key (local org again)
+```
+
+If step 2 does not fall back — i.e., the CLI keeps using the env.json profile after `env off` — that's a bug; report it.
 
 ### Example 4 — Removing an environment cleanly
 
