@@ -308,6 +308,32 @@ dailybot env remove staging --yes
 - **`DAILYBOT_API_KEY` still works.** For CI or one-off overrides. `env.json` beats it inside a repo; outside a repo (or when disabled), the env var wins.
 - **Repo `profile.json` is orthogonal.** It still governs the *display name* and `default_metadata` for reports. `env.json` provides *credentials + URLs*. Both can be present.
 
+### Transparent Bearer → API-key fallback (auto)
+
+The CLI's HTTP client automatically retries every user-scoped and agent-scoped call **once** with the alternative credential when the server answers 401 or 403. This is what makes the "logged into prod, `cd` into a local-dev repo" case Just Work:
+
+```
+                            + client.auth_status()
+                            |
+                            | Attempt 1: Bearer <prod-tok>   -> http://localhost:8000
+                            |            403 Forbidden  (Bearer unknown to local API)
+                            |
+                            | Attempt 2: X-API-KEY <env.json local-admin>  -> http://localhost:8000
+                            |            200 OK
+                            |
+                            + returns local org data (silently)
+```
+
+Retry semantics:
+
+- Triggers on **HTTP 401 or 403** (Django/DRF answers 403 for rejected credentials just as often as 401; both are treated as "credential problem, try the other one").
+- Fires **at most once per call** with the alternative credential.
+- **Login-lifecycle endpoints do NOT retry** — `dailybot login`, `dailybot logout`, and the agent-registration challenge always report the truth of what happened (the credential IS what's being negotiated there, or invalidated).
+- Costs one extra round-trip only on the first hit against a new server; subsequent calls in the same process use the same client instance, which now knows which credential works.
+- **`dailybot status --auth` inspects the auth mode after the call** and reports which credential actually succeeded on the wire (`Authenticated via API key` vs `Authenticated via login (OTP)`), so the developer always sees the truth.
+
+Ships with the same CLI floor as `env.json` itself.
+
 ---
 
 ## Troubleshooting

@@ -393,18 +393,39 @@ Neither field overlaps. Both can be present.
 Both credentials can coexist — the CLI stores them separately, and a developer
 can hold an API key and a Bearer session at the same time.
 
-### Automatic fallback on 401 (CLI >= 3.5.1)
+### Automatic fallback on 401 or 403
 
-When the primary credential is rejected (HTTP 401), the CLI automatically
-retries once with the alternative credential if available. This is
-bidirectional:
+When the primary credential is rejected (HTTP **401 or 403**), the CLI
+automatically retries once with the alternative credential if available.
+This is bidirectional:
 
 - **Bearer expired** → retries with API key
 - **API key stale/revoked** → retries with Bearer session
 
-This prevents users from being blocked when one credential goes stale while
-the other is still valid (e.g., a revoked API key in `agents.json` while a
-valid login session exists).
+Both `_agent_request()` (agent-scoped endpoints) and `_request()` (all
+user-scoped endpoints — `auth_status`, `checkin`, `form`, `kudos`, `chat`,
+`ask`, `user`, `team`, ...) implement identical retry semantics. Login-
+lifecycle endpoints (`request_code`, `verify_code`, `logout`, agent
+registration) never retry because the credential IS the thing being
+negotiated or invalidated.
+
+The retry covers three real-world cases at zero UX cost:
+
+1. **`env.json` active + stale Bearer.** Prod OTP session on disk, `cd` into
+   a repo whose `env.json` points at `http://localhost:8000` — the local
+   API rejects the Bearer (403), the retry uses the `env.json` API key,
+   the command succeeds. `dailybot status --auth` then reports
+   `Authenticated via API key` (not `login (OTP)`) — the report reflects
+   what actually worked, not what was tried first.
+2. **Bearer expired** in normal single-org use → falls back to a locally
+   configured API key without a login prompt.
+3. **API key revoked** while a valid login session exists → falls back to
+   the Bearer.
+
+Retrying on **403** in addition to 401 is required because Django/DRF
+frequently returns 403 for rejected credentials (see
+[DRF authentication docs](https://www.django-rest-framework.org/api-guide/authentication/#unauthorized-and-forbidden-responses)).
+Relying on 401 alone leaves the local-Django + `env.json` case broken.
 
 > **Parity.** All commands — user-scoped (`checkin`, `form`, `kudos`, `user`),
 > agent-scoped (`agent update`, `agent health`), and the AI chat (`ask`) —
