@@ -363,6 +363,13 @@ endpoints preferred API key and user endpoints preferred Bearer — the CLI
 now behaves consistently everywhere. The server accepts both credentials on
 every `/v1/` endpoint, so the two paths are functionally identical.
 
+One deliberate exception (CLI >= 3.7.0): when the API key resolves from a
+repo's `.dailybot/env.json` active profile, the client sends `X-API-KEY`
+**first** — the per-repo key must beat the global Bearer session even against
+a server that would accept the Bearer, and the session token must never be
+transmitted to the env.json server. The 401/403 alt-credential retry covers
+the reverse direction. See [`env-json.md`](env-json.md).
+
 | Scope | Auth priority (since CLI 3.5.1) | Used by |
 |-------|--------------------------------|---------|
 | **All endpoints** | Bearer preferred → API key fallback | Every command: `agent update`, `form submit`, `kudos`, `chat send`, `ask`, etc. |

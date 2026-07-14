@@ -23,7 +23,7 @@ If the developer's request involves creating, editing, sharing, moving, or expla
 
 The rule is absolute because git history is forever. On a public repo the keys are burned the instant the push lands; on a private repo they still leak to every collaborator, every past fork, every CI cache, and every backup. `git revert` does not undo the exposure. **Rotate, don't revert.**
 
-The CLI enforces this same rule with three independent layers (gitignore convention, `0o600` permissions, and a fatal load-time guard in the root `cli()` callback). All three must be in place. If any of them looks broken on the developer's machine, treat it as a bug worth reporting — do NOT paper over it.
+The CLI enforces this same rule with four independent protections (gitignore convention, `0o600` permissions, a fatal load-time guard in the root `cli()` callback, and an advisory write-time `git check-ignore` warning). All of them must be in place. If any of them looks broken on the developer's machine, treat it as a bug worth reporting — do NOT paper over it.
 
 ---
 
@@ -151,6 +151,11 @@ The full precedence for `api_key` / `api_url` / `app_url` when a repo has `env.j
 | 7 | Login session Bearer token (`credentials.json::token`) | From `dailybot login` |
 
 When `env.json::disabled` is `true`, or `active` is empty/null/unknown, the file is transparently skipped and every resolver behaves as if the file didn't exist.
+
+Two precision notes (CLI >= 3.7.0):
+
+- **Layer 2 holds on the wire, not just in resolution.** When the key comes from `env.json`, the HTTP client sends `X-API-KEY` on the **first** attempt even if a Bearer login session exists — the per-repo key wins even against a server that would have accepted the Bearer, and the global session token is never transmitted to the env.json server. Keys from layers 5–6 keep the historical Bearer-first wire order.
+- **Layer 1 vs layer 2 for `agent *` commands:** a keyed `agents.json` profile beats `env.json` only when selected with an explicit `--profile` flag. The same profile resolved implicitly (via `profile.json::profile` or as the `agents.json` default) yields to `env.json`. `dailybot agent profiles --resolve` always shows exactly what will be sent.
 
 ---
 
@@ -374,29 +379,28 @@ dailybot env remove staging --yes
 - **`DAILYBOT_API_KEY` still works.** For CI or one-off overrides. `env.json` beats it inside a repo; outside a repo (or when disabled), the env var wins.
 - **Repo `profile.json` is orthogonal.** It still governs the *display name* and `default_metadata` for reports. `env.json` provides *credentials + URLs*. Both can be present.
 
-### Transparent Bearer → API-key fallback (auto)
+### env.json key first + transparent alt-credential retry (auto)
 
-The CLI's HTTP client automatically retries every user-scoped and agent-scoped call **once** with the alternative credential when the server answers 401 or 403. This is what makes the "logged into prod, `cd` into a local-dev repo" case Just Work:
+When the resolved API key comes from `env.json`, the CLI's HTTP client sends it on the **first** attempt — the global Bearer session never reaches the env.json server. This is what makes the "logged into prod, `cd` into a local-dev repo" case Just Work in one round-trip:
 
 ```
                             + client.auth_status()
                             |
-                            | Attempt 1: Bearer <prod-tok>   -> http://localhost:8000
-                            |            403 Forbidden  (Bearer unknown to local API)
-                            |
-                            | Attempt 2: X-API-KEY <env.json local-admin>  -> http://localhost:8000
-                            |            200 OK
+                            | Attempt 1: X-API-KEY <env.json local-admin>  -> http://localhost:8000
+                            |            200 OK   (prod Bearer never leaves the machine)
                             |
                             + returns local org data (silently)
 ```
 
+Backing that up, the client automatically retries every user-scoped and agent-scoped call **once** with the alternative credential when the server answers 401 or 403 — in either direction (stale env.json key → Bearer, stale Bearer → API key).
+
 Retry semantics:
 
 - Triggers on **HTTP 401 or 403** (Django/DRF answers 403 for rejected credentials just as often as 401; both are treated as "credential problem, try the other one").
-- Fires **at most once per call** with the alternative credential.
+- Fires **at most once per call** with the alternative credential — a double rejection surfaces as a normal auth error.
 - **Login-lifecycle endpoints do NOT retry** — `dailybot login`, `dailybot logout`, and the agent-registration challenge always report the truth of what happened (the credential IS what's being negotiated there, or invalidated).
-- Costs one extra round-trip only on the first hit against a new server; subsequent calls in the same process use the same client instance, which now knows which credential works.
 - **`dailybot status --auth` inspects the auth mode after the call** and reports which credential actually succeeded on the wire (`Authenticated via API key` vs `Authenticated via login (OTP)`), so the developer always sees the truth.
+- **`dailybot login` inside a repo with an active env.json profile warns first** — login persists the resolved `api_url` into the GLOBAL `~/.config/dailybot/credentials.json`, so the CLI names the profile and the server and suggests `dailybot env off` before proceeding.
 
 Ships with the same CLI floor as `env.json` itself.
 
@@ -435,4 +439,4 @@ That's what `~/.config/dailybot/agents.json` (global profiles) is for — see `d
 - [`shared/repo-profile.md`](repo-profile.md) — the sibling file `profile.json` (agent identity, committed).
 - [CLI configuration reference](https://github.com/DailybotHQ/cli/blob/main/docs/CONFIGURATION.md#repo-level-env-override-dailybotenvjson) — canonical schema + precedence + security posture.
 - [CLI auth-resolution order](https://github.com/DailybotHQ/cli/blob/main/AGENTS.md#14-auth-resolution-order-do-not-break) — the per-field precedence the CLI implements.
-- [CLI security posture](https://github.com/DailybotHQ/cli/blob/main/docs/SECURITY.md) — the three-layer protection for `env.json`.
+- [CLI security posture](https://github.com/DailybotHQ/cli/blob/main/docs/SECURITY.md) — the four-layer protection for `env.json`.

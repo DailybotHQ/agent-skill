@@ -140,7 +140,7 @@ dailybot env remove staging --yes
 3. **Never write API keys into `.dailybot/profile.json`.** That is a hard error in the CLI. `env.json` is the ONLY sanctioned place inside `.dailybot/` for credentials.
 4. **If the developer accidentally committed `env.json`**: tell them to rotate every key immediately (assume compromise), then `git rm --cached` + fix `.gitignore` + rewrite `env.json` with newly generated keys. Do NOT try to `git filter-repo` the leak away — assume the world has seen the keys.
 
-Full three-layer protection story (gitignore, fatal refuse-if-tracked, `0o600`): see [`../shared/env-json.md` § Security](../shared/env-json.md#security--non-negotiable-rules).
+Full four-layer protection story (gitignore, `0o600`, fatal refuse-if-tracked, write-time gitignore warning): see [`../shared/env-json.md` § Security](../shared/env-json.md#security--non-negotiable-rules).
 
 ## Interaction with existing auth (short version)
 

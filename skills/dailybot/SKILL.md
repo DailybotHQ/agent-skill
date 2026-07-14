@@ -143,7 +143,7 @@ subprocess or prints the exact command for installs the CLI shouldn't drive.
 
 If the developer is below the required baseline for the sub-skill they
 want to use (3.1.2 for anything shipped in v3.9.0 or earlier; 3.7.0 for
-the `env` sub-skill added in v3.10.0), ask them to run `dailybot upgrade`
+the `env` sub-skill), ask them to run `dailybot upgrade`
 once, then resume. Do not retry CLI commands in a loop while the upgrade
 is pending.
 
