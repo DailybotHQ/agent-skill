@@ -368,6 +368,28 @@ every `/v1/` endpoint, so the two paths are functionally identical.
 | **All endpoints** | Bearer preferred → API key fallback | Every command: `agent update`, `form submit`, `kudos`, `chat send`, `ask`, etc. |
 | **Login lifecycle** | OTP / Bearer only | `dailybot login`, `dailybot logout` (revokes the session token) |
 
+### Per-repo API key override (`.dailybot/env.json`) — CLI >= 3.7.0
+
+Since `dailybot-cli >= 3.7.0`, the CLI also honours an **opt-in, gitignored**
+per-repo file at `<repo>/.dailybot/env.json` that carries API keys + optional
+URL overrides for one or more environments. When present with an *active*
+profile, it sits **just below** explicit `--profile` / `--api-url` flags in
+the auth-resolution order — above `agents.json`, above `DAILYBOT_API_KEY`,
+above `config.json`, above the login Bearer.
+
+If the developer asks about "per-repo API keys", "staging vs prod",
+"different orgs per project", or wants to override auth without touching
+env vars, route them to [`shared/env-json.md`](env-json.md) — it has the
+full schema, CLI commands (`dailybot env add / use / show / list / remove /
+off / on`), security posture, and worked examples.
+
+`env.json` is orthogonal to `profile.json`:
+
+- `profile.json` = identity (tracked in git, team-shared).
+- `env.json` = auth context (gitignored, per-developer).
+
+Neither field overlaps. Both can be present.
+
 Both credentials can coexist — the CLI stores them separately, and a developer
 can hold an API key and a Bearer session at the same time.
 

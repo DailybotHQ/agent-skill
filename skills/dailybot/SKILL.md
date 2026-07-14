@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads and sending as a user's identity), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **and browse/read the workspace** — who am I / my org / a user's profile (`me` / `org` / `user get`), browse the kudos feed + the org-wide feed + wall of fame, and list/read workflows, all with shared pagination / search / date-range filters. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads and sending as a user's identity), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **and browse/read the workspace** — who am I / my org / a user's profile (`me` / `org` / `user get`), browse the kudos feed + the org-wide feed + wall of fame, and list/read workflows — all with shared pagination / search / date-range filters. Also **manages per-repo API keys** through the opt-in `.dailybot/env.json` file (dailybot env add/use/show/list/remove/off/on — CLI 3.7.0+) so a developer can be "logged into different orgs in different repos" simultaneously. Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "3.9.0"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
@@ -30,7 +30,8 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    the `dailybot` CLI is the integration surface. If it is missing, follow
    [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
    installer and installs **only after the developer confirms**. Confirm with
-   `dailybot --version` (minimum `>= 3.1.2` for the whole pack).
+   `dailybot --version` (minimum `>= 3.1.2` for the pre-existing sub-skills;
+   `>= 3.7.0` for the new `env` sub-skill).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.
@@ -67,6 +68,7 @@ Thirteen coordinated capabilities, with smart routing between them:
 | **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (`form list` is now **org-scoped** by default, with `--mine` to narrow to your own; list + responses support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
 | **Workflows** | `dailybot-workflow` | Developer wants to **read** the org's workflows — `workflow list` (paginated/searchable) and `workflow get`. Read-only; writes are web-app only. Plan-gated |
 | **Report channels** | `dailybot-channels` | Discover report-channel UUIDs to attach to forms/check-ins with `--report-channel` |
+| **Per-repo API keys** | `dailybot-env` | Configure `.dailybot/env.json` — an **opt-in, gitignored** file that carries API keys + URLs for one or more environments (live, local, staging) so the developer can be "logged into different orgs in different repos". `dailybot env add / use / show / list / remove / off / on`. CLI >= 3.7.0 |
 
 ## Install
 
@@ -84,9 +86,12 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 
 ## Required Dailybot CLI version
 
-> **Minimum: `dailybot-cli >= 3.1.2`.** This is the baseline for the entire skill
-> pack — every sub-skill assumes it. Install or upgrade to at least 3.1.2 before
-> using any command below.
+> **Baseline: `dailybot-cli >= 3.1.2`** for every sub-skill in the pack that
+> existed before the `env` sub-skill was added. The **`env` sub-skill**
+> requires `dailybot-cli >= 3.7.0` (per-repo API key override — see
+> [`shared/env-json.md`](shared/env-json.md)). Recommended install / upgrade
+> target: **latest release** — `dailybot upgrade` (or `pip install
+> --upgrade dailybot-cli`) gets you both baselines in one step.
 >
 > Requires **Python >= 3.10**. The wheel is `py3-none-any` (pure Python), MIT-licensed.
 >
@@ -100,11 +105,16 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 
 ### Why this minimum
 
-`3.1.2` is the line in the sand: from this release on, the skill pack and the CLI
-move together, and the pack no longer tracks per-feature version floors. If
-`dailybot --version` reports below 3.1.2, the sub-skills may reference commands,
-flags, or error codes that don't exist yet — ask the developer to run
-`dailybot upgrade` (or `pip install --upgrade 'dailybot-cli>=3.1.2'`).
+`3.1.2` remains the baseline for the pre-existing sub-skills (report, chat,
+kudos, email, forms, checkin, teams, health, messages, workflow, ask,
+conversation, channels). The **new `env` sub-skill** requires `3.7.0` — the
+CLI release that introduces `dailybot env` and reads `.dailybot/env.json`.
+In practice, if you always install the latest CLI (`dailybot upgrade`),
+you never have to think about these floors — every sub-skill Just Works.
+
+If `dailybot --version` reports below 3.7.0 and the developer wants to use
+`env` commands, ask them to run `dailybot upgrade` (or `pip install --upgrade
+'dailybot-cli>=3.7.0'`) first. All other sub-skills remain usable at 3.1.2+.
 
 ### Checking the installed version
 
@@ -131,14 +141,17 @@ Homebrew / Linux binary / editable dev) and either runs the right command in a
 subprocess or prints the exact command for installs the CLI shouldn't drive.
 `dailybot upgrade --dry-run` previews without executing.
 
-If the developer is below 3.1.2, ask them to run `dailybot upgrade` once,
-then resume. Do not retry CLI commands in a loop while the upgrade is pending.
+If the developer is below the required baseline for the sub-skill they
+want to use (3.1.2 for anything shipped in v3.9.0 or earlier; 3.7.0 for
+the `env` sub-skill added in v3.10.0), ask them to run `dailybot upgrade`
+once, then resume. Do not retry CLI commands in a loop while the upgrade
+is pending.
 
 ### Direct install commands
 
 | Channel | Command |
 |---------|---------|
-| pip      | `pip install 'dailybot-cli>=3.1.2'` |
+| pip      | `pip install 'dailybot-cli>=3.7.0'` (covers both the 3.1.2 pack baseline and the 3.7.0 `env` floor) |
 | Homebrew | `brew install dailybothq/tap/dailybot` |
 | Universal installer (Linux / macOS / WSL2 / Git Bash) | `curl -fsSL https://cli.dailybot.com/install.sh \| bash` |
 | Windows PowerShell (when WSL2 / Git Bash unavailable) | `irm https://cli.dailybot.com/install.ps1 \| iex` |
@@ -163,7 +176,7 @@ Full safety story (SHA-256 sidecar, cross-origin diff, optional cosign): see
 
 Every install method defaults to the latest release but can pin an exact
 version — useful when a developer needs to reproduce a known-good setup or
-pin the `3.1.2` baseline (the installer scripts, `pip`, and Homebrew all accept
+pin the `3.7.0` baseline for `env` (or `3.1.2` for older sub-skills; the installer scripts, `pip`, and Homebrew all accept
 a version pin):
 
 | Channel | Pin a version |
