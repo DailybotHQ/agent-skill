@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.1] — 2026-07-14
+
+### Changes
+
+- Merge pull request #38 from DailybotHQ/docs/cli-3.7.0-release-alignment
+- docs(env-json): align skill with released CLI 3.7.0 behavior
+
+
 ## [3.10.0] — 2026-07-14
 
 ### Changes
