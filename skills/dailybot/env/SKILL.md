@@ -157,8 +157,9 @@ Precedence order (full table in [`../shared/env-json.md` § Auth resolution orde
 ## Troubleshooting (quick reference)
 
 - **"The CLI is not using my env.json."** → `dailybot env show`; check `disabled`, `active`, and the walk-up path. Are you overriding with `--profile` / `--api-url` / `--app-url` flags?
-- **"The CLI refuses to run and complains about tracked env.json."** → run the exact fix printed in the error message.
+- **"The CLI refuses to run and complains about tracked env.json."** → run the exact fix printed in the error message. Staged-but-uncommitted counts as tracked. (`dailybot hook *` commands print the error but still run and exit 0 — by design, per their harness contract.)
 - **"I edited env.json by hand and now nothing works."** → `dailybot env show` surfaces schema warnings; if unrecoverable, delete the file and re-add profiles via `dailybot env add`.
+- **"I set `disabled: "true"` and it's still active."** → `disabled` must be a JSON boolean; the CLI warns and treats a string as `false`. Use `dailybot env off`.
 
 ## See also
 

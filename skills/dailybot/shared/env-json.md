@@ -88,7 +88,7 @@ Neither file overlaps on any field. Both can be present, and typically will be: 
 
 | Field | Type | Required? | Purpose |
 |---|---|---|---|
-| `disabled` | boolean | optional (default `false`) | Kill-switch. `true` ignores the whole file even if `active` points to a valid profile. Preserves `active` for one-command re-enable. |
+| `disabled` | boolean | optional (default `false`) | Kill-switch. `true` ignores the whole file even if `active` points to a valid profile. Preserves `active` for one-command re-enable. Must be a **JSON boolean** — a hand-edited string like `"true"` is NOT honored: the CLI warns loudly and the file **stays active** (use `dailybot env off` instead). |
 | `active` | string \| null | optional | Name of the profile to use. `null` / `""` / missing / unknown-name → file is *inert* and resolution falls through. Only one active at a time. |
 | `profiles` | list of objects | **required** | Every configured environment. |
 | `profiles[].name` | string | **required** | Unique per file. Human-friendly, may contain spaces. |
@@ -123,6 +123,9 @@ dailybot env use ""                    # clear active → fall through to global
 # Inspect.
 dailybot env show                      # resolved profile (API key masked)
 dailybot env list                      # all profiles, active marked
+# `env show` also prints an explicit "Disabled: no" row (since `disabled:
+# false` is normalized away on write) and resolves defaulted API/Webapp URLs
+# so the developer sees the concrete server the context points at.
 
 # Kill-switch — preserves `active` so `on` restores instantly.
 dailybot env off
@@ -176,7 +179,7 @@ The broad ignore covers `env.json` automatically. **`env.json` is NEVER excepted
 
 ### 2. Owner-only permissions (`0o600`)
 
-Every write and every load enforces mode `0o600` — even if the file was created by an editor with a lax umask, the CLI tightens it defensively on read.
+Every write via `dailybot env` creates the file with mode `0o600` **from the first byte** (`os.open(..., 0o600)` — there is no umask window where the keys sit world-readable), and every load re-chmods it defensively — even if the file was created by an editor or `cp` with a lax umask.
 
 ### 3. Fatal refuse-if-tracked guard — fires at the ROOT of every CLI invocation
 
@@ -186,7 +189,7 @@ The root `cli()` callback in `dailybot_cli/main.py` calls `load_repo_env()` on *
 git ls-files --error-unmatch .dailybot/env.json
 ```
 
-If the file is tracked, `RepoEnvError` fires, `print_error()` writes to stderr, and `SystemExit(1)` aborts the process **before any subcommand runs**. Sample stderr:
+If the file is tracked, `RepoEnvError` fires, `print_error()` writes to stderr, and `SystemExit(1)` aborts the process **before any subcommand runs**. "Tracked" includes **staged-but-uncommitted** — `git ls-files` reads the index, so a stray `git add -f` trips the guard before a commit ever happens. Sample stderr:
 
 ```
 Error: /path/.dailybot/env.json is tracked by git. This file contains API keys and
@@ -197,7 +200,12 @@ must never be committed. Fix with:
 The CLI refuses to load env.json while it is tracked.
 ```
 
-**No command bypasses this** — `dailybot status`, `dailybot user list`, `dailybot form list`, `dailybot agent update`, `dailybot env show`, `dailybot login`, `dailybot upgrade`, `dailybot uninstall`, everything is blocked. The only exempt paths are `dailybot --help` and `dailybot --version` (Click short-circuits them before the callback runs), so the developer can always read instructions. There is no silent fallback to global auth — the CLI refuses to operate until `env.json` is untracked.
+**No auth-consuming command bypasses this** — `dailybot status`, `dailybot user list`, `dailybot form list`, `dailybot agent update`, `dailybot env show`, `dailybot login`, `dailybot upgrade`, `dailybot uninstall`, everything is blocked. There is no silent fallback to global auth — the CLI refuses to operate until `env.json` is untracked. Exactly two carve-outs:
+
+- `dailybot --help` / `dailybot --version` — Click short-circuits them before the callback runs, so the developer can always read instructions.
+- The `dailybot hook *` group — it prints the same error to stderr but **still runs and exits 0**, honoring its always-exit-0 harness contract (a tracked env.json must not break every agent session in the repo). Hook commands are local-only and never consume env.json auth, so nothing leaks through this path.
+
+Edge case: if the `git` binary is not on PATH but a `.git` directory exists in an ancestor, the guard cannot verify tracking — it degrades to a **loud warning** instead of a silent pass. Treat that warning as a prompt to check `.gitignore` manually.
 
 ### 4. Write-time gitignore warning
 
@@ -412,10 +420,13 @@ Ships with the same CLI floor as `env.json` itself.
 1. `dailybot env show` — is it reporting the profile you expect?
 2. Look at `disabled`, `active`, and the walk-up path. `env show` prints the resolved file path — is it the one you edited?
 3. Are you running with `--profile` / `--api-url` / `--app-url`? Flags win.
-4. Did you edit the file directly? Check the JSON — the CLI's `env` commands validate on write, but hand-edits can produce invalid JSON that the loader silently rejects (a warning appears on stderr).
+4. Did you edit the file directly? Check the JSON — the CLI's `env` commands validate on write, but hand-edits can produce invalid JSON that the loader rejects with a parse warning (printed to stdout, once per process) before falling back to global auth.
 
 **"The CLI refuses to run and complains about tracked env.json."**
-Run the fix printed in the error. This is the fatal refuse-if-tracked guard doing its job.
+Run the fix printed in the error. This is the fatal refuse-if-tracked guard doing its job. (Exception: `dailybot hook *` commands print the error but still run and exit 0 — that is by design, not a hole; see § Security above.)
+
+**"I set `disabled` to `"true"` by hand and the file is still active."**
+`disabled` must be a JSON boolean (`true`, no quotes). The CLI warns about the string and treats it as `false` so a typo never silently changes which org you talk to. Run `dailybot env off` instead of hand-editing.
 
 **"I edited env.json by hand and now nothing works."**
 `dailybot env show` will surface schema warnings. If unrecoverable, delete the file and re-add profiles via `dailybot env add`.
