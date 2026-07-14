@@ -93,6 +93,40 @@ Returns the recognition leaderboard — the top receiver, the top giver, and the
 ranked leaderboard entries. `--limit N` caps the number of leaderboard entries
 returned.
 
+**Parse the payload carefully — three fields are commonly misread:**
+
+- Every person is **nested under a `user` key** — the name lives at
+  `top_receiver.user.full_name` (and likewise in `top_giver` and in every
+  leaderboard entry), **not** at a top-level `full_name`.
+- `leaderboard` is itself a **paginated envelope** `{count, next, previous,
+  results}` — the ranked entries are in `leaderboard.results`, and the total
+  ranked members is `leaderboard.count` (do not count the envelope's keys).
+- `leaderboard_summary` is the **caller's own standing**: `{position, total}`.
+
+```json
+{
+  "top_receiver": { "user": { "uuid": "…", "full_name": "…", "image": "…" },
+                    "kudos_received": 11, "kudos_given": 5,
+                    "total_plus_kudos_received": 18, "total_plus_kudos_given": 2 },
+  "top_giver":    { "user": { "…": "…" }, "kudos_given": 14 },
+  "dna_distribution": [ { "company_value": { "id": "…", "value": "…", "emoji": "…" },
+                          "count": 10, "percentage": 38.5 } ],
+  "leaderboard": { "count": 11, "next": false, "previous": false,
+                   "results": [ { "position": 1, "user": { "…": "…" },
+                                  "score": 11, "total_plus_kudos": 18 } ] },
+  "leaderboard_summary": { "position": 1, "total": 11 }
+}
+```
+
+`dna_distribution` breaks the kudos down by the org's company values.
+
+> **Version note:** on `dailybot-cli >= 3.7.2` the human (non-`--json`) output
+> renders the full wall of fame — top receiver/giver, your position, the
+> company-values distribution, and the ranked leaderboard table. Older CLI
+> versions render an incomplete summary panel (dashes instead of names), so
+> always prefer `--json` when parsing, and suggest `dailybot upgrade` if the
+> developer sees dashes.
+
 ---
 
 ## When to Use
