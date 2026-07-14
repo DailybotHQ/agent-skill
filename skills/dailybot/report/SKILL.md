@@ -123,7 +123,7 @@ trigger in a previous session.
 
 #### Check whether hooks apply, and whether they are already installed
 
-1. **CLI version.** Run `dailybot --version`. If it reports below `3.1.2`
+1. **CLI version.** Run `dailybot --version`. If it reports below `3.7.0`
    (or the CLI is absent), the `dailybot hook` group does not exist — skip
    Step 0b silently and continue to Step 1. The Step 0a trigger alone still
    works.

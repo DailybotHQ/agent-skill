@@ -285,11 +285,11 @@ prompts — handy for humans; agents should use the headless commands above.
 
 ## Step 3.7 — Authoring check-ins (create / configure / questions)
 
-> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The authoring surface — `checkin create`,
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The authoring surface — `checkin create`,
 > `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
 > group, resolving people by email, the smart/AI flags, and the **create requires
 > ≥ 1 question** rule (`questions_required`) — is all available. If
-> `dailybot --version` is below 3.1.2, run `dailybot upgrade`.
+> `dailybot --version` is below 3.7.0, run `dailybot upgrade`.
 
 Everything above **answers** a check-in. This section **builds** one. As of the
 authoring release, an agent can create a check-in from scratch, tune every
@@ -299,7 +299,7 @@ it — all headless with an API key.
 
 > **Role-gated.** Configuring, archiving a check-in, and editing its questions
 > are **admin/manager** operations server-side. **Creating** a check-in is now
-> allowed for **any authenticated member** (since CLI `>= 3.3.0` / API update).
+> allowed for **any authenticated member**.
 > Update and delete remain admin/manager only. Answering check-ins (Steps 2–3.5)
 > is not role-gated.
 

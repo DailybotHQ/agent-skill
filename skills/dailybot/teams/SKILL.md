@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Teams
 
-> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). `dailybot team list`, `dailybot team get`, and the account-context commands `dailybot me` / `org` / `user get` are all available. If `dailybot --version` is below 3.1.2, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). `dailybot team list`, `dailybot team get`, and the account-context commands `dailybot me` / `org` / `user get` are all available. If `dailybot --version` is below 3.7.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You help agents resolve and read teams visible to the logged-in user. Teams are how Dailybot groups people inside an organization — they're the targets for team-scoped kudos, the routing context for some messages, and the source of truth for "who's in X?".
 
@@ -170,7 +170,7 @@ Returns the team plus its membership when `--with-members` is set. Useful when t
 
 ## Step 4.5 — Read a single user, and your own account context
 
-> **Baseline:** `user get`, `me`, and `org` are part of the `dailybot-cli >= 3.1.2` baseline.
+> **Baseline:** `user get`, `me`, and `org` are part of the `dailybot-cli >= 3.7.0` baseline.
 
 The org directory has always been readable in bulk via `dailybot user list`
 (names + UUIDs; emails hidden as PII). You can also read

@@ -10,9 +10,9 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Workflows (read-only)
 
-> **Requires `dailybot-cli >= 3.1.2`** (the skill-pack baseline). The `dailybot workflow list` /
+> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The `dailybot workflow list` /
 > `dailybot workflow get` command group is available. If
-> `dailybot --version` reports below 3.1.2, ask the developer to run
+> `dailybot --version` reports below 3.7.0, ask the developer to run
 > `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version)
 > for install commands and version-check tooling.
 
