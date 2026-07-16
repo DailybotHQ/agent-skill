@@ -396,3 +396,5 @@ openclaw skills remove dailybot
 - [API documentation (Swagger)](https://api.dailybot.com/api/swagger/)
 - [Open Agent Skills standard (agentskills.io)](https://agentskills.io)
 - [skills.sh](https://skills.sh) — cross-agent skills directory
+- [Contributing](CONTRIBUTING.md) — how to change this repo (only `skills/dailybot/` ships to users)
+- [AGENTS.md](AGENTS.md) — rules for AI agents editing this repository
