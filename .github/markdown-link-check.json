@@ -8,6 +8,18 @@
     },
     {
       "pattern": "^https?://skills\\.sh"
+    },
+    {
+      "pattern": "^https?://(www\\.)?no-color\\.org"
+    },
+    {
+      "pattern": "anyBins"
+    },
+    {
+      "pattern": "\\}\\}"
+    },
+    {
+      "pattern": "ITERATION_AWARENESS\\.md"
     }
   ],
   "timeout": "10s",

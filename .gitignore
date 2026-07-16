@@ -97,3 +97,6 @@ tmp/*
 .vscode/
 .vscode_*/
 !.vscode_example/
+
+# Deep Work Plan runtime state (plans, drafts, progress)
+.dwp/
