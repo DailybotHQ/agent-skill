@@ -9,10 +9,18 @@ name: Auto-release on merge to main
 #   feat(...):                                → MINOR
 #   anything else (incl. no prefix)           → PATCH
 #
+# OPT-IN ESCAPE HATCH — the `[skip release]` marker:
+# A `[skip release]` token anywhere in the body of the head commit on `main`
+# (i.e. the squash-merge commit) suppresses PSR-style version bumps. Use it
+# only for contributor-kit / tooling PRs that do NOT change
+# `skills/dailybot/` (the installed artifact) — e.g. DWP onboarding,
+# AI Diff Reviewer wiring, docs-only contributor infrastructure. Placing
+# the marker on a PR that changes shipped skill behavior is a bug.
+#
 # What it does:
 #   1. Reads the current version from skills/dailybot/SKILL.md frontmatter
 #   2. Looks at commits since the last `vX.Y.Z` git tag and decides MAJOR/MINOR/PATCH
-#   3. Writes the new version into all 5 SKILL.md files (router + sub-skills)
+#   3. Writes the new version into all SKILL.md files under skills/dailybot/
 #   4. Prepends a new section to CHANGELOG.md with the merged commits as bullets
 #   5. Commits as "Dailybot Automations" with `[skip ci]` to break the loop
 #   6. Tags `vX.Y.Z` and pushes
@@ -52,8 +60,21 @@ jobs:
           git config user.name "Dailybot Automations"
           git config user.email "ops@dailybot.com"
 
+      - name: Detect [skip release] marker on head commit
+        id: skip_release
+        run: |
+          set -euo pipefail
+          BODY="$(git log -1 --pretty=%B)"
+          if printf '%s' "$BODY" | grep -Fq '[skip release]'; then
+            echo "Found [skip release] on head commit — suppressing auto-release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Determine bump level + new version
         id: version
+        if: steps.skip_release.outputs.skip != 'true'
         run: |
           set -euo pipefail
           # Read current version from the router SKILL.md (single source of truth)
@@ -110,7 +131,7 @@ jobs:
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
       - name: Bump version in SKILL.md files
-        if: steps.version.outputs.skip != 'true'
+        if: steps.skip_release.outputs.skip != 'true' && steps.version.outputs.skip != 'true'
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
           while IFS= read -r f; do
@@ -118,7 +139,7 @@ jobs:
           done < <(find skills/dailybot -name 'SKILL.md')
 
       - name: Update CHANGELOG.md
-        if: steps.version.outputs.skip != 'true'
+        if: steps.skip_release.outputs.skip != 'true' && steps.version.outputs.skip != 'true'
         env:
           # Pass commit subjects through the environment, NOT via ${{ }}
           # interpolation into the script. A commit message can contain shell
@@ -159,7 +180,7 @@ jobs:
           mv CHANGELOG.md.new CHANGELOG.md
 
       - name: Commit, tag, push
-        if: steps.version.outputs.skip != 'true'
+        if: steps.skip_release.outputs.skip != 'true' && steps.version.outputs.skip != 'true'
         run: |
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
           NEW_TAG="${{ steps.version.outputs.new_tag }}"
@@ -169,7 +190,7 @@ jobs:
           git push origin main --follow-tags
 
       - name: Create GitHub Release
-        if: steps.version.outputs.skip != 'true'
+        if: steps.skip_release.outputs.skip != 'true' && steps.version.outputs.skip != 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.new_tag }}

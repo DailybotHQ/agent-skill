@@ -31,6 +31,8 @@ the same instructions other agents do.
 | Adding a new sub-skill | [docs/SUB_SKILL_GUIDE.md](docs/SUB_SKILL_GUIDE.md) |
 | Contribution guide | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Skills & agents catalog (contributor kit) | [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md) |
+| Slash-command reference (contributor kit) | [`.agents/docs/COMMANDS_REFERENCE.md`](.agents/docs/COMMANDS_REFERENCE.md) |
 | Router meta-skill | [skills/dailybot/SKILL.md](skills/dailybot/SKILL.md) |
 | Auth + consent flow | [skills/dailybot/shared/auth.md](skills/dailybot/shared/auth.md) |
 | Context detection + opt-out | [skills/dailybot/shared/context.sh](skills/dailybot/shared/context.sh) |
@@ -69,8 +71,12 @@ agent-skill/
 ├── README.md                              ← public README on GitHub (NOT installed)
 ├── LICENSE, SECURITY.md, CHANGELOG.md     ← repo metadata (NOT installed)
 ├── setup.sh                               ← symlink installer for non-skills.sh users
+├── .agents/                               ← contributor kit (NOT installed): DWP + AI Diff Reviewer
+├── .claude → .agents, .cursor → .agents   ← agent-directory symlinks (NOT installed)
+├── .review/extension.md                   ← AI Diff Reviewer overrides (NOT installed)
 ├── .github/
 │   ├── workflows/ci.yml                   ← shellcheck + bats + frontmatter validation
+│   ├── workflows/pr-review.yml            ← AI Diff Reviewer CI (Ready label)
 │   ├── ISSUE_TEMPLATE/                    ← bug + feature templates
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── tests/                                 ← bats-core tests (NOT installed)
@@ -79,8 +85,7 @@ agent-skill/
 │   ├── verify-cdn.sh                      ← checks install.sh + .sha256 are published
 │   └── validate-frontmatter.py            ← schema check on every SKILL.md
 ├── docs/                                  ← internal docs (NOT installed)
-│   ├── skill.md                           ← mirrored at www.dailybot.com/skill.md
-│   └── openclaw.md
+│   ├── API_REFERENCE.md, INSTALLATION.md, DESIGN.md, …
 └── skills/dailybot/                       ← THE INSTALLED ARTIFACT — only this ships
     ├── SKILL.md                           ← router (+ "Start here (first run)" self-contained setup)
     ├── TRUST.md                           ← install-time trust & guarantees + self-audit (ships)
@@ -439,6 +444,41 @@ that's both validation and documentation.
 - [ ] Setup.sh tested with at least `./setup.sh --host claude`
 - [ ] Commit message follows `<type>(<scope>): description` format
 
+## Working with Deep Work Plans (DWP)
+
+For non-trivial contributor work (multi-sub-skill changes, install-surface
+edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
+through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
+at **v2.17.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+
+| Step | Command | What it does |
+|------|---------|--------------|
+| 1. Plan | `/dwp-create` | Decompose the goal into numbered tasks with validation gates |
+| 2. Execute | `/dwp-execute` | Task-by-task execution; state in gitignored `.dwp/` |
+| 3. Verify | `/dwp-verify` | Objective CONFORMANT / NOT CONFORMANT check |
+
+Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
+Symlinks: `.claude → .agents`, `.cursor → .agents`.
+
+### Dailybot addon (contributor reporting)
+
+Optional DWP lifecycle reporting uses the companion CLI / the in-repo
+`skills/dailybot/report` skill. Best-effort only — never blocks plan
+execution. Auth stays in the Dailybot skill's own consent flow.
+
+### AI Diff Reviewer (Flow B — dual-surface)
+
+| Surface | What | How |
+|---------|------|-----|
+| **Local** | Augments DWP Security Review | [`.agents/skills/ai-diff-reviewer/`](.agents/skills/ai-diff-reviewer/) + [`.review/extension.md`](.review/extension.md). Phrase: *"Review my current branch"*. |
+| **CI** | PR merge gate | [`.github/workflows/pr-review.yml`](.github/workflows/pr-review.yml) — apply the **`Ready`** label on a PR to `main`. Check name: **`AI review gate`**. Bypass: `skip-ai-review`. |
+
+**Secret required for CI:** `CURSOR_API_KEY` (repo Settings → Secrets).
+
+Contributor-kit / tooling PRs that do **not** change `skills/dailybot/` may
+put `[skip release]` in the squash-merge commit body so auto-release does
+not bump the shipped skill version.
+
 ## Shared Agent Coordination
 
 Multiple AI agents may work on this repo simultaneously. They all read
@@ -455,7 +495,7 @@ this `AGENTS.md`:
 If you're updating shared standards in this file, you don't need to mirror
 to per-agent files — `AGENTS.md` is the canonical source.
 
-## Temporary Files (tmp/)
+## Temporary Files (tmp/) and `.dwp/`
 
 The `tmp/` folder at the repo root is **git-ignored entirely** — the
 directory is preserved with a `.gitkeep` placeholder, but every file or
@@ -463,6 +503,10 @@ subdirectory you create inside it is invisible to git. It exists so
 agents and contributors can do scratch work without polluting the
 working tree or risking accidental commits of debug output. The folder
 is yours — write freely, clean up when done.
+
+The gitignored `.dwp/` tree is the **structured** Deep Work Plan output
+area (`plans/`, `drafts/`, progress state) — distinct from unstructured
+`tmp/` scratch. Do not commit plans unless explicitly asked.
 
 Use `tmp/` for:
 
