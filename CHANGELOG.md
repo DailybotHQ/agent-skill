@@ -4,6 +4,17 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.4] — 2026-07-16
+
+### Changes
+
+- Merge pull request #42 from DailybotHQ/docs/readme-contributor-links
+- docs: link Contributing and AGENTS.md from the README
+- Merge pull request #41 from DailybotHQ/chore/dwp-2.17-onboard
+- fix(ci): ignore vendored skill frontmatter false-positives in link check
+- chore(agents): onboard DWP 2.17.0 and AI Diff Reviewer Flow B
+
+
 ## [3.10.3] — 2026-07-14
 
 ### Changes
