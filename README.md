@@ -4,10 +4,11 @@
 
 Give your AI coding agent the ability to report progress, check for messages,
 send emails, announce status, complete check-ins, give kudos, submit forms,
-and **send chat messages on Slack / Teams / Discord / Google Chat** (with
-report-style threads and in-place edits) — all through Dailybot. Your team
-sees what the agent accomplished, sends instructions, and stays coordinated
-across humans and agents.
+**send chat messages on Slack / Teams / Discord / Google Chat** (with
+report-style threads, interactive buttons, and in-place edits), and **trigger
+workflows** — all through Dailybot. Your team sees what the agent
+accomplished, sends instructions, and stays coordinated across humans and
+agents.
 
 - **License:** [MIT](LICENSE)
 - **Security policy:** [SECURITY.md](SECURITY.md)
@@ -26,7 +27,8 @@ across humans and agents.
 | **dailybot-checkin** | Full check-in lifecycle: list/status, complete, inspect questions & schedule, response history, edit/reset a response, and backfill or future-date — all headless with `--json`. Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
 | **dailybot-kudos** | Give kudos to a teammate to recognize their contributions. Team-visible recognition through Dailybot. |
 | **dailybot-forms** | List and submit form responses (feedback surveys, retros, pulse checks). Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
-| **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 1.13.0`. |
+| **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); interactive buttons (approval flows, workflow triggers, modals, callbacks); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 1.13.0`. |
+| **dailybot-workflow** | List, inspect, and trigger Dailybot workflows. Fire API-triggerable workflows on demand with optional JSON payloads. Plan-gated feature. |
 | **dailybot-ask** | Ask the Dailybot AI a question headlessly — `dailybot ask "..."` prints the answer to stdout (or `--json`). The primary way an agent queries the Dailybot AI with only an API key. Requires `dailybot-cli >= 1.15.0`. |
 
 A root **dailybot** meta-skill acts as a router — it describes all
@@ -109,7 +111,8 @@ right sub-skill:
 - "Complete my check-in" → **dailybot-checkin**
 - "Give kudos to Jane" / "kudos al equipo Engineering" → **dailybot-kudos**
 - "Fill out the feedback form" → **dailybot-forms**
-- "Send a Slack message to #releases" / "DM Sergio in chat" / "post a deploy report with the changelog in a thread" → **dailybot-chat**
+- "Send a Slack message to #releases" / "DM Sergio in chat" / "post a deploy report with the changelog in a thread" / "send an approval request with buttons" → **dailybot-chat**
+- "Trigger the deploy workflow" / "list my workflows" → **dailybot-workflow**
 
 Or invoke directly: `/dailybot_report`. The messages, email, and health
 skills are agent-only — the agent uses them autonomously without a slash
@@ -233,7 +236,9 @@ All outbound calls go to `api.dailybot.com` over HTTPS:
 | `POST /v1/kudos/` | `dailybot-kudos` skill | `X-API-KEY` or Bearer, `receivers` list, content |
 | `GET /v1/teams/` | `dailybot-teams` skill (team-name resolution; used by kudos + chat) | `X-API-KEY` **or** Bearer |
 | `POST /v1/cli/chat/completions/` | `dailybot-ask` skill | `X-API-KEY` **or** Bearer; `{message}` → AI answer; 30 req/min per key |
-| `POST /v1/send-message/` | `dailybot-chat` skill | **Either** `X-API-KEY` (org-wide) **or** Bearer token (login, role-scoped). Targets users/channels/teams, optional `thread_responses[]` for replies, optional `bot_message_id` to edit a previous message (parent or reply) |
+| `POST /v1/send-message/` | `dailybot-chat` skill | **Either** `X-API-KEY` (org-wide) **or** Bearer token (login, role-scoped). Targets users/channels/teams, optional `thread_responses[]` for replies, optional `bot_message_id` to edit a previous message (parent or reply), optional `buttons[]` for interactive buttons |
+| `GET /v1/workflows/` | `dailybot-workflow` skill (list/get) | `X-API-KEY` **or** Bearer |
+| `POST /v1/workflows/<uuid>/trigger/` | `dailybot-workflow` skill (trigger) | `X-API-KEY` **or** Bearer; optional `{payload}` JSON object (≤8 KiB) |
 | `https://cli.dailybot.com/install.sh{,.sha256}` | CLI install on first session, with consent | None (download only) |
 
 ### Per-repo opt-out
@@ -319,6 +324,7 @@ agent-skill/
         ├── kudos/SKILL.md         — user + team recognition (user-scoped)
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
+        ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated)
         └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest on PyPI)
 ```
 
