@@ -4,6 +4,16 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.0] — 2026-07-24
+
+### Changes
+
+- Merge pull request #43 from DailybotHQ/feat/interactive-buttons-workflow-trigger
+- docs(pack): address AI review findings on CLI 3.8.0 floor docs
+- docs(pack): align interactive buttons with CLI 3.8.0 + raise floor
+- feat(chat,workflow): document interactive buttons and workflow trigger
+
+
 ## [3.10.4] — 2026-07-16
 
 ### Changes
