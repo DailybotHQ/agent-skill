@@ -10,12 +10,11 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Workflows
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The
-> `dailybot workflow list` / `dailybot workflow get` command group is available
-> at this floor. The `dailybot workflow trigger` command requires a recent
-> `dailybot-cli` with workflow-trigger support (the next CLI release after
-> 3.7.4). If `dailybot --version` reports below 3.7.0, ask the developer to
-> run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The
+> `dailybot workflow list` / `get` / `trigger` command group — including
+> `--filter api_trigger` and `--payload` — is available at this floor. If
+> `dailybot --version` reports below 3.8.0, ask the developer to run
+> `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI
 > version](../SKILL.md#required-dailybot-cli-version) for install commands and
 > version-check tooling.
 

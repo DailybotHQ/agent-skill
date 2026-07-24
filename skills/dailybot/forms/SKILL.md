@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Forms
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The full forms lifecycle — `form list` / `submit` / `get` / `responses` / `response get` / `update` / `transition` / `delete` — plus the structured `--json` 4xx error shape are all available. If `dailybot --version` is below 3.7.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The full forms lifecycle — `form list` / `submit` / `get` / `responses` / `response get` / `update` / `transition` / `delete` — plus the structured `--json` 4xx error shape are all available. If `dailybot --version` is below 3.8.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
 
 You help developers work with the full Dailybot forms lifecycle: list, inspect, submit, update, transition between workflow states, and read prior responses. Forms are custom questionnaires created by team leads — feedback surveys, retrospectives, release checklists, approval flows, or any structured data collection. Some forms are simple "fill once and done"; others have **workflow states** (e.g. `draft → review → released`) with audience-scoped permissions on who can edit and who can transition.
 
@@ -140,7 +140,7 @@ Returns all forms in the caller's organization. Every org member sees every org 
 
 ### Pagination, search, and date filters
 
-> **Note:** the shared list query flags below are part of the `dailybot-cli >= 3.7.0` baseline. Older CLIs
+> **Note:** the shared list query flags below are part of the `dailybot-cli >= 3.8.0` baseline. Older CLIs
 > return the full list with no filtering.
 
 `form list` accepts the **full shared list query flag set** — pagination
@@ -314,7 +314,7 @@ When the form has a workflow (`workflow.enabled: true`), the agent must understa
 
 ## Step 5.5 — Authoring forms (create / configure / questions)
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — is all available. If `dailybot --version` is below 3.7.0, ask the developer to run `dailybot upgrade`.
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The full authoring surface — `form create`, `form config` (workflow states, the three permission audiences, anonymous/public/brand/require-identity with `public_url`, approval + approvers, the ChatOps command), `form archive`, the `form questions add|edit|delete|reorder` group, resolving people by email, `--no-approvers`, the 3 report-channel cap, and the **create requires ≥ 1 question** rule (`questions_required`) — is all available. If `dailybot --version` is below 3.8.0, ask the developer to run `dailybot upgrade`.
 
 Everything above this point *reads* and *responds to* forms. This section *builds and reshapes* them. An agent with the right permissions can now create a form, wire up its workflow states, permission audiences, approval flow, and ChatOps command, and manage its questions — all end-to-end from the CLI, without opening the Dailybot webapp.
 

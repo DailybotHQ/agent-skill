@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Ask
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline) — the `dailybot ask`
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline) — the `dailybot ask`
 > command and full API-key parity on the AI chat. On much older CLIs the AI chat only
 > exists as the interactive TUI (`dailybot interactive`) and requires a login
 > session. If `dailybot ask --help` is not recognized, ask the developer to run
@@ -59,7 +59,7 @@ Read and follow the authentication steps in [`../shared/auth.md`](../shared/auth
 The AI chat accepts **either** a login session **or** an org API key — an agent
 with only `DAILYBOT_API_KEY` set can use `dailybot ask` directly.
 
-Confirm the command exists (`dailybot-cli >= 3.7.0`):
+Confirm the command exists (`dailybot-cli >= 3.8.0`):
 
 ```bash
 dailybot ask --help 2>&1 | head -1

@@ -1,6 +1,6 @@
 ---
 name: dailybot-chat
-description: Send and edit Dailybot bot messages on the team's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams. Supports report-style threads (one headline + replies, in one call) and editing the parent or any reply afterward. Use when the developer says "send a message to my Slack channel", "ping the team in chat", "post the deploy report to #releases", or wants to update a previously sent bot message. Works headless for agents.
+description: Send and edit Dailybot bot messages on the team's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams. Supports report-style threads (one headline + replies, in one call), interactive buttons (approval flows, workflow triggers, modals, callbacks), and editing the parent or any reply afterward. Use when the developer says "send a message to my Slack channel", "ping the team in chat", "post the deploy report to #releases", "send an approval request with buttons", or wants to update a previously sent bot message. Works headless for agents.
 version: "3.10.4"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
@@ -10,7 +10,15 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Chat
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The `dailybot chat send` / `chat update` command group, the `--thread-message` flag (≤10 replies per call, each independently editable), the login-Bearer auth path on `/v1/send-message/` (send without an org API key), and `--send-as-user` / `--send-as-me` (admin-only) are all available. If `dailybot --version` is below 3.7.0, ask the developer to run `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version) for install commands and version-check tooling.
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The
+> `dailybot chat send` / `chat update` command group — including
+> `--thread-message`, login-Bearer auth on `/v1/send-message/`,
+> `--send-as-user` / `--send-as-me`, and the full interactive-button
+> surface (`--buttons`, approval / workflow-button flags, modals,
+> callbacks) — is available at this floor. If `dailybot --version` is
+> below 3.8.0, ask the developer to run `dailybot upgrade`. See
+> [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version)
+> for install commands and version-check tooling.
 
 You send **Dailybot bot messages** on the developer's behalf to the organization's connected chat platform (Slack, Microsoft Teams, Discord, Google Chat) — to user DMs, channels, or whole teams (expanded to member DMs server-side). This skill is the right surface for:
 
@@ -265,7 +273,10 @@ dailybot chat send -c C0123 -m "Release v2.5 ready for approval" \
 
 `--approve-button` and `--reject-button` take `"Label=value"` (equals sign
 separator). `--callback-url` sets the URL for both. `--callback-bearer` is
-optional — when set, the callback POST includes `Authorization: Bearer <token>`.
+optional — when set, each button gets
+`callback_auth: {"type": "bearer", "token": "<token>"}`. Prefer passing the
+token via an env var (`--callback-bearer "$TOKEN"`) so it does not land in
+shell history or process lists.
 
 #### Workflow trigger buttons
 
@@ -279,30 +290,43 @@ dailybot chat send -c C0123 -m "Ready to deploy?" \
 
 `--workflow-button` takes `"Label=<workflow-uuid>"`. Only workflows with the
 `api_trigger` event type ("When triggered via API or button") can be fired this
-way. See [`../workflow/SKILL.md`](../workflow/SKILL.md) for triggering
-workflows directly.
+way. Resolve eligible UUIDs with `dailybot workflow list --filter api_trigger`.
+See [`../workflow/SKILL.md`](../workflow/SKILL.md) for triggering workflows
+directly (including `--payload`).
 
 #### Full-control buttons via `--buttons` (JSON pass-through)
 
 For advanced callbacks (forms, commands, prompts, modals, auth overrides), pass
-the full button contract as a JSON array:
+the full button contract as a JSON array. Keys are forwarded untouched (including
+unknown future fields). Prefer including `button_type` / `value` for interactive
+buttons (the ergonomic flags set these automatically):
 
 ```bash
-dailybot chat send -c C0123 -m "Pick an action" \
+dailybot chat send -u <user-uuid> -m "Pick an action" \
   --buttons '[
-    {"label": "Open form", "callback_form": "<form-uuid>"},
-    {"label": "Run command", "callback_command": "/deploy staging"},
-    {"label": "Ask AI", "callback_prompt": "Summarize the last deploy"},
-    {"label": "Start workflow", "callback_workflow": "<workflow-uuid>"},
-    {"label": "Confirm", "callback_url": "https://ci.example.com/confirm",
-     "callback_auth": "Bearer <token>"},
-    {"label": "Details", "response": "Here are the deploy details…"},
-    {"label": "Fill info", "callback_url": "https://example.com/hook",
-     "modal_body": [
-       {"type": "input", "label": "Reason", "name": "reason"},
-       {"type": "select", "label": "Priority", "name": "priority",
-        "options": [{"label": "High", "value": "high"}, {"label": "Low", "value": "low"}]}
-     ]}
+    {"label": "Open form", "button_type": "interactive", "value": "open_form",
+     "callback_form": "<form-uuid>"},
+    {"label": "Run command", "button_type": "interactive", "value": "run_cmd",
+     "callback_command": "/deploy staging"},
+    {"label": "Ask AI", "button_type": "interactive", "value": "ask",
+     "callback_prompt": "Summarize the last deploy"},
+    {"label": "Start workflow", "button_type": "interactive", "value": "wf",
+     "callback_workflow": "<workflow-uuid>"},
+    {"label": "Confirm", "button_type": "interactive", "value": "confirm",
+     "callback_url": "https://ci.example.com/confirm",
+     "callback_auth": {"type": "bearer", "token": "<token>"}},
+    {"label": "Details", "button_type": "interactive", "value": "details",
+     "response": "Here are the deploy details…"},
+    {"label": "Fill info", "button_type": "interactive", "value": "fill",
+     "callback_url": "https://hooks.example.com/x",
+     "modal_body": {
+       "title": "Request details",
+       "submit_label": "Submit",
+       "blocks": [
+         {"type": "input", "name": "summary", "label": "Summary", "optional": false},
+         {"type": "input", "name": "notes", "label": "Notes", "multiline": true, "optional": true}
+       ]
+     }}
   ]'
 ```
 
@@ -311,24 +335,28 @@ dailybot chat send -c C0123 -m "Pick an action" \
 | Field | Description |
 |-------|-------------|
 | `label` | Button text (required) |
-| `callback_url` | URL to POST on click |
+| `button_type` | `"link"` (needs `url`) or `"interactive"` (needs `value` + a callback / `response`) |
+| `url` | Destination for link buttons |
+| `value` | Click payload for interactive buttons |
+| `callback_url` | HTTPS URL the server POSTs to on click (may include modal answers) |
 | `callback_form` | Open a Dailybot form for the user to fill |
 | `callback_command` | Execute a Dailybot ChatOps command |
 | `callback_prompt` | Send a prompt to the Dailybot AI |
-| `callback_workflow` | Trigger a Dailybot workflow by UUID |
-| `modal_body` | JSON array of input fields shown in a modal before the callback fires |
-| `response` | Static text response shown to the clicker (no server call) |
-| `callback_auth` | Auth header value for the callback endpoint (e.g. `"Bearer <token>"`) |
+| `callback_workflow` | Trigger a Dailybot `api_trigger` workflow by UUID |
+| `modal_body` | Modal composer: `{title, submit_label?, blocks: [{type, name, label, …}]}` — used with `callback_url` or `callback_workflow` when collecting inputs |
+| `response` | Auto-reply text (may nest further buttons) |
+| `callback_auth` | Auth for `callback_url` only: `{type: "bearer"\|"basic"\|"custom_header", …}` — never a bare `"Bearer …"` string |
 
 **Constraints:**
 
 - At most **one** of the five callback types (`callback_url`, `callback_form`,
   `callback_command`, `callback_prompt`, `callback_workflow`) per button.
   Combining two is rejected with `button_callback_conflict`.
-- A button cannot mix `callback_url`/`callback_*` with a link `url` — that's
+- A button cannot mix a link `url` with any `callback_*` — that's
   `button_link_and_callback_conflict`.
 - Unknown keys are forwarded to the API (forward-compatible).
 - Max **25** buttons per message (`buttons_count_out_of_range`).
+- `callback_auth` is only valid with `callback_url`.
 
 #### Button behavior on `chat update`
 
@@ -337,11 +365,10 @@ preserved unless you pass new button flags. Custom identity flags
 (`--bot-name`/`--bot-icon-*`) and send-as-user flags are ignored on edits.
 The 72-hour edit window applies.
 
-> **Requires a recent `dailybot-cli` with interactive-button support.** The
-> `--buttons`, `--approve-button`, `--reject-button`, `--callback-url`,
-> `--callback-bearer`, and `--workflow-button` flags land in the next CLI
-> release after 3.7.4. `--link-button` and `--button` work on any
-> `dailybot-cli >= 3.7.0`.
+> Interactive-button flags (`--buttons`, `--approve-button` /
+> `--reject-button`, `--callback-url`, `--callback-bearer`,
+> `--workflow-button`) require **`dailybot-cli >= 3.8.0`** (this pack's
+> baseline). `--link-button` and `--button` are also available at that floor.
 
 ### Headless / agent use — capture the ids in JSON
 
@@ -516,13 +543,13 @@ The CLI translates these to friendly messages automatically. In `--json` mode (o
 | `400`  | `button_link_and_callback_conflict` | A button has both a link `url` and a `callback_*` field | Use one or the other — a button is either a link or an interactive callback. |
 | `400`  | `button_callback_conflict` | A button has more than one `callback_*` field | Only one of `callback_url`/`callback_form`/`callback_command`/`callback_prompt`/`callback_workflow` per button. |
 | `400`  | `button_callback_url_invalid` | `callback_url` is not a valid URL | Fix the URL. |
-| `400`  | `button_modal_body_invalid` | `modal_body` JSON is malformed or has invalid field types | Check the modal spec — array of `{type, label, name, …}` objects. |
+| `400`  | `button_modal_body_invalid` | `modal_body` JSON is malformed or has invalid field types | Use `{title, submit_label?, blocks: [{type, name, label, …}]}` — not a bare array of fields. |
 | `400`  | `button_callback_form_not_found` | `callback_form` UUID doesn't match a form | Verify the form UUID (`dailybot form list`). |
 | `400`  | `button_callback_command_invalid` | `callback_command` is not a recognized ChatOps command | Check the command string. |
 | `400`  | `button_callback_prompt_invalid` | `callback_prompt` is empty or too long | Fix the prompt text. |
-| `400`  | `button_callback_workflow_not_found` | `callback_workflow` UUID doesn't match a workflow, or the workflow isn't triggerable | Verify the UUID and that the workflow has the `api_trigger` event type. |
+| `400`  | `button_callback_workflow_not_found` | `callback_workflow` UUID doesn't match a workflow, or the workflow isn't triggerable | Verify the UUID (`dailybot workflow list --filter api_trigger`). |
 | `400`  | `button_response_invalid` | `response` text is empty or too long | Fix the response text. |
-| `400`  | `button_callback_auth_invalid` | `callback_auth` value is malformed | Use the format `"Bearer <token>"`. |
+| `400`  | `button_callback_auth_invalid` | `callback_auth` value is malformed | Use `{type: "bearer"\|"basic"\|"custom_header", …}` — only with `callback_url`. |
 | `400`  | `buttons_count_out_of_range` | More than 25 buttons on a single message | Reduce to ≤25 buttons. |
 | `400`  | (other) | No/invalid targets, malformed UUID, empty channel id, invalid bot identity | Surface the `detail` verbatim and fix the input. |
 | `401` / `403` |  | Unauthenticated / invalid auth | Suggest `dailybot login` (or, if the developer prefers, `dailybot config key=...`). |
@@ -614,7 +641,7 @@ Agent:
 ```
 Developer: "post a message to #deploys with a button that fires the deploy workflow"
 Agent:
-  1. dailybot workflow list --json   → find the deploy workflow UUID
+  1. dailybot workflow list --filter api_trigger --json   → find the deploy workflow UUID
   2. Confirm:
        "I'll post to C0123456789:
           Message:  Deploy ready — click to start
@@ -626,7 +653,25 @@ Agent:
   4. Surface the bot_message_id.
 ```
 
-### Dialogue G — Team not visible to the caller (role scope)
+### Dialogue G — Modal with inputs + callback URL
+
+```
+Developer: "DM me a button that opens a form modal and POSTs the answers to our webhook"
+Agent:
+  1. Resolve the developer's user UUID (`dailybot me --json` or `user list`).
+  2. Confirm the message + that the modal collects Summary + Notes, callback = the webhook URL.
+  3. dailybot chat send -u <user-uuid> -m "Please fill in the details" \
+       --buttons '[{"label":"Open form","button_type":"interactive","value":"open",
+         "callback_url":"https://hooks.example.com/x",
+         "modal_body":{"title":"Request details","submit_label":"Submit",
+           "blocks":[
+             {"type":"input","name":"summary","label":"Summary"},
+             {"type":"input","name":"notes","label":"Notes","multiline":true}]}}]' --json
+  4. Surface the bot_message_id; remind that answers land on the webhook after Submit.
+```
+
+### Dialogue H — Team not visible to the caller (role scope)
+
 
 ```
 Developer: "post a heads-up to the Security team's channel"

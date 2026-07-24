@@ -1,10 +1,10 @@
 # Shared reference — list query flags, pagination, and machine-readable errors
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). Everything on this page — the shared
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). Everything on this page — the shared
 > list query flags, the `{count, next, previous, results}` pagination envelope,
 > the `Showing X of N` footer, the machine-readable error `code` dispatch, and
 > the API-key / Bearer parity + free-plan gating rules — is available at this
-> floor. If `dailybot --version` is below 3.7.0, ask the developer to run
+> floor. If `dailybot --version` is below 3.8.0, ask the developer to run
 > `dailybot upgrade`.
 
 This is the **single source of truth** for behavior shared across every
@@ -165,16 +165,18 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `button_link_and_callback_conflict` | A button has both a link `url` and a `callback_*` field. | Use one or the other — a button is either a link or an interactive callback. |
 | `button_callback_conflict` | A button has more than one `callback_*` field. | Only one of `callback_url`/`callback_form`/`callback_command`/`callback_prompt`/`callback_workflow` per button. |
 | `button_callback_url_invalid` | `callback_url` is not a valid URL. | Fix the URL. |
-| `button_modal_body_invalid` | `modal_body` JSON is malformed or has invalid field types. | Check the modal spec — array of `{type, label, name, …}` objects. |
+| `button_modal_body_invalid` | `modal_body` JSON is malformed or has invalid field types. | Use `{title, submit_label?, blocks: [{type, name, label, …}]}` — not a bare array of fields. |
 | `button_callback_form_not_found` | `callback_form` UUID doesn't match a form. | Verify the form UUID (`dailybot form list`). |
 | `button_callback_command_invalid` | `callback_command` is not a recognized ChatOps command. | Check the command string. |
 | `button_callback_prompt_invalid` | `callback_prompt` is empty or too long. | Fix the prompt text. |
 | `button_callback_workflow_not_found` | `callback_workflow` UUID doesn't match a workflow, or the workflow isn't API-triggerable. | Verify the UUID (`dailybot workflow list --filter api_trigger`). |
 | `button_response_invalid` | `response` text is empty or too long. | Fix the response text. |
-| `button_callback_auth_invalid` | `callback_auth` value is malformed. | Use the format `"Bearer <token>"`. |
+| `button_callback_auth_invalid` | `callback_auth` value is malformed. | Use an object: `{type: "bearer"\|"basic"\|"custom_header", …}` — only with `callback_url`. |
 | `buttons_count_out_of_range` | More than 25 buttons on a single message. | Reduce to ≤25 buttons. |
 | `workflow_not_triggerable` | `workflow trigger` targeted a workflow whose event type is not `api_trigger`. | Only `api_trigger` workflows can be triggered. Use `workflow list --filter api_trigger`. |
-| `workflow_trigger_payload_invalid` | `workflow trigger --payload` is not a valid JSON object or exceeds 8 KiB. | Fix the payload — must be a JSON object ≤8 KiB. |
+| `workflow_trigger_payload_invalid` | `workflow trigger --payload` is not a valid JSON object or exceeds 8 KiB. | Fix the payload — must be a JSON object ≤8 KiB (measured as sent on the wire). |
+| `workflow_execute_not_allowed` | Caller lacks permission to execute workflows. | An admin (or a user with execute permission) must run it. |
+| `workflow_frozen` | The workflow is disabled (frozen). | Re-enable it in the Dailybot web app. |
 | `invalid_owner_user_id` | `--owner` value isn't a valid UUID (after resolution). | Fix the UUID or name. |
 | `too_many_owner_user_ids` | More than 50 `--owner` values. | Narrow the filter — max 50 owners per request. |
 

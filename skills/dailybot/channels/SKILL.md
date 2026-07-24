@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Report Channels
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The `dailybot channels list`
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The `dailybot channels list`
 > command is available at this floor. If `dailybot --version` reports below
 > 3.7.0, ask the developer to run `dailybot upgrade`. See
 > [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
