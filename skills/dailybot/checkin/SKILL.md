@@ -285,11 +285,11 @@ prompts — handy for humans; agents should use the headless commands above.
 
 ## Step 3.7 — Authoring check-ins (create / configure / questions)
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). The authoring surface — `checkin create`,
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The authoring surface — `checkin create`,
 > `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
 > group, resolving people by email, the smart/AI flags, and the **create requires
 > ≥ 1 question** rule (`questions_required`) — is all available. If
-> `dailybot --version` is below 3.7.0, run `dailybot upgrade`.
+> `dailybot --version` is below 3.8.0, run `dailybot upgrade`.
 
 Everything above **answers** a check-in. This section **builds** one. As of the
 authoring release, an agent can create a check-in from scratch, tune every

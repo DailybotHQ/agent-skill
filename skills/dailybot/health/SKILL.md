@@ -12,7 +12,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 You announce the agent's status (online, working, offline, degraded) to Dailybot so the team knows whether the agent is alive and what it's doing. Health check responses also deliver pending messages from the team.
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline). See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). See [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version).
 
 ---
 

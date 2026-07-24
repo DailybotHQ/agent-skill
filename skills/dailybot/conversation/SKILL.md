@@ -10,7 +10,7 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Conversations
 
-> **Requires `dailybot-cli >= 3.7.0`** (the skill-pack baseline; the
+> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline; the
 > `dailybot conversation open` command itself shipped in 3.2.0). If
 > `dailybot --version` reports lower, ask the developer to run
 > `dailybot upgrade` and continue with your primary task meanwhile. See
