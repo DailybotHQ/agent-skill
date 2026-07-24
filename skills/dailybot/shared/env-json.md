@@ -294,7 +294,7 @@ Rules:
 Developer: *"I need to test against my local Dailybot instance for this project without breaking my prod login."*
 
 ```bash
-# 1. Confirm CLI >= 3.7.0 (env command exists).
+# 1. Confirm CLI >= 3.8.0 (pack baseline; env command exists).
 dailybot env --help >/dev/null 2>&1 || {
   echo "This feature requires dailybot-cli >= 3.8.0. Run: dailybot upgrade" >&2
 }

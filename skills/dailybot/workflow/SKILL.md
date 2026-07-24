@@ -140,6 +140,12 @@ developer rather than re-deriving them.
 > types (schedule, form submission, etc.) are not triggerable from the CLI —
 > the server returns `workflow_not_triggerable`.
 
+> **Confirm before triggering.** `workflow trigger` is side-effecting — it can
+> start a deploy or other automation and enqueues a run. Restate the target
+> workflow (name + UUID) and the payload (or "no payload") to the developer and
+> wait for an explicit yes before running the command. Do not fire workflows
+> unprompted. Same confirm-before-write posture as chat button sends.
+
 ```bash
 dailybot workflow trigger <workflow_uuid> --json
 ```

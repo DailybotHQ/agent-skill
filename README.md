@@ -325,7 +325,7 @@ agent-skill/
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
         ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated)
-        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 1.13.0; latest on PyPI)
+        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.8.0; latest on PyPI)
 ```
 
 ## Execution Paths

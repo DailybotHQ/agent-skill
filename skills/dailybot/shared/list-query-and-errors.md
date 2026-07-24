@@ -175,8 +175,6 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `buttons_count_out_of_range` | More than 25 buttons on a single message. | Reduce to ≤25 buttons. |
 | `workflow_not_triggerable` | `workflow trigger` targeted a workflow whose event type is not `api_trigger`. | Only `api_trigger` workflows can be triggered. Use `workflow list --filter api_trigger`. |
 | `workflow_trigger_payload_invalid` | `workflow trigger --payload` is not a valid JSON object or exceeds 8 KiB. | Fix the payload — must be a JSON object ≤8 KiB (measured as sent on the wire). |
-| `workflow_execute_not_allowed` | Caller lacks permission to execute workflows. | An admin (or a user with execute permission) must run it. |
-| `workflow_frozen` | The workflow is disabled (frozen). | Re-enable it in the Dailybot web app. |
 | `invalid_owner_user_id` | `--owner` value isn't a valid UUID (after resolution). | Fix the UUID or name. |
 | `too_many_owner_user_ids` | More than 50 `--owner` values. | Narrow the filter — max 50 owners per request. |
 
