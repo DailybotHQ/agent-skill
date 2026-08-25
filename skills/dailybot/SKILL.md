@@ -51,7 +51,7 @@ machine — permissions, consent guarantees, and a self-audit you can run — is
 
 ## What it does
 
-Thirteen coordinated capabilities, with smart routing between them:
+Fourteen coordinated capabilities, with smart routing between them:
 
 | Capability | Sub-skill | When it fires |
 |------------|-----------|---------------|
@@ -67,6 +67,7 @@ Thirteen coordinated capabilities, with smart routing between them:
 | **Teams** | `dailybot-teams` | List teams, inspect members, resolve a team name → UUID (used as a resolver by other skills) — **plus account context**: `dailybot me` (who am I / role), `dailybot org` (which org), and `dailybot user get` (one user's profile) |
 | **Forms** | `dailybot-forms` | List, submit, update, or transition forms — including workflow-state forms with audience permissions (`form list` is now **org-scoped** by default, with `--mine` to narrow to your own; list + responses support pagination / search / date filters) — **plus authoring**: create/configure a form (workflow states, permissions, anonymous/public/approval, ChatOps command) and manage its questions |
 | **Workflows** | `dailybot-workflow` | Developer wants to **read or trigger** the org's workflows — `workflow list` (paginated/searchable, with `--filter api_trigger`), `workflow get`, and `workflow trigger` (fire an API-triggerable workflow with an optional JSON payload). Creating/editing workflows is web-app only. Plan-gated |
+| **Labels** | `dailybot-labels` | Create org Labels and assign them to forms, check-ins, and workflows (`label assign` / `label batch`) — same chip picker as the web app |
 | **Report channels** | `dailybot-channels` | Discover report-channel UUIDs to attach to forms/check-ins with `--report-channel` |
 | **Per-repo API keys** | `dailybot-env` | Configure `.dailybot/env.json` — an **opt-in, gitignored** file that carries API keys + URLs for one or more environments (live, local, staging) so the developer can be "logged into different orgs in different repos". `dailybot env add / use / show / list / remove / off / on`. Pack baseline (`>= 3.8.0`) |
 
@@ -242,6 +243,7 @@ the full step-by-step workflow.
 | "list / search / browse my forms (or kudos, or workflows) with pagination", "only the first N", "since last week", "grep for retro" | The matching sub-skill — all share [`shared/list-query-and-errors.md`](shared/list-query-and-errors.md) for the query flags |
 | "who am I?", "what's my role?", "which org am I in?", "show a user's profile" | **Teams** → read [`teams/SKILL.md`](teams/SKILL.md) § Step 4.5 (`me` / `org` / `user get`) |
 | "browse kudos", "kudos I received / gave", "org kudos stats", "who's on the wall of fame?" | **Kudos** → read [`kudos/SKILL.md`](kudos/SKILL.md) § Browsing kudos |
+| "add a label to a form / check-in / workflow", "tag this standup with Sprint", "assign organization labels" | **Labels** → read [`labels/SKILL.md`](labels/SKILL.md) |
 | "list my workflows", "show workflows", "what's in workflow X?" | **Workflows** → read [`workflow/SKILL.md`](workflow/SKILL.md) |
 | "trigger the deploy workflow", "fire automation X", "run workflow `<uuid>`", "trigger workflow with payload" | **Workflows** → read [`workflow/SKILL.md`](workflow/SKILL.md) § Step 4 (Trigger) |
 | "which channels can Dailybot post to?", "list report channels", "I need a channel UUID for the form / check-in" | **Channels** → read [`channels/SKILL.md`](channels/SKILL.md) |
