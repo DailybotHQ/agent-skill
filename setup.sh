@@ -58,7 +58,7 @@ resolve_skills_dir() {
 }
 
 # ─── Sub-skills to link ──────────────────────────────────────
-SKILLS=("report" "messages" "email" "health" "checkin" "kudos" "teams" "forms" "chat" "ask")
+SKILLS=("report" "messages" "email" "health" "checkin" "kudos" "teams" "forms" "chat" "ask" "labels" "featured")
 
 # ─── Link one agent ──────────────────────────────────────────
 link_agent() {
