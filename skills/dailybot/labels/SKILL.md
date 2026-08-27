@@ -1,7 +1,7 @@
 ---
 name: dailybot-labels
 description: Manage organization Labels via the Dailybot CLI — list, create, update, archive, assign to forms/check-ins/workflows, and inspect entitlement. Use when the developer asks about org labels, label CRUD, tagging entities, or label entitlement. Not for private Featured stars (use dailybot-featured) or saved views.
-version: "1.1.0"
+version: "3.12.0"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"🏷️","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
