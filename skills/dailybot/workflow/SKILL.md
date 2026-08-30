@@ -10,10 +10,10 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Workflows
 
-> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The
+> **Requires `dailybot-cli >= 3.9.0`** (the skill-pack baseline). The
 > `dailybot workflow list` / `get` / `trigger` command group — including
 > `--filter api_trigger` and `--payload` — is available at this floor. If
-> `dailybot --version` reports below 3.8.0, ask the developer to run
+> `dailybot --version` reports below 3.9.0, ask the developer to run
 > `dailybot upgrade`. See [`../SKILL.md` § Required Dailybot CLI
 > version](../SKILL.md#required-dailybot-cli-version) for install commands and
 > version-check tooling.
@@ -65,6 +65,10 @@ operation. And do not confuse it with **form workflow states** (the
 `draft → review → released` states inside a single form) — those are managed in
 [`../forms/SKILL.md`](../forms/SKILL.md). This skill is the org-level
 **workflow** object.
+
+To **tag** an existing workflow with organization Labels after you have its
+UUID from `workflow list`, use [`../labels/SKILL.md`](../labels/SKILL.md)
+(`dailybot label assign <uuid> --type workflows` — `automations` is an alias).
 
 ---
 

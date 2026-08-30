@@ -10,13 +10,13 @@ allowed-tools: Bash, Read, Grep, Glob
 
 # Dailybot Chat
 
-> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The
+> **Requires `dailybot-cli >= 3.9.0`** (the skill-pack baseline). The
 > `dailybot chat send` / `chat update` command group — including
 > `--thread-message`, login-Bearer auth on `/v1/send-message/`,
 > `--send-as-user` / `--send-as-me`, and the full interactive-button
 > surface (`--buttons`, approval / workflow-button flags, modals,
 > callbacks) — is available at this floor. If `dailybot --version` is
-> below 3.8.0, ask the developer to run `dailybot upgrade`. See
+> below 3.9.0, ask the developer to run `dailybot upgrade`. See
 > [`../SKILL.md` § Required Dailybot CLI version](../SKILL.md#required-dailybot-cli-version)
 > for install commands and version-check tooling.
 
@@ -367,7 +367,7 @@ The 72-hour edit window applies.
 
 > Interactive-button flags (`--buttons`, `--approve-button` /
 > `--reject-button`, `--callback-url`, `--callback-bearer`,
-> `--workflow-button`) require **`dailybot-cli >= 3.8.0`** (this pack's
+> `--workflow-button`) require **`dailybot-cli >= 3.9.0`** (this pack's
 > baseline). `--link-button` and `--button` are also available at that floor.
 
 ### Headless / agent use — capture the ids in JSON
