@@ -285,11 +285,11 @@ prompts — handy for humans; agents should use the headless commands above.
 
 ## Step 3.7 — Authoring check-ins (create / configure / questions)
 
-> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). The authoring surface — `checkin create`,
+> **Requires `dailybot-cli >= 3.9.0`** (the skill-pack baseline). The authoring surface — `checkin create`,
 > `checkin config`, `checkin archive`, the `checkin questions add|edit|delete|reorder`
 > group, resolving people by email, the smart/AI flags, and the **create requires
 > ≥ 1 question** rule (`questions_required`) — is all available. If
-> `dailybot --version` is below 3.8.0, run `dailybot upgrade`.
+> `dailybot --version` is below 3.9.0, run `dailybot upgrade`.
 
 Everything above **answers** a check-in. This section **builds** one. As of the
 authoring release, an agent can create a check-in from scratch, tune every
@@ -727,6 +727,12 @@ dailybot checkin create -n "Daily Standup" \
 
 # 2. Verify the round-trip
 dailybot checkin show <followup_uuid> --json
+
+# 3. Optional — attach organization Labels (CLI >= 3.9.0; create has no --labels).
+#    Prefer `.uuid` from create --json (aliased from API `id`). Full procedure: ../labels/SKILL.md
+# LABEL=$(dailybot label create --name "Standup" --color "#4A90E2" --json | jq -r '.uuid')
+# CID=$(dailybot checkin create ... --json | jq -r '.uuid // .id')
+# dailybot label assign "$CID" --type checkins --label "$LABEL"
 ```
 
 **2. Smart AI check-in with insights and capped follow-ups:**

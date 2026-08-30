@@ -27,9 +27,11 @@ agents.
 | **dailybot-checkin** | Full check-in lifecycle: list/status, complete, inspect questions & schedule, response history, edit/reset a response, and backfill or future-date — all headless with `--json`. Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
 | **dailybot-kudos** | Give kudos to a teammate to recognize their contributions. Team-visible recognition through Dailybot. |
 | **dailybot-forms** | List and submit form responses (feedback surveys, retros, pulse checks). Works with a login session **or** an API key (`dailybot-cli >= 1.15.0`). |
-| **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); interactive buttons (approval flows, workflow triggers, modals, callbacks); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 3.8.0`. |
-| **dailybot-workflow** | List, inspect, and trigger Dailybot workflows (`workflow list` / `get` / `trigger`, with `--filter api_trigger` and optional `--payload`). Plan-gated feature. Requires `dailybot-cli >= 3.8.0`. |
+| **dailybot-chat** | Send and edit bot messages on the team's connected chat platform (Slack / Microsoft Teams / Discord / Google Chat). DMs, channels, or whole teams; report-style threads (headline + replies in one call); interactive buttons (approval flows, workflow triggers, modals, callbacks); edit the parent or any thread reply afterward. Requires `dailybot-cli >= 3.9.0`. |
+| **dailybot-workflow** | List, inspect, and trigger Dailybot workflows (`workflow list` / `get` / `trigger`, with `--filter api_trigger` and optional `--payload`). Plan-gated feature. Requires `dailybot-cli >= 3.9.0`. |
 | **dailybot-ask** | Ask the Dailybot AI a question headlessly — `dailybot ask "..."` prints the answer to stdout (or `--json`). The primary way an agent queries the Dailybot AI with only an API key. Requires `dailybot-cli >= 1.15.0`. |
+| **dailybot-labels** | Organization Labels — create/list/update/archive/delete and assign (or batch) to forms, check-ins, and workflows/automations. Web chip-picker parity. Requires `dailybot-cli >= 3.9.0`. |
+| **dailybot-featured** | Private per-user Featured stars on forms, automations, and check-ins. Not the same as org Labels. Requires `dailybot-cli >= 3.9.0`. |
 
 A root **dailybot** meta-skill acts as a router — it describes all
 capabilities and routes to the right sub-skill based on the developer's
@@ -325,7 +327,7 @@ agent-skill/
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
         ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated)
-        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.8.0; latest on PyPI)
+        └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.9.0; latest on PyPI)
 ```
 
 ## Execution Paths

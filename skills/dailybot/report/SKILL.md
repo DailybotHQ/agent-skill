@@ -125,7 +125,7 @@ trigger in a previous session.
 
 1. **CLI version.** Run `dailybot --version`. If it reports below `3.8.0`
    (or the CLI is absent), skip Step 0b silently and continue to Step 1 —
-   the pack baseline is `dailybot-cli >= 3.8.0`, and the Step 0a trigger
+   the pack baseline is `dailybot-cli >= 3.9.0`, and the Step 0a trigger
    alone still works on older installs.
 2. **Harness support.** If the current harness has no lifecycle-hook system
    (e.g. Cline today), skip Step 0b silently — Step 0a covers it.

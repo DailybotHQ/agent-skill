@@ -89,7 +89,7 @@ agent-skill/
 └── skills/dailybot/                       ← THE INSTALLED ARTIFACT — only this ships
     ├── SKILL.md                           ← router (+ "Start here (first run)" self-contained setup)
     ├── TRUST.md                           ← install-time trust & guarantees + self-audit (ships)
-    ├── shared/                            ← auth.md, context.sh, http-fallback.md
+    ├── shared/                            ← auth.md, context.sh, http-fallback.md, list-query-and-errors.md, …
     ├── report/                            ← progress reporting + auto-activation
     ├── messages/SKILL.md
     ├── email/SKILL.md
@@ -98,8 +98,12 @@ agent-skill/
     ├── kudos/SKILL.md
     ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
     ├── forms/SKILL.md
+    ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
+    ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
+    ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)
+    ├── env/SKILL.md                        ← .dailybot/env.json per-repo API keys
     ├── channels/SKILL.md                   ← report-channel discovery (UUIDs for --report-channel on forms/check-ins)
-    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.8.0; latest on PyPI)
+    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.9.0; latest on PyPI)
 ```
 
 The hard rule: **anything you put outside `skills/dailybot/` is invisible

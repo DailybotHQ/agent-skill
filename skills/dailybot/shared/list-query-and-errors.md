@@ -1,10 +1,10 @@
 # Shared reference — list query flags, pagination, and machine-readable errors
 
-> **Requires `dailybot-cli >= 3.8.0`** (the skill-pack baseline). Everything on this page — the shared
+> **Requires `dailybot-cli >= 3.9.0`** (the skill-pack baseline). Everything on this page — the shared
 > list query flags, the `{count, next, previous, results}` pagination envelope,
 > the `Showing X of N` footer, the machine-readable error `code` dispatch, and
 > the API-key / Bearer parity + free-plan gating rules — is available at this
-> floor. If `dailybot --version` is below 3.8.0, ask the developer to run
+> floor. If `dailybot --version` is below 3.9.0, ask the developer to run
 > `dailybot upgrade`.
 
 This is the **single source of truth** for behavior shared across every
@@ -147,6 +147,8 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `org_admin_required` | The endpoint is org-admin only (e.g. `kudos org`, `chat send --send-as-user`, webhook/team-member management). | Only an org admin can run it — a member must ask an admin or use an admin API key. Not a session problem. |
 | `workflow_execute_not_allowed` | The caller doesn't have permission to execute (trigger) workflows. | An admin or a user with the execute permission must run it. |
 | `workflow_frozen` | The workflow is disabled (frozen) and cannot be triggered. | Tell the developer; the workflow must be re-enabled in the Dailybot web app. |
+| `feature_not_available` | Organization Labels (or another gated feature) are not enabled for this org. | For Labels: stop tagging work; surface the entitlement gap (`dailybot label entitlement`). Do not retry. |
+| `paid_plan_required` | The org's plan lacks Feature.LABELS (or similar). | Surface any upgrade path; do not retry Labels commands. |
 
 ### 400 — bad input
 
@@ -177,6 +179,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `workflow_trigger_payload_invalid` | `workflow trigger --payload` is not a valid JSON object or exceeds 8 KiB. | Fix the payload — must be a JSON object ≤8 KiB (measured as sent on the wire). |
 | `invalid_owner_user_id` | `--owner` value isn't a valid UUID (after resolution). | Fix the UUID or name. |
 | `too_many_owner_user_ids` | More than 50 `--owner` values. | Narrow the filter — max 50 owners per request. |
+| `archived_label_not_assignable` | `label assign` / `label batch` used an archived Label. | Create a new Label or stop assigning that UUID. |
 
 ### 429 — rate limit
 
