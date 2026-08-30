@@ -4,6 +4,15 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.0] — 2026-08-30
+
+### Changes
+
+- Merge pull request #45 from DailybotHQ/feat/labels-skill-cli-3.9.0-full
+- fix(labels): address AI review on CLI floor and Labels error codes
+- feat(labels): full Labels skill for CLI 3.9.0 + raise pack floor
+
+
 ## [3.12.0] — 2026-08-27
 
 ### Changes
