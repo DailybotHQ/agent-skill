@@ -38,11 +38,11 @@ Route here when the developer says any of:
 
 ## Pre-flight — before writing anything
 
-1. **Confirm the CLI meets the pack baseline** (>= 3.8.0):
+1. **Confirm the CLI meets the pack baseline** (>= 3.9.0):
 
     ```bash
     dailybot env --help >/dev/null 2>&1 || {
-      echo "This feature requires dailybot-cli >= 3.8.0. Run: dailybot upgrade" >&2
+      echo "This feature requires dailybot-cli >= 3.9.0. Run: dailybot upgrade" >&2
       exit 1
     }
     ```

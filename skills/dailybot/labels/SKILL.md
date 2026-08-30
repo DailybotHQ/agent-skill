@@ -49,7 +49,8 @@ Same session as the rest of the CLI (`dailybot login` or `DAILYBOT_API_KEY` /
 Point at a non-prod API with the global flag when needed:
 
 ```bash
-dailybot --api-url https://staging-api.dailybot.com label entitlement
+dailybot --api-url <your-api-url> label entitlement
+# Example placeholder: https://staging-api.example.com
 ```
 
 ## Step 1 — Entitlement (always first)
@@ -221,18 +222,19 @@ replace-set semantics for a single row matter.
 
 ```bash
 # Soft-archive (idempotent). Archived Labels cannot be newly assigned
-# (archived_label_not_assignable).
+# (code: archived_label).
 dailybot label archive <label-uuid>
 dailybot label archive <label-uuid> --json
 
 # Hard-delete — elevated only; fails when the Label is still attached
+# (code: label_in_use).
 dailybot label delete <label-uuid> -y
 dailybot label delete <label-uuid> -y --json
 ```
 
-If delete fails because the Label is in use: clear or reassign entities
-(`label assign … --clear` / `label batch --mode remove`), then delete again —
-or leave it archived.
+If delete fails because the Label is in use (`label_in_use`): clear or
+reassign entities (`label assign … --clear` / `label batch --mode remove`),
+then delete again — or leave it archived.
 
 ## Worked end-to-end flow
 
@@ -268,21 +270,32 @@ dailybot form list --limit 5 --json | jq 'map({name, labels})'
 
 See also [`../shared/list-query-and-errors.md`](../shared/list-query-and-errors.md).
 
-| `code` | When | What to do |
-|--------|------|------------|
-| `feature_not_available` | Org not entitled to Labels | Stop Labels work; tell the developer; do not retry |
-| `paid_plan_required` | Plan lacks Feature.LABELS | Surface upgrade path if present; do not retry |
-| `archived_label_not_assignable` | Assign/batch used an archived Label | Create a new Label or un-archive via product rules; do not force |
-| `insufficient_role` / `org_admin_required` | Caller cannot manage/delete | Ask an admin/manager |
-| Duplicate name / validation 400 | Create/update conflict | Pick another `--name` or update the existing UUID |
+| `code` | HTTP | When | What to do |
+|--------|------|------|------------|
+| `feature_not_available` | 403 | Org not entitled to Labels | Stop Labels work; tell the developer; do not retry |
+| `paid_plan_required` | 403 | Plan lacks Feature.LABELS | Surface upgrade path if present; do not retry |
+| `guest_not_allowed` | 403 | Guest caller hit a Labels endpoint | Stop; Labels require a non-guest member |
+| `permission_denied` | 403 | Caller lacks permission for this Labels action | Ask an admin/manager; do not retry blindly |
+| `org_admin_required` / `insufficient_role` | 403 | Caller cannot manage/delete | Ask an admin/manager |
+| `archived_label` | 400 | Assign/batch used an archived Label | Create a new Label or stop assigning that UUID; do not force |
+| `invalid_color` | 400 | Create/update color is not valid hex | Fix `--color` (e.g. `#4A90E2`) |
+| `label_limit_exceeded` | 400 | Assign/batch would exceed per-entity Label limit | Remove a Label first, then retry |
+| `duplicate_name` | 409 | Label name already exists in the org | Pick another `--name` or update the existing UUID |
+| `label_in_use` | 409 | Hard-delete while the Label still has attachments | Clear/reassign entities, then delete — or archive instead |
+| `not_found` | 404 | Unknown Label or entity UUID | Verify UUID via `label list` / entity `list` |
+
+Frozen public codes: [Errors](https://www.dailybot.com/developers/errors)
+(Labels & personalization). Match on `code` from CLI `--json` (server value
+forwarded unchanged).
 
 A **403** is never “session expired” — only **401** is. Re-login will not
 fix a plan/role 403.
 
 ## HTTP fallback
 
-When the CLI is unavailable, call `/v1/labels/` and
-`/v1/{forms\|checkins\|workflows}/…/labels/` with Bearer or `X-API-KEY`.
+When the CLI is unavailable, call `/v1/labels/` and the per-entity assign
+paths under `/v1/forms/…/labels/`, `/v1/checkins/…/labels/`, or
+`/v1/workflows/…/labels/` with Bearer or `X-API-KEY`.
 See [`../shared/http-fallback.md`](../shared/http-fallback.md) and
 [Labels API docs](https://www.dailybot.com/developers/api/labels).
 

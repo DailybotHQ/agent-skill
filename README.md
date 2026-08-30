@@ -326,7 +326,11 @@ agent-skill/
         ├── kudos/SKILL.md         — user + team recognition (user-scoped)
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
-        ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated)
+        ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated; CLI >= 3.9.0)
+        ├── labels/SKILL.md        — org Labels CRUD + assign/batch (CLI >= 3.9.0)
+        ├── featured/SKILL.md      — private Featured stars (CLI >= 3.9.0)
+        ├── env/SKILL.md           — .dailybot/env.json per-repo API keys
+        ├── channels/SKILL.md      — report-channel discovery (UUIDs for --report-channel)
         └── chat/SKILL.md          — Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.9.0; latest on PyPI)
 ```
 

@@ -179,7 +179,13 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `workflow_trigger_payload_invalid` | `workflow trigger --payload` is not a valid JSON object or exceeds 8 KiB. | Fix the payload — must be a JSON object ≤8 KiB (measured as sent on the wire). |
 | `invalid_owner_user_id` | `--owner` value isn't a valid UUID (after resolution). | Fix the UUID or name. |
 | `too_many_owner_user_ids` | More than 50 `--owner` values. | Narrow the filter — max 50 owners per request. |
-| `archived_label_not_assignable` | `label assign` / `label batch` used an archived Label. | Create a new Label or stop assigning that UUID. |
+| `archived_label` | `label assign` / `label batch` used an archived Label. | Create a new Label or stop assigning that UUID. |
+| `guest_not_allowed` | Guest caller hit a Labels endpoint. | Stop; Labels require a non-guest member. |
+| `label_in_use` | `label delete` while the Label still has attachments (409). | Clear/reassign entities, then delete — or archive instead. |
+| `label_limit_exceeded` | Assign/batch would exceed the per-entity Label limit. | Remove a Label first, then retry. |
+| `duplicate_name` | Label name collides with an existing org Label (409). | Pick another `--name` or update the existing UUID. |
+| `invalid_color` | Label create/update color is not a valid hex color. | Fix `--color` (e.g. `#4A90E2`). |
+| `permission_denied` | Caller lacks permission for this Labels action. | Ask an admin/manager; do not retry blindly. |
 
 ### 429 — rate limit
 
