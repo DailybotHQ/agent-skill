@@ -31,7 +31,8 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
    installer and installs **only after the developer confirms**. Confirm with
    `dailybot --version` (minimum `>= 3.9.0` — the skill-pack baseline for
-   every sub-skill).
+   every sub-skill; **`dailybot-tasks` needs `>= 3.12.0`**, which is the release
+   that ships the Tasks commands).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.

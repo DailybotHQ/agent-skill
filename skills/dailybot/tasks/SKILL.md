@@ -59,7 +59,10 @@ or chat messages (`dailybot-chat`).
 
 Follow [`../shared/auth.md`](../shared/auth.md) for install, login and API-key setup.
 
-Confirm the Tasks surface is present:
+**Requires `dailybot-cli >= 3.12.0`** — the release that ships the Tasks commands.
+The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more.
+
+Confirm by capability rather than by version, because that is what actually matters:
 
 ```bash
 dailybot tasks status --help
@@ -165,6 +168,21 @@ missing cursor does not tell you where to get one — the snapshot is the only s
 **This command performs exactly one read per invocation** — there is no `--follow`. The
 loop is yours because the rate limit is yours: the server publishes 240 delta reads per
 minute. Sleep between calls.
+
+**Your credential is the expensive one.** An organization API key costs 3–4 more queries
+per door than a signed-in session — the server resolves the key, its organization, the
+plan, the owner and the feature gate on every request. An empty delta poll costs 13. Not
+a reason to avoid polling; a reason not to poll every second when every thirty would do.
+
+**A deep walk is approximate.** `--all` follows every page, but pagination under
+concurrent modification is not asserted: if other people are editing while you walk a
+large project, exactly-once is not promised. When you need to know what *changed*, use
+the cursor above rather than re-walking the list.
+
+**A deep walk is approximate.** `--all` follows every page, but the API does not
+currently assert pagination under concurrent modification: if other people are editing
+while you walk a large project, exactly-once is not promised. When you need to know what
+*changed*, use the cursor above rather than re-walking the list.
 
 Full treatment: [`../shared/tasks-delta.md`](../shared/tasks-delta.md).
 

@@ -60,6 +60,24 @@ message saying it is not. Use the `Z` form, or percent-encode.
 
 The CLI normalises this for you. Direct HTTP callers must not forget it.
 
+## What the poll costs
+
+Confirmed by the API team (2026-09-20): an **empty** delta poll costs **13 queries**
+with an organization API key, and the cost is flat between 2 and 40 tasks.
+
+An organization API key costs **3–4 more queries per door** than a signed-in session,
+because the server resolves the key, its organization, the plan, the owner and the
+feature gate on every request. The credential an unattended agent holds is the expensive
+one. Not a reason to avoid polling — a reason not to poll every second when every thirty
+would do.
+
+## Deep walks are approximate
+
+`--all` follows every page, but pagination under **concurrent modification** is not
+asserted by the API. Walking a large project while other people edit it cannot promise
+exactly-once. When you need to know what *changed*, use the cursor rather than
+re-walking the list.
+
 ## The other two refusals
 
 | Condition | Code | Fix |

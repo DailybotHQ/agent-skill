@@ -843,6 +843,9 @@ dailybot login --email me@example.com
 
 ## Tasks
 
+> **Requires `dailybot-cli >= 3.12.0`** — the release that ships the Tasks commands.
+> The pack-wide baseline is `>= 3.9.0`.
+
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task.
 
