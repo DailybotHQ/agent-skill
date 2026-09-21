@@ -301,6 +301,7 @@ exit 8.
 | **3** | needs a signed-in person (`actor_required`) | `dailybot login` — not a permissions bug |
 | **4** | the server refused this action, including `tasks:admin` | read `code`; see below |
 | **5** | not found | the uuid is wrong, **or it belongs to another organization** — those are indistinguishable by design |
+| **7** | a human declined the confirmation | **stop.** Nothing was changed. Do **not** retry, and never re-run the same call with `--yes` — that skips the prompt they just refused |
 | **8** | could not reach the API | check the connection and `dailybot env show`; a **write** that timed out may have been applied |
 | **9** | delta cursor expired | re-snapshot; do **not** retry |
 
@@ -320,9 +321,13 @@ Codes worth recognising:
   `idempotency_key` in the `--json` envelope) — pass it back with `--idempotency-key`. A fresh
   key cannot be replayed, so retrying without it is how a timeout becomes a duplicate.
 - `user_aborted` — someone declined the confirmation prompt. Exit 7; nothing was changed.
-- `state_in_use` — the column still has tasks. The server wants a `migrate_to` column, which
-  **the CLI cannot send yet**: empty the column first, or make the change in the web app.
-  Do not tell the developer to pass a `migrate_to` flag; there is none.
+- `state_in_use` — the column still has tasks. The server wants a `migrate_to` column so they
+  are **moved**, and the CLI cannot send that field yet. **Stop and hand this to the web app.**
+  Do not improvise a substitute: `task bulk --operation archive` would archive the tasks
+  instead of moving them, which is not what `migrate_to` does and is not reversible per task
+  without hunting each one down. Moving them one at a time with `task move` is acceptable only
+  if the developer asks for exactly that. And do not tell them to pass a `migrate_to` flag —
+  there is none.
 
 **A 404 never means "forbidden".** If an object is invisible to you it reports as not
 found, on purpose. Do not tell the developer they lack permission.

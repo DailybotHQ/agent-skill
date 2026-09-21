@@ -882,6 +882,7 @@ user's role: the fix is `dailybot login`, never "ask an admin".
 | 3 | needs a signed-in person — `actor_required` on a person-shaped door |
 | 4 | the server refused — read `code` in `--json`; this includes `tasks:admin` |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
+| 7 | a human declined the confirmation — stop; never re-run with `--yes` |
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |
 
