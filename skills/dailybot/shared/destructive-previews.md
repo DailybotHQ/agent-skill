@@ -37,6 +37,21 @@ tasks" is the sentence that changes someone's mind; "this will archive the board
   proceed.
 - **An irreversible operation offers no restore path**, because there is none.
 
+## Under `--json`, stdout is the document and stderr is the record
+
+`--json` promises one parseable document on stdout, and the preview panel would break it.
+So the panel goes to **stderr** and stdout carries exactly one JSON object:
+
+| Invocation | stdout | stderr |
+| --- | --- | --- |
+| `--dry-run --json` | the preview (`consequence`, `affects`, `reversible`, `restore_path`) | — |
+| `--yes --json` | the write result | the consequence panel |
+| preview failed, `--json` | `{"status": "error", "code", "detail", "message"}`, exit 1 | — |
+
+Read the `consequence` from stdout under `--dry-run --json`; never scrape the panel. And
+note that a failed preview still gives you a parseable stdout — an agent that branches on
+stdout for every exit code does not need a special case here.
+
 ## Bulk has no dry run
 
 Its blast radius is bounded by a **100-item cap** instead (`too_many_items` above it).

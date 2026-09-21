@@ -270,6 +270,7 @@ English sentence.
 
 | Exit | Meaning | What to do |
 | --- | --- | --- |
+| **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`) — fix the call, do not retry |
 | **3** | needs a signed-in person, or a scope a key cannot hold | `dailybot login` — not a permissions bug |
 | **4** | the server refused this action | read `code`; see below |
 | **5** | not found | the uuid is wrong, **or it belongs to another organization** — those are indistinguishable by design |
@@ -281,7 +282,8 @@ Codes worth recognising:
 - `idempotency_key_payload_mismatch` — same key, different body. Use a **new** key; retrying
   cannot succeed.
 - `idempotency_in_progress` — an identical call is still running. Wait and check; do not loop.
-- `too_many_items` — split the batch; the cap is 100.
+- `too_many_items` — split the batch; the cap is 100. Exits **2**, like every other
+  bad-input refusal, on reads and writes alike.
 - `state_in_use` — the column still has tasks; pass `migrate_to`.
 - `task_boards_limit_reached` — the plan's board limit, not a permission problem.
 
