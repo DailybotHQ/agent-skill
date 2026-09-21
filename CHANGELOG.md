@@ -4,6 +4,25 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.0] — 2026-09-21
+
+### Changes
+
+- Merge pull request #46 from DailybotHQ/feat/tasks-subskill
+- docs(tasks): say what happens when Tasks is off for the organization
+- docs(tasks): the declined prompt needs a row, and a safe recovery
+- docs(tasks): the timed-out write carries the key on its error
+- docs(tasks): correct the retry claim and sync the exit table
+- docs(tasks): put the parser contract in the shipped sub-skill
+- docs(tasks): state the single error envelope agents parse
+- docs(tasks): mirror the bad-input exit into the pack API reference
+- docs(tasks): document the --json stream contract and the bad-input exit
+- feat(tasks): set the Tasks CLI floor and apply the API team's feedback
+- docs(tasks): document the Tasks capability in the skill repo
+- feat(tasks): route dailybot-tasks from the pack router
+- feat(tasks): add the dailybot-tasks sub-skill and its shared patterns
+
+
 ## [3.13.0] — 2026-08-30
 
 ### Changes
