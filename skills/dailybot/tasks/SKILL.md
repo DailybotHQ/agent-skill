@@ -77,9 +77,21 @@ Check the plan allows Tasks, and note the limits:
 dailybot tasks entitlements --json
 ```
 
-This door always answers 200; it reports limits rather than refusing against them. A
-board limit of `3/3` means `board create` will fail, and `labels.enabled: false` means the
-Tasks labels family is unavailable. Know that *before* you try.
+This door always answers 200; it reports limits rather than refusing against them. Read
+three things from it, and know them *before* you try anything:
+
+| Field | If it says | What it means |
+| --- | --- | --- |
+| `enabled` | `false` | **Tasks is switched off for this organization.** Stop — every other Tasks door will refuse with exit 4 / `plan_upgrade_required`. `reason` says why. |
+| `boards` | `3/3` | the board cap is reached; `board create` will fail with `task_boards_limit_reached` |
+| `labels.enabled` | `false` | the Tasks labels family is unavailable |
+
+**`enabled: false` is not a plan problem you can talk your way around, and not a credential
+problem.** Tasks is switched on **per organization**, independently of the plan — so
+`dailybot login`, a different API key, and an admin role all change nothing. The two real
+remedies are the ones the server names: a workspace admin enables Tasks, or the plan is
+upgraded (the refusal carries an upgrade link). Tell the developer that and stop; do not
+retry the doors hoping one of them is ungated.
 
 ---
 
@@ -301,6 +313,7 @@ exit 8.
 | **3** | needs a signed-in person (`actor_required`) | `dailybot login` — not a permissions bug |
 | **4** | the server refused this action, including `tasks:admin` | read `code`; see below |
 | **5** | not found | the uuid is wrong, **or it belongs to another organization** — those are indistinguishable by design |
+| **6** | transient — back off | rate limiting, or Tasks writes switched off org-wide during an incident (`feature_temporarily_read_only`). Wait and retry; change nothing |
 | **7** | a human declined the confirmation | **stop.** Nothing was changed. Do **not** retry, and never re-run the same call with `--yes` — that skips the prompt they just refused |
 | **8** | could not reach the API | check the connection and `dailybot env show`; a **write** that timed out may have been applied |
 | **9** | delta cursor expired | re-snapshot; do **not** retry |
@@ -313,6 +326,14 @@ Codes worth recognising:
 - `too_many_items` — split the batch; the cap is 100. Exits **2**, like every other
   bad-input refusal, on reads and writes alike.
 - `task_boards_limit_reached` — the plan's board limit, not a permission problem.
+- `plan_upgrade_required` — **Tasks is not enabled for this organization at all.** Exit 4.
+  Despite the name this is a per-organization switch, not a plan scope, so upgrading may not
+  be the fix on its own: a workspace admin can enable it. Nothing you do with credentials
+  helps. Run `dailybot tasks entitlements` to show the developer the state and the `reason`.
+- `feature_temporarily_read_only` — Dailybot has **switched Tasks writes off for everyone**
+  while something is being worked on. Exit 6. Reads still answer. This is an incident lever,
+  not your permissions: wait and retry later, and do not change credentials or hunt for a
+  setting. Tell the developer what happened rather than retrying in a loop.
 - `insufficient_scope` with `required_scope: tasks:admin` — exits **4**. If you are signed
   in, this is a **role** limit: ask an organization admin. Signing in again changes nothing.
   Only a bare API key gets the "a key can never hold this scope" answer.
