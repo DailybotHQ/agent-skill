@@ -215,13 +215,26 @@ dailybot project milestone-complete <project-uuid> <milestone-uuid> --dry-run
 **Completing a milestone does not close its open tasks.** They stay open and keep their
 state. Say so if you report it.
 
-### Retries are safe, with one trap
+### Retries are safe only if you keep the key
 
-Every create/update door sends an idempotency key, so a call that times out can be retried
-without duplicating. Two things to know:
+Every create/update door sends an idempotency key — but **the CLI mints a fresh uuid4 on each
+invocation unless you pass one.** Re-running the same command after a timeout therefore sends
+a key the server has never seen, and duplicates. "Automatic idempotency" buys you nothing on
+its own; keeping the key is what buys you the retry.
+
+The key used is printed, and returned as `_idempotency_key` under `--json`. Capture it, and
+pass it back:
+
+```bash
+dailybot task create -t "Fix the retry path" --board <board-uuid> --json   # → _idempotency_key
+dailybot task create -t "Fix the retry path" --board <board-uuid> \
+  --idempotency-key "<that value>" --json                                  # safe retry
+```
+
+Then:
 
 - reusing a key **within 24 hours** replays the original result and writes nothing — the
-  CLI tells you *"already applied"*;
+  CLI tells you *"already applied"*, and `_idempotency_replayed` is `true`;
 - reusing it **after 24 hours** is a **new** write and **will duplicate**.
 
 A timeout on a write is **not** a failure you can assume: check the current state before

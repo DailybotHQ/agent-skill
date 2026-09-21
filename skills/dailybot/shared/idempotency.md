@@ -59,13 +59,24 @@ retrying rather than assuming. The CLI says so in the message for exactly this r
 
 The server reports a replay in the `Idempotency-Replayed` **header**, which a caller reading
 only the JSON body cannot see. So every Tasks write body the CLI emits — including under
-`--json` — carries an extra key:
+`--json` — carries two extra keys:
 
 ```json
-{"uuid": "…", "_idempotency_replayed": true}
+{"uuid": "…", "_idempotency_replayed": false, "_idempotency_key": "5f2c…"}
 ```
 
-`true` means the server returned the original result and wrote nothing. The underscore marks
-it as added by the client; treat every other key in the body as the server's own.
+```json
+{"uuid": "…", "_idempotency_replayed": true,  "_idempotency_key": "5f2c…"}
+```
 
-This is the one fact a retry needs: it tells you whether your second call did anything.
+`_idempotency_replayed` is **always present** and always a boolean — branch on the value, not
+on whether the key exists. `true` means the server returned the original result and wrote
+nothing.
+
+`_idempotency_key` is the key the CLI actually sent. It matters because **the CLI generates a
+fresh uuid4 on every invocation when you do not pass one**: re-running the same command after
+a timeout sends a key the server has never seen, and duplicates. Capture this value and pass
+it back with `--idempotency-key` to make that retry safe for the 24h window.
+
+The underscore marks both as added by the client; treat every other key in the body as the
+server's own.

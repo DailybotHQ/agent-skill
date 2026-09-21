@@ -879,8 +879,8 @@ user's role: the fix is `dailybot login`, never "ask an admin".
 | Exit | Meaning |
 | --- | --- |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a signed-in person (or a scope a key cannot hold) |
-| 4 | the server refused — read `code` in `--json` |
+| 3 | needs a signed-in person — `actor_required` on a person-shaped door |
+| 4 | the server refused — read `code` in `--json`; this includes `tasks:admin` |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |
@@ -901,9 +901,13 @@ the refusals the CLI makes locally before spending a request:
 ```
 
 `status` is always the literal `"error"`, never an HTTP number, so one parser covers the
-family. A local refusal carries the code the server would have used — `actor_required` for a
-person-shaped door, `insufficient_scope` for a `tasks:admin` one — so you never have to know
-whether the request was actually sent. See
+family. A local refusal carries the code **and the exit** the server would have used —
+`actor_required` / exit 3 for a person-shaped door, `insufficient_scope` / exit 4 for a
+`tasks:admin` one — so you never have to know whether the request was actually sent.
+
+A `tasks:admin` refusal is exit **4**, not 3, because it is a `403` on the wire. If you are
+already signed in it is a **role** limit: ask an organization admin. Only a bare API key gets
+the "a key can never hold this scope" answer. See
 [`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
 
 ### The polling loop
@@ -924,6 +928,13 @@ Writes carry an idempotency key automatically. Reusing one **within 24 hours** r
 original result and writes nothing; reusing it **after** 24 hours is a new write and will
 duplicate. Two API keys in one organization share the namespace, which is why generated keys
 are uuid4.
+
+Every Tasks write body carries two client-added annotations: `_idempotency_replayed`, always
+a boolean, saying whether the server replayed rather than wrote; and `_idempotency_key`, the
+key that was actually sent. The second one is the load-bearing half — the CLI mints a fresh
+uuid4 per invocation, so **re-running a command after a timeout duplicates unless you pass
+that key back** with `--idempotency-key`. Full treatment:
+[`../skills/dailybot/shared/idempotency.md`](../skills/dailybot/shared/idempotency.md).
 
 ### Destructive operations
 
