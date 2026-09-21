@@ -268,11 +268,25 @@ Full treatment: [`../shared/destructive-previews.md`](../shared/destructive-prev
 Branch on the **exit code** and the machine-readable `code` in `--json`. Never parse the
 English sentence.
 
+**Under `--json`, stdout always holds one parseable document — including on failure.** The
+error shape is the same for every Tasks door, reads and writes alike:
+
+```json
+{"status": "error", "code": "not_found", "detail": "…", "message": "…"}
+```
+
+`status` is the literal string `"error"`, never an HTTP number, so one parser covers the
+family. Some refusals the CLI makes **locally**, before spending a request; those carry the
+code the server would have used — `actor_required` on a person-shaped door,
+`insufficient_scope` on a `tasks:admin` one — and the same exit, so you never have to know
+whether the call was actually sent. An unreachable host is `code: "transport_error"` with
+exit 8.
+
 | Exit | Meaning | What to do |
 | --- | --- | --- |
 | **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`) — fix the call, do not retry |
-| **3** | needs a signed-in person, or a scope a key cannot hold | `dailybot login` — not a permissions bug |
-| **4** | the server refused this action | read `code`; see below |
+| **3** | needs a signed-in person (`actor_required`) | `dailybot login` — not a permissions bug |
+| **4** | the server refused this action, including `tasks:admin` | read `code`; see below |
 | **5** | not found | the uuid is wrong, **or it belongs to another organization** — those are indistinguishable by design |
 | **8** | could not reach the API | check the connection and `dailybot env show`; a **write** that timed out may have been applied |
 | **9** | delta cursor expired | re-snapshot; do **not** retry |
@@ -286,6 +300,11 @@ Codes worth recognising:
   bad-input refusal, on reads and writes alike.
 - `state_in_use` — the column still has tasks; pass `migrate_to`.
 - `task_boards_limit_reached` — the plan's board limit, not a permission problem.
+- `insufficient_scope` with `required_scope: tasks:admin` — exits **4**. If you are signed
+  in, this is a **role** limit: ask an organization admin. Signing in again changes nothing.
+  Only a bare API key gets the "a key can never hold this scope" answer.
+- `transport_error` — the CLI never reached the server. A **write** that timed out may still
+  have been applied; reuse the same idempotency key rather than issuing a fresh one.
 
 **A 404 never means "forbidden".** If an object is invisible to you it reports as not
 found, on purpose. Do not tell the developer they lack permission.

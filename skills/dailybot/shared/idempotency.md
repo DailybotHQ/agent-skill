@@ -54,3 +54,18 @@ task subscription.
 
 A write that times out is **not known to have failed**. Check the current state before
 retrying rather than assuming. The CLI says so in the message for exactly this reason.
+
+## `_idempotency_replayed` is the CLI's own annotation
+
+The server reports a replay in the `Idempotency-Replayed` **header**, which a caller reading
+only the JSON body cannot see. So every Tasks write body the CLI emits — including under
+`--json` — carries an extra key:
+
+```json
+{"uuid": "…", "_idempotency_replayed": true}
+```
+
+`true` means the server returned the original result and wrote nothing. The underscore marks
+it as added by the client; treat every other key in the body as the server's own.
+
+This is the one fact a retry needs: it tells you whether your second call did anything.
