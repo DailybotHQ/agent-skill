@@ -878,11 +878,22 @@ user's role: the fix is `dailybot login`, never "ask an admin".
 
 | Exit | Meaning |
 | --- | --- |
+| 2 | bad input — the call itself is wrong; fix it, do not retry |
 | 3 | needs a signed-in person (or a scope a key cannot hold) |
 | 4 | the server refused — read `code` in `--json` |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |
+
+Exit **2** covers every HTTP 400: `too_many_items`, `invalid_filter_value`,
+`idempotency_key_required`. Exit **4** covers the 409s, where the call was well-formed but
+the server cannot apply it as asked: `idempotency_key_payload_mismatch`,
+`idempotency_in_progress`, `state_in_use`. Reads and writes agree on both.
+
+Under `--json`, stdout carries exactly one parseable document on every path — the result, the
+dry-run preview, or an `{"status": "error", "code", "detail", "message"}` envelope. Prompts
+and consequence panels go to stderr. See
+[`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
 
 ### The polling loop
 
