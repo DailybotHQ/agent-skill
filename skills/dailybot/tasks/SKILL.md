@@ -191,11 +191,6 @@ concurrent modification is not asserted: if other people are editing while you w
 large project, exactly-once is not promised. When you need to know what *changed*, use
 the cursor above rather than re-walking the list.
 
-**A deep walk is approximate.** `--all` follows every page, but the API does not
-currently assert pagination under concurrent modification: if other people are editing
-while you walk a large project, exactly-once is not promised. When you need to know what
-*changed*, use the cursor above rather than re-walking the list.
-
 Full treatment: [`../shared/tasks-delta.md`](../shared/tasks-delta.md).
 
 ---
