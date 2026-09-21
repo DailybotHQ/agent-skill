@@ -891,8 +891,19 @@ the server cannot apply it as asked: `idempotency_key_payload_mismatch`,
 `idempotency_in_progress`, `state_in_use`. Reads and writes agree on both.
 
 Under `--json`, stdout carries exactly one parseable document on every path — the result, the
-dry-run preview, or an `{"status": "error", "code", "detail", "message"}` envelope. Prompts
-and consequence panels go to stderr. See
+dry-run preview, or an error envelope. Prompts and consequence panels go to stderr.
+
+The error envelope is the same shape for every Tasks door, reads and writes alike, including
+the refusals the CLI makes locally before spending a request:
+
+```json
+{"status": "error", "code": "not_found", "detail": "…", "message": "…"}
+```
+
+`status` is always the literal `"error"`, never an HTTP number, so one parser covers the
+family. A local refusal carries the code the server would have used — `actor_required` for a
+person-shaped door, `insufficient_scope` for a `tasks:admin` one — so you never have to know
+whether the request was actually sent. See
 [`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
 
 ### The polling loop
