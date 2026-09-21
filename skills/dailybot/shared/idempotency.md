@@ -80,3 +80,17 @@ it back with `--idempotency-key` to make that retry safe for the 24h window.
 
 The underscore marks both as added by the client; treat every other key in the body as the
 server's own.
+
+## The timeout is the case that needs the key most
+
+A timed-out write has no response body, so there is no `_idempotency_key` to read. The CLI
+therefore puts it on the **error**: it is printed on the human path, and appears as
+`idempotency_key` in the `--json` error envelope alongside `code: "transport_error"`.
+
+```json
+{"status": "error", "code": "transport_error", "message": "…", "idempotency_key": "5f2c…"}
+```
+
+Retry that exact call with `--idempotency-key <that value>`. The server either replays the
+write it already committed or performs it once. Retrying without it mints a fresh key the
+server has never seen — which is precisely how a timeout becomes a duplicate.

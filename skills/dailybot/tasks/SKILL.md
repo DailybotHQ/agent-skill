@@ -311,13 +311,18 @@ Codes worth recognising:
 - `idempotency_in_progress` — an identical call is still running. Wait and check; do not loop.
 - `too_many_items` — split the batch; the cap is 100. Exits **2**, like every other
   bad-input refusal, on reads and writes alike.
-- `state_in_use` — the column still has tasks; pass `migrate_to`.
 - `task_boards_limit_reached` — the plan's board limit, not a permission problem.
 - `insufficient_scope` with `required_scope: tasks:admin` — exits **4**. If you are signed
   in, this is a **role** limit: ask an organization admin. Signing in again changes nothing.
   Only a bare API key gets the "a key can never hold this scope" answer.
 - `transport_error` — the CLI never reached the server. A **write** that timed out may still
-  have been applied; reuse the same idempotency key rather than issuing a fresh one.
+  have been applied. **The error carries the key that write used** (printed, and
+  `idempotency_key` in the `--json` envelope) — pass it back with `--idempotency-key`. A fresh
+  key cannot be replayed, so retrying without it is how a timeout becomes a duplicate.
+- `user_aborted` — someone declined the confirmation prompt. Exit 7; nothing was changed.
+- `state_in_use` — the column still has tasks. The server wants a `migrate_to` column, which
+  **the CLI cannot send yet**: empty the column first, or make the change in the web app.
+  Do not tell the developer to pass a `migrate_to` flag; there is none.
 
 **A 404 never means "forbidden".** If an object is invisible to you it reports as not
 found, on purpose. Do not tell the developer they lack permission.
