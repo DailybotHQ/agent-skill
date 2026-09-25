@@ -857,7 +857,7 @@ This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 103 Tasks commands, with every argument, flag, API door
+The complete command list (all 115 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
 from the CLI's command definitions.
@@ -878,7 +878,7 @@ data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, curso
 | create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants` (list too), `watch`, `mute` — reveal or change **who is notified** |
 | `project update-post`, milestones (create, update, complete, reopen, retire) | `project members` (the list) — reveals **who can see** |
 | task archive & restore | saved views (`board views`, `project views`, saves), board labels, pins (`star`, `favorites`) — belong to a person |
-| | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink — needs `tasks:admin` (exit 4) |
+| | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink, project / goal attach and attachment delete — needs `tasks:admin` (exit 4) |
 
 The server answers a key on any of these with `403 insufficient_scope`; the CLI refuses
 before sending (exit 3 for a person-shaped door, 4 for a `tasks:admin` one).

@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.0`: 103 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.0`: 115 commands across
 `tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
@@ -57,10 +57,10 @@ Examples use placeholder uuids (`00000000-0000-0000-0000-00000000000N`) and the 
 | Group | Commands |
 | --- | --- |
 | `tasks` | `activity`, `changes`, `counts`, `cursor`, `entitlements`, `favorites`, `inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`, `mine`, `search`, `status`, `timeline`, `view delete`, `view get`, `view star`, `view unstar`, `view update` |
-| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `bulk`, `children`, `comment`, `comment-delete`, `comment-edit`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
+| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
 | `board` | `archive`, `create`, `get`, `label create`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views` |
-| `project` | `archive`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-update`, `milestones`, `restore`, `update`, `update-post`, `updates`, `view save`, `views` |
-| `goal` | `archive`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
+| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-update`, `milestones`, `restore`, `update`, `update-post`, `updates`, `view save`, `views` |
+| `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
 
 ## Workspace — `dailybot tasks`
 
@@ -374,6 +374,46 @@ Comment on a task.
 - **Flags:**
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task comment ENG-142 "Deployed. <@DB@00000000-0000-0000-0000-000000000004> can you verify?"`
+
+### `dailybot task comment-attach TASK COMMENT FILE`
+
+Attach a file to a comment.
+
+- **API:** `POST /v1/tasks/tasks/{t}/comments/{c}/attachments/ (multipart, ≤5 MiB; the comment's author only)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--caption` `<text>` — Short caption shown with the file.
+- **Example:** `dailybot task comment-attach ENG-142 00000000-0000-0000-0000-000000000007 ./trace.txt`
+
+### `dailybot task comment-attachment delete TASK COMMENT ATTACHMENT`
+
+Remove an attachment from a comment.
+
+- **API:** `DELETE /v1/tasks/tasks/{t}/comments/{c}/attachments/{a}/ (uploader, comment author or an org admin)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot task comment-attachment delete ENG-142 00000000-0000-0000-0000-000000000007 00000000-0000-0000-0000-000000000009 --yes`
+
+### `dailybot task comment-attachment get TASK COMMENT ATTACHMENT`
+
+Download a comment's attachment to a file.
+
+- **API:** `GET /v1/tasks/tasks/{t}/comments/{c}/attachments/{a}/content/`
+- **Signed-in person:** no
+- **Flags:**
+  - `--output`, `-o` `<file>` **required** — Where to write the file.
+  - `--force` — Overwrite the output file if it exists.
+- **Example:** `dailybot task comment-attachment get ENG-142 00000000-0000-0000-0000-000000000007 00000000-0000-0000-0000-000000000009 -o ./trace.txt`
+
+### `dailybot task comment-attachments TASK COMMENT`
+
+List a comment's attachments.
+
+- **API:** `GET /v1/tasks/tasks/{t}/comments/{c}/attachments/`
+- **Signed-in person:** no
+- **Example:** `dailybot task comment-attachments ENG-142 00000000-0000-0000-0000-000000000007 --json`
 
 ### `dailybot task comment-delete TASK COMMENT`
 
@@ -919,6 +959,46 @@ Archive a project.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot project archive 00000000-0000-0000-0000-000000000002 --dry-run`
 
+### `dailybot project attach PROJECT FILE`
+
+Attach a file to a project.
+
+- **API:** `POST /v1/tasks/projects/{p}/attachments/ (multipart, ≤5 MiB) (tasks:admin)`
+- **Signed-in person:** **admin** (a key exits 4)
+- **Flags:**
+  - `--caption` `<text>` — Short caption shown with the file.
+- **Example:** `dailybot project attach 00000000-0000-0000-0000-000000000002 ./plan.pdf`
+
+### `dailybot project attachment delete PROJECT ATTACHMENT`
+
+Remove an attachment from a project.
+
+- **API:** `DELETE /v1/tasks/projects/{p}/attachments/{a}/ (tasks:admin)`
+- **Signed-in person:** **admin** (a key exits 4)
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot project attachment delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000009 --yes`
+
+### `dailybot project attachment get PROJECT ATTACHMENT`
+
+Download a project's attachment to a file.
+
+- **API:** `GET /v1/tasks/projects/{p}/attachments/{a}/content/`
+- **Signed-in person:** no
+- **Flags:**
+  - `--output`, `-o` `<file>` **required** — Where to write the file.
+  - `--force` — Overwrite the output file if it exists.
+- **Example:** `dailybot project attachment get 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000009 -o ./plan.pdf`
+
+### `dailybot project attachments PROJECT`
+
+List a project's attachments.
+
+- **API:** `GET /v1/tasks/projects/{p}/attachments/`
+- **Signed-in person:** no
+- **Example:** `dailybot project attachments 00000000-0000-0000-0000-000000000002 --json`
+
 ### `dailybot project create`
 
 Create a project.
@@ -1166,6 +1246,46 @@ Archive a goal.
   - `--yes`, `-y` — Skip the prompt (still previews).
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot goal archive 00000000-0000-0000-0000-000000000003 --dry-run`
+
+### `dailybot goal attach GOAL FILE`
+
+Attach a file to a goal.
+
+- **API:** `POST /v1/tasks/goals/{g}/attachments/ (multipart, ≤5 MiB) (tasks:admin)`
+- **Signed-in person:** **admin** (a key exits 4)
+- **Flags:**
+  - `--caption` `<text>` — Short caption shown with the file.
+- **Example:** `dailybot goal attach 00000000-0000-0000-0000-000000000003 ./okr.pdf`
+
+### `dailybot goal attachment delete GOAL ATTACHMENT`
+
+Remove an attachment from a goal.
+
+- **API:** `DELETE /v1/tasks/goals/{g}/attachments/{a}/ (tasks:admin)`
+- **Signed-in person:** **admin** (a key exits 4)
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot goal attachment delete 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000009 --yes`
+
+### `dailybot goal attachment get GOAL ATTACHMENT`
+
+Download a goal's attachment to a file.
+
+- **API:** `GET /v1/tasks/goals/{g}/attachments/{a}/content/`
+- **Signed-in person:** no
+- **Flags:**
+  - `--output`, `-o` `<file>` **required** — Where to write the file.
+  - `--force` — Overwrite the output file if it exists.
+- **Example:** `dailybot goal attachment get 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000009 -o ./okr.pdf`
+
+### `dailybot goal attachments GOAL`
+
+List a goal's attachments.
+
+- **API:** `GET /v1/tasks/goals/{g}/attachments/`
+- **Signed-in person:** no
+- **Example:** `dailybot goal attachments 00000000-0000-0000-0000-000000000003 --json`
 
 ### `dailybot goal create`
 

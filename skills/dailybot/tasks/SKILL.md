@@ -25,7 +25,7 @@ text. A goal has a declared **status**.
 Every `<task>` argument takes a key like `ENG-142` or a uuid.
 
 **Every command, with its arguments, flags, API door and an example, is in
-[commands.md](commands.md)** (103 commands, generated from the CLI). This file teaches
+[commands.md](commands.md)** (115 commands, generated from the CLI). This file teaches
 how to use them safely; look up exact flags there before you guess one.
 
 ---
@@ -140,7 +140,7 @@ that says so is not a bug — pass the message on.
 | `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` | reveals or changes **who is notified**; no key may do that |
 | `project members` | reveals **who can see**; no key may do that |
 | `board labels`, `board label create`, `board views`, `board view save`, `project views`, `project view save`, `tasks view …`, `board star` / `unstar`, `tasks favorites` | label usage, saved views and pins belong to a person |
-| every structure change: `board` / `board state` / `project` / `goal` create, update, archive and restore; `board state reorder`; `board member add` / `remove`; `project member add` / `remove`; `goal link` / `unlink` | need `tasks:admin`, which **cannot be stored on a key at all** |
+| every structure change: `board` / `board state` / `project` / `goal` create, update, archive and restore; `board state reorder`; `board member add` / `remove`; `project member add` / `remove`; `goal link` / `unlink`; `project` / `goal` `attach` and `attachment delete` | need `tasks:admin`, which **cannot be stored on a key at all** |
 
 The server answers a key on any of these with `403 insufficient_scope`. The CLI refuses
 them **before** sending anything: the person-shaped ones exit **3**, and every `tasks:admin`
@@ -255,7 +255,13 @@ dailybot task move ENG-142 --board <board-uuid>    # to another board
 dailybot task comment ENG-142 "Deployed to staging"
 dailybot task link ENG-142 ENG-99 --type blocks    # blocks | relates_to | duplicates
 dailybot task attach ENG-142 ./crash.log
+dailybot task comment-attach ENG-142 <comment-uuid> ./trace.txt   # only the comment's author
 ```
+
+**Files attach to a task, a comment, a project or a goal.** A task takes up to 25 MiB. A
+comment, project or goal takes up to **5 MiB** in one request, and the CLI checks that before
+sending. Attaching to or deleting from a project or a goal is a structure change
+(`tasks:admin`, Step 2); reading them only needs visibility.
 
 **`--state` accepts a column name** (case-insensitive), **a category** (`backlog`, `todo`,
 `in_progress`, `done`, `canceled` — the first column of that category), or a state uuid. A
@@ -436,8 +442,9 @@ Codes worth recognising:
 - `goal_name_conflict` — another live goal took this name while it was archived; rename one.
 - `precondition_failed` — someone saved views since you read them; read `board views --etag`
   again. Saving views always needs `--if-match <etag>` or `--fetch-etag`.
-- `attachment_too_large` / `attachment_storage_unavailable` — the server's limit (25 MiB, or
-  5 MiB without storage) / no file storage on this server. Nothing was uploaded. Do **not**
+- `attachment_too_large` / `attachment_storage_unavailable` — over the server's limit (25 MiB
+  for a task upload through storage; 5 MiB for a captioned task upload and for every comment,
+  project and goal attachment) / no file storage on this server. Nothing was uploaded. Do **not**
   retry `attachment_storage_unavailable` even though it exits 6: waiting will not add storage.
 - `transport_error` — the CLI never reached the server. A **write** that timed out may still
   have been applied. **The error carries the key that write used** — pass it back with
