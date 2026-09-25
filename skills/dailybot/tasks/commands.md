@@ -721,7 +721,7 @@ Archive a board.
 
 Create a board in a project.
 
-- **API:** `POST /v1/tasks/boards/ +key (tasks:admin)`
+- **API:** `POST /v1/tasks/boards/ +key (tasks:admin); --project and --key need the CLI release after 3.14.1`
 - **Signed-in person:** **admin** (a key exits 4)
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Board name.

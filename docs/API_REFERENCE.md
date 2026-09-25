@@ -949,11 +949,12 @@ original result and writes nothing; reusing it **after** 24 hours is a new write
 duplicate. Two API keys in one organization share the namespace, which is why generated keys
 are uuid4.
 
-Every Tasks write body carries two client-added annotations: `_idempotency_replayed`, always
-a boolean, saying whether the server replayed rather than wrote; and `_idempotency_key`, the
-key that was actually sent. The second one is the load-bearing half — the CLI mints a fresh
-uuid4 per invocation, so **re-running a command after a timeout duplicates unless you pass
-that key back** with `--idempotency-key`. Full treatment:
+On a `+key` door, the write body carries two client-added annotations: `_idempotency_replayed`,
+a boolean saying whether the server replayed rather than wrote, and `_idempotency_key`, the
+key that was actually sent. That key is the load-bearing half. The CLI mints a fresh uuid4 per
+invocation, so **re-running a `+key` command after a timeout duplicates unless you pass that
+key back** with `--idempotency-key`. A door without `+key` sends no key and returns none, so
+there is nothing to pass back: check the current state before retrying it. Full treatment:
 [`../skills/dailybot/shared/idempotency.md`](../skills/dailybot/shared/idempotency.md).
 
 ### Destructive operations

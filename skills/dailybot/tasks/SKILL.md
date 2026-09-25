@@ -80,6 +80,9 @@ parity with the web (owner, board administration, attachments, bulk dry run). Th
 pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more. Tasks first
 shipped in 3.12.0; on a CLI between 3.12.0 and 3.14.0, `--owner`, `task set-owner` and
 everything in Step 8 are missing — ask the developer to run `dailybot upgrade`.
+One exception: `board create --project --key`, which the API requires, ships in the CLI
+release after 3.14.1. On 3.14.0 or 3.14.1, `board create` cannot succeed. Check with
+`dailybot board create --help`: if it lists no `--project`, ask the developer to upgrade.
 
 Confirm by capability rather than by version, because that is what actually matters:
 
@@ -540,6 +543,7 @@ dailybot task get "$KEY" --json    # confirm it exists; show its key and title t
 # only after they confirm this is the card:
 dailybot task move "$KEY" --state done --json
 dailybot task comment "$KEY" "Merged: <one line on what shipped>"
+# the project: the task's board names it (board get <board-uuid> --json → project); if none, ask
 dailybot project update-post <project-uuid> "<what shipped and what it unblocks>" --health on_track
 ```
 
@@ -580,8 +584,17 @@ dailybot task bulk --operation update -f sprint.json --yes --json
 ```
 
 To move the chosen cards into the sprint column, run a second batch with `--operation move`
-and `"state"` (the column's uuid from the snapshot) on each item. Gate it the same way:
-`--dry-run` first, show the moves, and wait for their go-ahead before the `--yes` call.
+and `"state"` (the column's uuid from the snapshot) on each item, gated the same way:
+
+```bash
+dailybot task bulk --operation move -f moves.json --dry-run
+```
+
+Show the developer the moves, and only after they agree:
+
+```bash
+dailybot task bulk --operation move -f moves.json --yes --json
+```
 
 ### 5. Report progress against a goal
 
