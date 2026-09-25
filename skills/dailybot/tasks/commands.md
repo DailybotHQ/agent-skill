@@ -21,7 +21,8 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   key. `(tasks:admin)` marks a structure change.
 - **Signed-in person.** **admin** means the command needs the `tasks:admin` scope. That is
   every structure change: creating, updating, archiving or restoring boards, columns,
-  projects and goals, board and project membership, and linking goals to projects. The scope
+  projects and goals, board and project membership, linking goals to projects, and
+  attaching files to or deleting them from a project or a goal. The scope
   can never be held by an API key, even an organization admin's. With a key the CLI refuses
   **before sending anything**, exits 4, and reports `insufficient_scope`. The fix is
   `dailybot login` as an organization admin. **yes** means the answer is about a person (their
@@ -38,6 +39,9 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
 - **Destructive commands.** Every archive / delete / remove / unlink / retire command takes
   `--dry-run` (shows the consequence, changes nothing) and `--yes` (skips the prompt). Show the
   consequence to the human first ([destructive previews](../shared/destructive-previews.md)).
+  `board view save` and `project view save` are destructive too: they replace the person's
+  whole saved-view list and have **no** preview. Read the current views, show what the new
+  file drops, and wait before saving with `--if-match`.
   Exit 7 means a person declined. Stop, and never re-run with `--yes`.
 - **Exit codes.** 0 ok · 1 partial bulk, predicted refusals, `preview_not_honoured`, or another failure (read
   `code`) · 2 bad input, including `invalid_identifier` · 3 needs a signed-in person ·

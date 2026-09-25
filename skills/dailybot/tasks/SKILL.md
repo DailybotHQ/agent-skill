@@ -260,8 +260,9 @@ dailybot task attach ENG-142 ./crash.log
 dailybot task comment-attach ENG-142 <comment-uuid> ./trace.txt   # only the comment's author
 ```
 
-**Files attach to a task, a comment, a project or a goal.** A task takes up to 25 MiB. A
-comment, project or goal takes up to **5 MiB** in one request, and the CLI checks that before
+**Files attach to a task, a comment, a project or a goal.** A task takes up to 25 MiB
+through the default upload (5 MiB with `--caption`, which is a single request). A comment,
+project or goal takes up to **5 MiB** in one request, and the CLI checks that before
 sending. Attaching to or deleting from a project or a goal is a structure change
 (`tasks:admin`, Step 2); reading them only needs visibility.
 
@@ -448,8 +449,10 @@ Codes worth recognising:
 - `last_grant_cannot_be_removed` — the last member of a private board stays; a private board
   with nobody in it is readable by nobody.
 - `goal_name_conflict` — another live goal took this name while it was archived; rename one.
-- `precondition_failed` — someone saved views since you read them; read `board views --etag`
-  again. Saving views always needs `--if-match <etag>` or `--fetch-etag`.
+- `precondition_failed` — someone saved views since you read them. Read `board views --json`
+  (and `--etag`) again, show the developer what changed, and save again with `--if-match`
+  and the new ETag. Do not switch to `--fetch-etag` to get past it: that skips the review
+  Step 6 requires.
 - `attachment_too_large` / `attachment_storage_unavailable` — over the server's limit (25 MiB
   for a task upload through storage; 5 MiB for a captioned task upload and for every comment,
   project and goal attachment) / no file storage on this server. Nothing was uploaded. Do **not**
@@ -512,6 +515,7 @@ update/reopen/retire, goal restore/unlink, saved views) is in [commands.md](comm
 # todo.json — one object per task; only "title" is required
 # [{"title": "Rotate the API keys", "priority": 2}, {"title": "Write the runbook", "owner": "<user-uuid>"}]
 dailybot task bulk --operation create --board <board-uuid-or-key> -f todo.json --dry-run
+# stop here: show the developer the dry run, and run the next line only after they say yes
 dailybot task bulk --operation create --board <board-uuid-or-key> -f todo.json --yes --json
 ```
 
@@ -558,6 +562,7 @@ dailybot board snapshot <board-uuid> --json          # the whole board: columns,
 # build sprint.json from the cards you chose, e.g.
 # [{"task": "ENG-142", "owner": "<user-uuid>", "priority": 2, "due_date": "2026-10-09"}]
 dailybot task bulk --operation update -f sprint.json --dry-run
+# stop here: present the from → to table, and run the next line only after they agree
 dailybot task bulk --operation update -f sprint.json --yes --json
 ```
 
