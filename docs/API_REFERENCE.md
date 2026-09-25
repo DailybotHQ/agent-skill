@@ -843,11 +843,15 @@ dailybot login --email me@example.com
 
 ## Tasks
 
-> **Requires `dailybot-cli >= 3.12.0`** — the release that ships the Tasks commands.
-> The pack-wide baseline is `>= 3.9.0`.
+> **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
+
+> **Requires `dailybot-cli >= 3.14.0`** — the release that brings Tasks to parity with the
+> web. The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
-workspace, **`dailybot task`** for one task.
+workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
+containers. A task has an **owner** (never "assignee"; `--owner`, `task set-owner`) and a
+**state** (its column). Every task argument takes a key (`ENG-142`) or a uuid.
 
 This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
@@ -865,19 +869,21 @@ data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, curso
 
 | Works with `DAILYBOT_API_KEY` | Requires `dailybot login` |
 | --- | --- |
-| pulse, search, activity, timeline, boards, tasks, projects, goals, milestones | `tasks mine` / `counts` / `inbox` — defined relative to *the calling user* |
-| create / update / move / assign / comment / link / labels / bulk | `task participants` — changes **who is notified** |
-| `project update-post`, `milestone complete` / `reopen` | board & project **member** writes — change **who can see** |
-| archive & restore for tasks, boards, projects, goals | `board create`, `project create`, `goal create` — need `tasks:admin` |
+| pulse, search, activity, timeline, boards, columns, tasks, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `board mentionables` — defined relative to *the calling user* |
+| create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants`, `watch`, `mute` — change **who is notified** |
+| `project update-post`, milestones (create, update, complete, reopen, retire) | board & project **member** writes — change **who can see** |
+| task archive & restore | saved views, board labels, pins (`star`, `favorites`) — belong to a person |
+| | every board / column / project / goal structure change, incl. create, archive, restore — needs `tasks:admin` |
 
-**`tasks:admin` cannot be stored on an API key at all**, so the last row is refused **even
-to an organization admin's own key**. A refusal there is about the credential kind, not the
+**`tasks:admin` cannot be stored on an API key at all**, so structure changes are refused
+**even to an organization admin's own key**. A refusal there is about the credential kind, not the
 user's role: the fix is `dailybot login`, never "ask an admin".
 
 ### Exit codes
 
 | Exit | Meaning |
 | --- | --- |
+| 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
 | 3 | needs a signed-in person — `actor_required` on a person-shaped door |
 | 4 | the server refused — read `code` in `--json`; this includes `tasks:admin` |
@@ -887,10 +893,13 @@ user's role: the fix is `dailybot login`, never "ask an admin".
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |
 
+(Exit 10 is form-response quota; Tasks never uses it.)
+
 Exit **2** covers every HTTP 400: `too_many_items`, `invalid_filter_value`,
 `idempotency_key_required`. Exit **4** covers the 409s, where the call was well-formed but
 the server cannot apply it as asked: `idempotency_key_payload_mismatch`,
-`idempotency_in_progress`, `state_in_use`. Reads and writes agree on both.
+`idempotency_in_progress`, `state_in_use` (retire a column with `--migrate-to` instead).
+Reads and writes agree on both.
 
 Under `--json`, stdout carries exactly one parseable document on every path — the result, the
 dry-run preview, or an error envelope. Prompts and consequence panels go to stderr.
@@ -944,8 +953,11 @@ Archive doors are previewed with `?dry_run=true` before acting, and the CLI show
 server's `consequence` sentence plus the affected counts. **Surface that sentence to the
 developer** rather than summarising it. Archiving a board cascade-archives its live tasks
 and restoring the board does not bring them back; `task delete` is an alias of archive and
-destroys nothing. `--yes` skips the prompt, not the preview. Bulk has no dry run — its
-blast radius is bounded by a 100-item cap.
+destroys nothing. `--yes` skips the prompt, not the preview. **Bulk has a real dry run**
+(`task bulk --dry-run`): the server runs the batch and rolls it back, showing each change and
+refusal, and writes nothing; the cap is 100 items. Doors with no server preview (member and
+participant removal, unlink, comment / attachment / milestone / view deletes) take a
+client-side `--dry-run` that sends nothing.
 
 ### Object URLs
 

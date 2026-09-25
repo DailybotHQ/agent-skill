@@ -32,7 +32,7 @@ agents.
 | **dailybot-ask** | Ask the Dailybot AI a question headlessly — `dailybot ask "..."` prints the answer to stdout (or `--json`). The primary way an agent queries the Dailybot AI with only an API key. Requires `dailybot-cli >= 1.15.0`. |
 | **dailybot-labels** | Organization Labels — create/list/update/archive/delete and assign (or batch) to forms, check-ins, and workflows/automations. Web chip-picker parity. Requires `dailybot-cli >= 3.9.0`. |
 | **dailybot-featured** | Private per-user Featured stars on forms, automations, and check-ins. Not the same as org Labels. Requires `dailybot-cli >= 3.9.0`. |
-| **dailybot-tasks** | Boards, tasks, projects, goals and milestones. Requires `dailybot-cli >= 3.12.0`. Read the workspace, poll what changed since a cursor, create / move / assign / comment, bulk operations, archive with a server-previewed consequence, and post project updates. Some verbs need `dailybot login` — see the sub-skill's credential table. |
+| **dailybot-tasks** | **Beta.** Boards, tasks, projects, goals and milestones. Requires `dailybot-cli >= 3.14.0`. Read the workspace in one call, poll what changed since a cursor, create / move / set the owner / comment with @mentions / attach files, bulk operations with a server-side dry run, archive with a previewed consequence, administer boards and projects, and post project updates. Some verbs need `dailybot login` — see the sub-skill's credential table. |
 
 A root **dailybot** meta-skill acts as a router — it describes all
 capabilities and routes to the right sub-skill based on the developer's
