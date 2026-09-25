@@ -226,7 +226,7 @@ board cursor (needs `dailybot login`):
 
 ```bash
 dailybot tasks cursor --json                       # → last_seen_at
-dailybot tasks activity --updated-since <last_seen_at> --json
+dailybot tasks activity --since <last_seen_at> --json
 dailybot tasks cursor --now                        # I have caught up
 dailybot task activity ENG-142 --json              # one task's history, from → to
 ```
