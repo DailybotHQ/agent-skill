@@ -75,14 +75,12 @@ or chat messages (`dailybot-chat`).
 
 Follow [`../shared/auth.md`](../shared/auth.md) for install, login and API-key setup.
 
-**Requires `dailybot-cli >= 3.14.0`** — now on PyPI — the release that brings Tasks to
-parity with the web (owner, board administration, attachments, bulk dry run). The
-pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more. Tasks first
-shipped in 3.12.0; on a CLI between 3.12.0 and 3.14.0, `--owner`, `task set-owner` and
-everything in Step 8 are missing — ask the developer to run `dailybot upgrade`.
-One exception: `board create --project --key`, which the API requires, ships in the CLI
-release after 3.14.1. On 3.14.0 or 3.14.1, `board create` cannot succeed. Check with
-`dailybot board create --help`: if it lists no `--project`, ask the developer to upgrade.
+**Requires `dailybot-cli >= 3.14.2`** (on PyPI). Tasks reached parity with the web in
+3.14.0 (owner, board administration, attachments, bulk dry run); 3.14.2 adds the
+`--project` / `--key` that `board create` needs, without which the API refuses every create.
+The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more. Tasks first
+shipped in 3.12.0; on an older CLI, `--owner`, `task set-owner`, everything in Step 8 and
+`board create` are missing or broken, so ask the developer to run `dailybot upgrade`.
 
 Confirm by capability rather than by version, because that is what actually matters:
 
@@ -587,7 +585,7 @@ To move the chosen cards into the sprint column, run a second batch with `--oper
 and `"state"` (the column's uuid from the snapshot) on each item, gated the same way:
 
 ```bash
-dailybot task bulk --operation move -f moves.json --dry-run
+dailybot task bulk --operation move -f moves.json --dry-run --json
 ```
 
 Show the developer the moves, and only after they agree:

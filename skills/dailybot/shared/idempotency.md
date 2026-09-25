@@ -45,8 +45,12 @@ dailybot task create --title "Deploy v2" --idempotency-key "deploy-2026-09-19-v2
 
 Not every write honours it. Where the server ignores it, the CLI does not send one and
 offers no `--idempotency-key` flag — advertising a guarantee that does not exist is worse
-than having none. Currently: `project update-post`, `milestone complete` / `reopen`, and
-task subscription.
+than having none. Many Tasks doors are like this, for example: editing, restoring or
+reordering columns; creating or updating milestones; updating, restoring, linking or
+unlinking goals; comment edits; board labels; saved views; task subscription. The Tasks
+command reference (`tasks/commands.md`) marks every door that **does** send a key with
+`+key` (among them `project update-post` and `milestone complete` / `reopen`). For any other
+door, a retry can repeat the write, so check the state first.
 
 `POST /v1/tasks/tasks/bulk/` is the opposite: it **requires** the header.
 
@@ -59,7 +63,8 @@ retrying rather than assuming. The CLI says so in the message for exactly this r
 
 The server reports a replay in the `Idempotency-Replayed` **header**, which a caller reading
 only the JSON body cannot see. So every Tasks write body the CLI emits — including under
-`--json` — carries two extra keys:
+`--json` — carries `_idempotency_replayed`, and a write on a `+key` door also carries
+`_idempotency_key`, the key that was actually sent:
 
 ```json
 {"uuid": "…", "_idempotency_replayed": false, "_idempotency_key": "5f2c…"}
