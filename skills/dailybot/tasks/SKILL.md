@@ -1,7 +1,7 @@
 ---
 name: dailybot-tasks
 description: Manage Dailybot Tasks via the CLI — boards, columns, tasks, projects, goals and milestones. Read the workspace in one call (pulse, what needs attention, recent activity, goal progress), poll what changed since a cursor, create/update/move tasks and set their owner, comment with @mentions, relate, attach files, watch or mute, run bulk operations with a server-side dry run, archive safely with a previewed consequence, administer boards (columns, members, saved views), and post project updates so the team sees what an agent did. Use when the developer mentions tasks, a board, a backlog, a sprint, a kanban column, a project update, a milestone or a goal, or asks what is open / overdue / blocked. Not for check-in responses (use dailybot-checkin) or form submissions (use dailybot-forms).
-version: "3.14.0"
+version: "3.14.1"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
 metadata: {"openclaw":{"emoji":"✅","homepage":"https://dailybot.com","requires":{"anyBins":["dailybot","curl"]},"primaryEnv":"DAILYBOT_API_KEY","install":[{"id":"cli-install-script","kind":"download","url":"https://cli.dailybot.com/install.sh","label":"Install Dailybot CLI (official script — preferred on Linux/macOS)"},{"id":"pip","kind":"pip","package":"dailybot-cli","bins":["dailybot"],"label":"Install Dailybot CLI via pip (fallback if binary fails)"}]}}
@@ -75,11 +75,11 @@ or chat messages (`dailybot-chat`).
 
 Follow [`../shared/auth.md`](../shared/auth.md) for install, login and API-key setup.
 
-**Requires `dailybot-cli >= 3.14.0`** — the release that brings Tasks to parity with the
-web (owner, board administration, attachments, bulk dry run). The pack-wide baseline is
-`>= 3.9.0`; this sub-skill is the one that needs more. Tasks first shipped in 3.12.0; on a
-CLI between 3.12.0 and 3.14.0, `--owner`, `task set-owner` and everything in Step 8 are
-missing — ask the developer to run `dailybot upgrade`.
+**Requires `dailybot-cli >= 3.14.0`** — now on PyPI — the release that brings Tasks to
+parity with the web (owner, board administration, attachments, bulk dry run). The
+pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more. Tasks first
+shipped in 3.12.0; on a CLI between 3.12.0 and 3.14.0, `--owner`, `task set-owner` and
+everything in Step 8 are missing — ask the developer to run `dailybot upgrade`.
 
 Confirm by capability rather than by version, because that is what actually matters:
 
@@ -515,14 +515,18 @@ update/reopen/retire, goal restore/unlink, saved views) is in [commands.md](comm
 # todo.json — one object per task; only "title" is required
 # [{"title": "Rotate the API keys", "priority": 2}, {"title": "Write the runbook", "owner": "<user-uuid>"}]
 dailybot task bulk --operation create --board <board-uuid-or-key> -f todo.json --dry-run
-# stop here: show the developer the dry run, and run the next line only after they say yes
+```
+
+Show the developer the dry run and **wait for their go-ahead**. It lists every task that
+would be created and any row the server would refuse. Only after they say yes:
+
+```bash
 dailybot task bulk --operation create --board <board-uuid-or-key> -f todo.json --yes --json
 ```
 
-Show the developer the dry run and **wait for their go-ahead** before the `--yes` call: it
-lists every task that would be created and any row the server would refuse. If the real call
-times out (exit 8), its error envelope carries the `idempotency_key` it used. Pass that back
-with `--idempotency-key` so nothing is created twice. Up to 100 items per call.
+If the real call times out (exit 8), its error envelope carries the `idempotency_key` it
+used. Pass that back with `--idempotency-key` so nothing is created twice. Up to 100 items
+per call.
 
 ### 2. Move a task when a PR merges
 
@@ -562,13 +566,17 @@ dailybot board snapshot <board-uuid> --json          # the whole board: columns,
 # build sprint.json from the cards you chose, e.g.
 # [{"task": "ENG-142", "owner": "<user-uuid>", "priority": 2, "due_date": "2026-10-09"}]
 dailybot task bulk --operation update -f sprint.json --dry-run
-# stop here: present the from → to table, and run the next line only after they agree
-dailybot task bulk --operation update -f sprint.json --yes --json
 ```
 
 The dry run shows each field's `from → to`. Present that table to the developer and apply
-only after they agree. To move the chosen cards into the sprint column, run a second batch
-with `--operation move` and `"state"` (the column's uuid from the snapshot) on each item.
+only after they agree:
+
+```bash
+dailybot task bulk --operation update -f sprint.json --yes --json
+```
+
+To move the chosen cards into the sprint column, run a second batch with `--operation move`
+and `"state"` (the column's uuid from the snapshot) on each item.
 
 ### 5. Report progress against a goal
 

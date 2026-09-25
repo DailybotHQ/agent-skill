@@ -104,8 +104,8 @@ agent-skill/
     ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
     ├── forms/SKILL.md
     ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
-    ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones;
-    │                                          untrusted content is Step 0, before any command
+    ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones
+    │                                          (CLI >= 3.14.0); untrusted content is Step 0
     ├── tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
     ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
     ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)

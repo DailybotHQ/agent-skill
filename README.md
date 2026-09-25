@@ -328,7 +328,7 @@ agent-skill/
         ├── teams/SKILL.md         — team listing + name resolver (shared with kudos + chat)
         ├── forms/SKILL.md         — form submission (user-scoped)
         ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated; CLI >= 3.9.0)
-        ├── tasks/SKILL.md         — boards / tasks / projects / goals / milestones
+        ├── tasks/SKILL.md         — boards / tasks / projects / goals / milestones (CLI >= 3.14.0)
         ├── tasks/commands.md      — every Tasks command: args, flags, API door, example
         ├── labels/SKILL.md        — org Labels CRUD + assign/batch (CLI >= 3.9.0)
         ├── featured/SKILL.md      — private Featured stars (CLI >= 3.9.0)
