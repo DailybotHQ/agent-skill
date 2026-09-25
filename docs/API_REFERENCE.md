@@ -875,11 +875,13 @@ data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, curso
 | Works with `DAILYBOT_API_KEY` | Requires `dailybot login` |
 | --- | --- |
 | pulse, search, activity, timeline, boards, columns, tasks, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `board mentionables` — defined relative to *the calling user* |
-| create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants`, `watch`, `mute` — change **who is notified** |
-| `project update-post`, milestones (create, update, complete, reopen, retire) | board & project **member** writes — change **who can see** |
-| task archive & restore | saved views, board labels, pins (`star`, `favorites`) — belong to a person |
-| | every board / column / project / goal structure change, incl. create, archive, restore — needs `tasks:admin` |
+| create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants` (list too), `watch`, `mute` — reveal or change **who is notified** |
+| `project update-post`, milestones (create, update, complete, reopen, retire) | `project members` (the list) — reveals **who can see** |
+| task archive & restore | saved views (`board views`, `project views`, saves), board labels, pins (`star`, `favorites`) — belong to a person |
+| | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink — needs `tasks:admin` (exit 4) |
 
+The server answers a key on any of these with `403 insufficient_scope`; the CLI refuses
+before sending (exit 3 for a person-shaped door, 4 for a `tasks:admin` one).
 **`tasks:admin` cannot be stored on an API key at all**, so structure changes are refused
 **even to an organization admin's own key**. A refusal there is about the credential kind, not the
 user's role: the fix is `dailybot login`, never "ask an admin".
@@ -888,12 +890,12 @@ user's role: the fix is `dailybot login`, never "ask an admin".
 
 | Exit | Meaning |
 | --- | --- |
-| 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals |
+| 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals; or another failure (`preview_not_honoured`, an attachment upload) — read `code` |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a signed-in person — `actor_required` on a person-shaped door |
+| 3 | needs a signed-in person — a key on a person-shaped door |
 | 4 | the server refused — read `code` in `--json`; this includes `tasks:admin` |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
-| 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident |
+| 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
 | 7 | a human declined the confirmation — stop; never re-run with `--yes` |
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |

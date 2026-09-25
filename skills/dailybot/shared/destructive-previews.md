@@ -46,7 +46,7 @@ So the panel goes to **stderr** and stdout carries exactly one JSON object:
 | --- | --- | --- |
 | `--dry-run --json` | the preview (`consequence`, `affects`, `reversible`, `restore_path`) | — |
 | `--yes --json` | the write result | the consequence panel |
-| preview failed, `--json` | `{"status": "error", "code", "detail", "message"}`, exit 1 | — |
+| preview failed, `--json` | `{"status": "error", "code", "detail", "message"}`, exit per the error (e.g. 5 not found, 4 refused) | — |
 
 Read the `consequence` from stdout under `--dry-run --json`; never scrape the panel. And
 note that a failed preview still gives you a parseable stdout — an agent that branches on
@@ -70,8 +70,9 @@ do not read exit 0 as "all applied" without checking the per-item results.
 
 ## Doors with no server preview
 
-Removing a board or project member, taking someone off a task, unlinking two tasks, and
-deleting a comment, an attachment, a milestone or a saved view have no server-side preview.
+Removing a board or project member, taking someone off a task, unlinking two tasks or a goal
+from a project, and deleting a comment, an attachment, a milestone or a saved view have no
+server-side preview.
 Their `--dry-run` is the CLI's own: it states the exact act and sends **nothing**
 (`"previewed_by": "client"` under `--json`). There are no counts to read — say what will
 happen, and wait for the developer.

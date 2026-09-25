@@ -49,9 +49,11 @@ no network fetch is required** to know what to do. Run first-run setup in order:
 Then route by intent (below).
 
 > **One credential note that spans sub-skills:** some Tasks verbs answer only for a
-> signed-in person — `tasks mine` / `counts` / `inbox`, participant, watch and member
-> writes, saved views and pins, and every board/project/goal structure change. An organization API key is refused there, and so is an
-> organization **admin's** own key: the scope involved cannot be stored on a key at all.
+> signed-in person: `tasks mine` / `counts` / `inbox`, `tasks cursor`, `board mentionables`,
+> participants, watch and mute, `project members`, board labels, saved views and pins, and
+> every board / column / project / goal structure change, membership included. An
+> organization API key is refused there, and so is an organization **admin's** own key: the
+> scope involved cannot be stored on a key at all.
 > If you hold only `DAILYBOT_API_KEY`, do not start a flow that ends in one of those verbs.
 > The list is in [`tasks/SKILL.md`](tasks/SKILL.md). What this skill will and will **not** do on your
 machine — permissions, consent guarantees, and a self-audit you can run — is in
