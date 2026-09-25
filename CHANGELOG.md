@@ -4,6 +4,25 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.15.0] — 2026-09-25
+
+### Changes
+
+- Merge pull request #48 from DailybotHQ/feature__tasks_beta_orchestration
+- chore: merge origin/main and align the Tasks skill with CLI 3.14.0
+- fix(tasks): address AI review round 3 on the Tasks sub-skill
+- feat(tasks): document inbox --mentioned / --type filters
+- fix(tasks): address AI review round 2 on the Tasks sub-skill
+- feat(tasks): document board member add --team
+- fix(tasks): address AI review round 1 on the Tasks sub-skill
+- feat(tasks): document attachments on comments, projects and goals
+- fix(tasks): align credential rules, exit codes and recipes with the CLI and API
+- fix(skill): keep the router description valid YAML
+- feat(tasks): complete command reference for every Tasks command
+- fix(tasks): activity catch-up uses --since
+- feat(tasks): Tasks Beta parity — owner, board admin, attachments, bulk dry run, recipes
+
+
 ## [3.14.1] — 2026-09-25
 
 ### Changes
