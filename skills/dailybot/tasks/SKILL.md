@@ -473,6 +473,7 @@ dailybot board state create <board-uuid> -n "In review" --category in_progress -
 dailybot board state reorder <board-uuid> <state-1> <state-2> <state-3>   # every live column
 dailybot board state archive <board-uuid> <state-uuid> --migrate-to <other-state> --dry-run
 dailybot board member add <board-uuid> <user-uuid>                        # tasks:admin
+dailybot board member add <board-uuid> --team <team-uuid>                 # tasks:admin; follows the team live
 dailybot board label create <board-uuid> -n bug --color "#ef4444"         # login
 dailybot board star <board-uuid>                                          # login
 

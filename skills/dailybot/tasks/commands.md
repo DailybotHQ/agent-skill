@@ -755,13 +755,14 @@ List boards.
   - `--today` — Today only.
 - **Example:** `dailybot board list --json`
 
-### `dailybot board member add BOARD USER`
+### `dailybot board member add BOARD [[USER]]`
 
-Give someone sight of a board.
+Give a person or a whole team sight of a board.
 
 - **API:** `POST /v1/tasks/boards/{b}/members/ +key (tasks:admin)`
 - **Signed-in person:** **admin** (a key exits 4)
 - **Flags:**
+  - `--team` `<text>` — A whole team (uuid) instead of one person; membership follows the team live.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot board member add 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000004`
 
