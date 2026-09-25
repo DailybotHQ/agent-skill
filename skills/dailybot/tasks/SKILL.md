@@ -1,6 +1,6 @@
 ---
 name: dailybot-tasks
-description: Manage Dailybot Tasks via the CLI — boards, columns, tasks, projects, goals and milestones. Read the workspace in one call (pulse, inbox, what needs attention), poll what changed since a cursor, create/update/move tasks and set their owner, comment with @mentions, relate, attach files, watch or mute, run bulk operations with a server-side dry run, archive safely with a previewed consequence, administer boards (columns, members, saved views), and post project updates so the team sees what an agent did. Use when the developer mentions tasks, a board, a backlog, a sprint, a kanban column, a project update, a milestone or a goal, or asks what is open / overdue / blocked. Not for check-in responses (use dailybot-checkin) or form submissions (use dailybot-forms).
+description: Manage Dailybot Tasks via the CLI — boards, columns, tasks, projects, goals and milestones. Read the workspace in one call (pulse, what needs attention, recent activity, goal progress), poll what changed since a cursor, create/update/move tasks and set their owner, comment with @mentions, relate, attach files, watch or mute, run bulk operations with a server-side dry run, archive safely with a previewed consequence, administer boards (columns, members, saved views), and post project updates so the team sees what an agent did. Use when the developer mentions tasks, a board, a backlog, a sprint, a kanban column, a project update, a milestone or a goal, or asks what is open / overdue / blocked. Not for check-in responses (use dailybot-checkin) or form submissions (use dailybot-forms).
 version: "3.14.0"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
@@ -155,8 +155,10 @@ fix is `dailybot login`, never "ask an admin".
 
 ## Step 3 — Observe before you act
 
-Start here in a new session. One request, whole picture — counts, your unread inbox,
-projects, what needs attention, recent activity and goal progress:
+Start here in a new session. One request, whole picture: counts, projects, what needs
+attention, recent activity and goal progress. It works with an API key, and it does **not**
+include your notifications. The inbox is a separate, person-only read (`tasks inbox`,
+`tasks cursor`; see Step 4 and Recipe 3), so never report "caught up" from this call alone:
 
 ```bash
 dailybot tasks status --json
@@ -459,8 +461,10 @@ found, on purpose. Do not tell the developer they lack permission.
 ## Step 8 — Administer boards, projects and goals
 
 Structure changes need care; most are reversible, all are visible to the team, and they
-need a signed-in organization admin (`tasks:admin`, Step 2). Milestones and labels are the
-exceptions marked below.
+need a signed-in organization admin (`tasks:admin`, Step 2; a key or a non-admin gets exit 4).
+Below, `# tasks:admin` marks such a door. `# login` marks a person-only door that any
+signed-in member can use (a key gets exit 3). `# a key can do this` marks the one line an API
+key can run. Every unmarked line is `tasks:admin` too.
 
 ```bash
 # Boards: settings, columns, people, labels, saved views, pins
@@ -468,17 +472,17 @@ dailybot board update <board-uuid> --key DSN --visibility members
 dailybot board state create <board-uuid> -n "In review" --category in_progress --position 3
 dailybot board state reorder <board-uuid> <state-1> <state-2> <state-3>   # every live column
 dailybot board state archive <board-uuid> <state-uuid> --migrate-to <other-state> --dry-run
-dailybot board member add <board-uuid> <user-uuid>                        # login
+dailybot board member add <board-uuid> <user-uuid>                        # tasks:admin
 dailybot board label create <board-uuid> -n bug --color "#ef4444"         # login
 dailybot board star <board-uuid>                                          # login
 
 # Projects: settings, people (or whole teams), milestones
 dailybot project update <project-uuid> --health at_risk --target-date 2026-12-15
-dailybot project member add <project-uuid> --team <team-uuid>             # login
+dailybot project member add <project-uuid> --team <team-uuid>             # tasks:admin
 dailybot project milestone-create <project-uuid> -n Beta --date 2026-11-01   # a key can do this
 
 # Goals: a dated commitment with a declared status
-dailybot goal create -n "Q4 reliability" --period-start 2026-10-01 --period-end 2026-12-31   # login
+dailybot goal create -n "Q4 reliability" --period-start 2026-10-01 --period-end 2026-12-31   # tasks:admin
 dailybot goal update <goal-uuid> --status at_risk
 dailybot goal link <goal-uuid> <project-uuid>        # the project now counts toward the goal
 ```

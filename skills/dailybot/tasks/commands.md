@@ -231,7 +231,7 @@ Delete one saved view.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot tasks view delete 00000000-0000-0000-0000-000000000013 --yes`
+- **Example:** `dailybot tasks view delete 00000000-0000-0000-0000-000000000013 --dry-run`
 
 ### `dailybot tasks view get VIEW`
 
@@ -321,7 +321,7 @@ Remove an attachment from a task.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot task attachment delete ENG-142 00000000-0000-0000-0000-000000000009 --yes`
+- **Example:** `dailybot task attachment delete ENG-142 00000000-0000-0000-0000-000000000009 --dry-run`
 
 ### `dailybot task attachment get TASK ATTACHMENT`
 
@@ -349,7 +349,7 @@ Apply one operation to up to 100 tasks in a single call.
 - **API:** `POST /v1/tasks/tasks/bulk/ +key (required); --dry-run → ?dry_run=true, no key`
 - **Signed-in person:** no
 - **Flags:**
-  - `--operation` `<create|move|update|archive|restore|set_labels|set_owner|set_priority|set_due_date|set_parent|delete>` **required** — Operation to apply to every item.
+  - `--operation` `<create|move|update|archive|restore|set_labels|set_owner|set_priority|set_due_date|set_parent|delete>` **required** — Operation to apply to every item. `delete` is the archive alias: soft and restorable, like `task delete`.
   - `--file`, `-f` `<file (`-` = stdin)>` **required** — JSON file with the item list, or `-` for stdin.
   - `--board` `<text>` — Board (uuid or key) every created task lands on. Required for --operation create.
   - `--dry-run` — Run the batch on the server and roll it back: shows each change, writes nothing.
@@ -394,7 +394,7 @@ Remove an attachment from a comment.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot task comment-attachment delete ENG-142 00000000-0000-0000-0000-000000000007 00000000-0000-0000-0000-000000000009 --yes`
+- **Example:** `dailybot task comment-attachment delete ENG-142 00000000-0000-0000-0000-000000000007 00000000-0000-0000-0000-000000000009 --dry-run`
 
 ### `dailybot task comment-attachment get TASK COMMENT ATTACHMENT`
 
@@ -424,7 +424,7 @@ Delete a comment.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot task comment-delete ENG-142 00000000-0000-0000-0000-000000000007 --yes`
+- **Example:** `dailybot task comment-delete ENG-142 00000000-0000-0000-0000-000000000007 --dry-run`
 
 ### `dailybot task comment-edit TASK COMMENT BODY`
 
@@ -480,7 +480,7 @@ Archive a task.
   - `--dry-run` — Show the consequence and exit without acting.
   - `--yes`, `-y` — Skip the prompt (still previews).
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
-- **Example:** `dailybot task delete ENG-142 --yes`
+- **Example:** `dailybot task delete ENG-142 --dry-run`
 
 ### `dailybot task duplicate TASK`
 
@@ -600,7 +600,7 @@ Take someone off a task.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot task participants remove ENG-142 00000000-0000-0000-0000-000000000004 --yes`
+- **Example:** `dailybot task participants remove ENG-142 00000000-0000-0000-0000-000000000004 --dry-run`
 
 ### `dailybot task relations TASK`
 
@@ -639,7 +639,7 @@ Remove a link between two tasks.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot task unlink ENG-142 00000000-0000-0000-0000-000000000008 --yes`
+- **Example:** `dailybot task unlink ENG-142 00000000-0000-0000-0000-000000000008 --dry-run`
 
 ### `dailybot task unmute TASK`
 
@@ -774,7 +774,7 @@ Take someone's sight of a board away.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot board member remove 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000004 --yes`
+- **Example:** `dailybot board member remove 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000004 --dry-run`
 
 ### `dailybot board members BOARD`
 
@@ -841,19 +841,19 @@ Add a column to a board.
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Column name (max 48 characters).
   - `--category` `<backlog|todo|in_progress|done|canceled>` **required** — Fixed meaning of the column; it survives renames and never changes.
-  - `--position` `<int ≥ 0>` — Insert at this 1-based place among live columns; later columns shift right.
+  - `--position` `<int ≥ 0>` — Insert at this 1-based place among live columns (0 counts as 1; past the end goes last; omitted appends). Later columns shift right.
   - `--color` `<text>` — Column color, e.g. #3b82f6.
   - `--default` — New tasks land in this column.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot board state create 00000000-0000-0000-0000-000000000001 -n "In review" --category in_progress --position 3`
 
-### `dailybot board state reorder BOARD STATE...…`
+### `dailybot board state reorder BOARD STATE...`
 
 Set the left-to-right order of every live column in one call.
 
 - **API:** `POST /v1/tasks/boards/{b}/states/reorder/ {order[]} (every live column once) (tasks:admin)`
 - **Signed-in person:** **admin** (a key exits 4)
-- **Example:** `dailybot board state reorder 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000005 00000000-0000-0000-0000-000000000013 00000000-0000-0000-0000-0000000000014`
+- **Example:** `dailybot board state reorder 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000005 00000000-0000-0000-0000-000000000013 00000000-0000-0000-0000-000000000014`
 
 ### `dailybot board state restore BOARD STATE`
 
@@ -872,7 +872,7 @@ Rename, recolor or move one column.
 - **Flags:**
   - `--name`, `-n` `<text>` — New column name.
   - `--color` `<text>` — New column color.
-  - `--position` `<int ≥ 0>` — Move the column to this place.
+  - `--position` `<int ≥ 0>` — Move the column to this 1-based place among live columns (0 counts as 1; past the end goes last).
 - **Example:** `dailybot board state update 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000005 --name Shipped`
 
 ### `dailybot board states BOARD`
@@ -978,7 +978,7 @@ Remove an attachment from a project.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot project attachment delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000009 --yes`
+- **Example:** `dailybot project attachment delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000009 --dry-run`
 
 ### `dailybot project attachment get PROJECT ATTACHMENT`
 
@@ -1066,7 +1066,7 @@ Remove someone from a project.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot project member remove 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000004 --yes`
+- **Example:** `dailybot project member remove 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000004 --dry-run`
 
 ### `dailybot project members PROJECT`
 
@@ -1109,7 +1109,7 @@ Retire a milestone.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot project milestone-delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 --yes`
+- **Example:** `dailybot project milestone-delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 --dry-run`
 
 ### `dailybot project milestone-reopen PROJECT MILESTONE`
 
@@ -1266,7 +1266,7 @@ Remove an attachment from a goal.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot goal attachment delete 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000009 --yes`
+- **Example:** `dailybot goal attachment delete 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000009 --dry-run`
 
 ### `dailybot goal attachment get GOAL ATTACHMENT`
 
@@ -1356,7 +1356,7 @@ Stop a project counting toward a goal.
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
-- **Example:** `dailybot goal unlink 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000002 --yes`
+- **Example:** `dailybot goal unlink 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000002 --dry-run`
 
 ### `dailybot goal update GOAL`
 

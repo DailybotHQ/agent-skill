@@ -874,7 +874,7 @@ data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, curso
 
 | Works with `DAILYBOT_API_KEY` | Requires `dailybot login` |
 | --- | --- |
-| pulse, search, activity, timeline, boards, columns, tasks, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `board mentionables` — defined relative to *the calling user* |
+| pulse, search, activity, timeline, boards, columns, board members, tasks, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `board mentionables` — defined relative to *the calling user* |
 | create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants` (list too), `watch`, `mute` — reveal or change **who is notified** |
 | `project update-post`, milestones (create, update, complete, reopen, retire) | `project members` (the list) — reveals **who can see** |
 | task archive & restore | saved views (`board views`, `project views`, saves), board labels, pins (`star`, `favorites`) — belong to a person |
