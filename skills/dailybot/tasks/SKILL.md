@@ -148,8 +148,10 @@ door exits **4** (`insufficient_scope`), matching the server. [commands.md](comm
 marks each command **yes** (exit 3) or **admin** (exit 4).
 
 **Do not read a refusal on those verbs as a permissions bug.** It is the credential kind,
-not the user's role — an organization admin's own key is refused exactly the same way. The
-fix is `dailybot login`, never "ask an admin".
+not the user's role — an organization admin's own key is refused exactly the same way. With
+a key, the fix is `dailybot login`, not "ask an admin". Only once you are signed in does an
+`insufficient_scope` on a `tasks:admin` door mean a role limit that an admin can help with
+(Step 7).
 
 ---
 
@@ -538,13 +540,15 @@ dailybot task get "$KEY" --json    # confirm it exists; show its key and title t
 # only after they confirm this is the card:
 dailybot task move "$KEY" --state done --json
 dailybot task comment "$KEY" "Merged: <one line on what shipped>"
+dailybot project update-post <project-uuid> "<what shipped and what it unblocks>" --health on_track
 ```
 
 `--state done` resolves to the board's first `done` column, so it keeps working after
 someone renames the column. The pattern also matches tokens that are not task keys
 (`API-2`, `SHA-256`, `UTF-8`), so a key from a branch name is only a candidate. Confirm it
 with `task get` and the developer before moving anything. If there is no key, or `task get`
-exits 5, do not guess one; ask.
+exits 5, do not guess one; ask. Then close the loop with a project update, since moving a
+card is not communication (Step 5).
 
 ### 3. Triage my inbox (needs `dailybot login`)
 
@@ -576,7 +580,8 @@ dailybot task bulk --operation update -f sprint.json --yes --json
 ```
 
 To move the chosen cards into the sprint column, run a second batch with `--operation move`
-and `"state"` (the column's uuid from the snapshot) on each item.
+and `"state"` (the column's uuid from the snapshot) on each item. Gate it the same way:
+`--dry-run` first, show the moves, and wait for their go-ahead before the `--yes` call.
 
 ### 5. Report progress against a goal
 

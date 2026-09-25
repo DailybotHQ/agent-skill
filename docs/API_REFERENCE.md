@@ -942,7 +942,9 @@ ceiling of 240 delta reads per minute is yours to respect.
 
 ### Retries
 
-Writes carry an idempotency key automatically. Reusing one **within 24 hours** replays the
+Writes that accept an idempotency key carry one automatically (`commands.md` marks them
+`+key`). Many doors take none, so a retry there can repeat the write; check the state
+first. Reusing a key **within 24 hours** replays the
 original result and writes nothing; reusing it **after** 24 hours is a new write and will
 duplicate. Two API keys in one organization share the namespace, which is why generated keys
 are uuid4.
@@ -964,7 +966,9 @@ destroys nothing. `--yes` skips the prompt, not the preview. **Bulk has a real d
 (`task bulk --dry-run`): the server runs the batch and rolls it back, showing each change and
 refusal, and writes nothing; the cap is 100 items. Doors with no server preview (member and
 participant removal, unlink, comment / attachment / milestone / view deletes) take a
-client-side `--dry-run` that sends nothing.
+client-side `--dry-run` that sends nothing. Saving views (`board view save`, `project view
+save`) replaces the person's whole list and has no preview at all: read the current views,
+show the developer what the new file drops, and wait before saving with `--if-match`.
 
 ### Object URLs
 

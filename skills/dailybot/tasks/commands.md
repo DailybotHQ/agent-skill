@@ -719,14 +719,16 @@ Archive a board.
 
 ### `dailybot board create`
 
-Create a board.
+Create a board in a project.
 
 - **API:** `POST /v1/tasks/boards/ +key (tasks:admin)`
 - **Signed-in person:** **admin** (a key exits 4)
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Board name.
+  - `--project` `<text>` **required** — The project the board belongs to (uuid).
+  - `--key` `<text>` **required** — The board's key prefix, e.g. DSN, so its tasks read DSN-1, DSN-2…
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
-- **Example:** `dailybot board create --name "Design"`
+- **Example:** `dailybot board create --name "Design" --project 00000000-0000-0000-0000-000000000002 --key DSN`
 
 ### `dailybot board get BOARD`
 
@@ -775,7 +777,7 @@ List boards.
   - `--today` — Today only.
 - **Example:** `dailybot board list --json`
 
-### `dailybot board member add BOARD [[USER]]`
+### `dailybot board member add BOARD [USER]`
 
 Give a person or a whole team sight of a board.
 
