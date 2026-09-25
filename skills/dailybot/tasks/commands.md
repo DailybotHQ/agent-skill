@@ -150,13 +150,15 @@ List your pinned boards and saved views.
 
 Show your Tasks notifications.
 
-- **API:** `GET /v1/tasks/inbox/`
+- **API:** `GET /v1/tasks/inbox/ (?mentioned=true&type=)`
 - **Signed-in person:** **yes** (a key exits 3)
 - **Flags:**
   - `--page`, `-P` `<int>` — Page number to fetch.
   - `--page-size`, `-z` `<int>` — Items per page (max 100).
   - `--limit`, `-l` `<int>` — Stop after collecting N items.
-- **Example:** `dailybot tasks inbox --json`
+  - `--mentioned` — Only notifications where someone mentioned you.
+  - `--type` `<text>` — Only this kind of notification, e.g. task.owner_changed.
+- **Example:** `dailybot tasks inbox --mentioned --json`
 
 ### `dailybot tasks inbox-read ITEM`
 
@@ -178,9 +180,12 @@ Mark your whole Tasks inbox as read.
 
 How many Tasks notifications you have not read.
 
-- **API:** `GET /v1/tasks/inbox/unread-count/`
+- **API:** `GET /v1/tasks/inbox/unread-count/ (?mentioned=true&type=, same filters as the list)`
 - **Signed-in person:** **yes** (a key exits 3)
-- **Example:** `dailybot tasks inbox-unread --json`
+- **Flags:**
+  - `--mentioned` — Only notifications where someone mentioned you.
+  - `--type` `<text>` — Only this kind of notification, e.g. task.owner_changed.
+- **Example:** `dailybot tasks inbox-unread --mentioned --json`
 
 ### `dailybot tasks mine`
 
