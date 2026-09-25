@@ -77,6 +77,18 @@ Their `--dry-run` is the CLI's own: it states the exact act and sends **nothing*
 (`"previewed_by": "client"` under `--json`). There are no counts to read — say what will
 happen, and wait for the developer.
 
+## Saving views replaces the whole list
+
+`board view save` and `project view save` replace **every** saved view the person has on
+that board or project with the file you send. There is no preview of any kind: the ETag
+(`--if-match`) only stops you from overwriting a save that happened after you read. It does
+not check that the new list is what the person wants. So:
+
+1. Read the current list: `dailybot board views <board-uuid> --json` (or `project views`).
+2. Show the developer the views that the new file drops or changes.
+3. Wait for their go-ahead, then save with the ETag you read:
+   `dailybot board view save <board-uuid> -f views.json --if-match "<etag>"`.
+
 ## What to do as an agent
 
 1. Run the preview.
