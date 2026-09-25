@@ -26,7 +26,8 @@ in the matching skill under [`.agents/skills/`](../skills/).
 | `/ai-diff-reviewer-setup` | `../skills/ai-diff-reviewer/setup/SKILL.md` | CI workflow wizard |
 | `/ai-diff-reviewer-open-pr` | `../skills/ai-diff-reviewer/open-pr/SKILL.md` | Draft PR title/body |
 | `/ai-diff-reviewer-apply-review` | `../skills/ai-diff-reviewer/apply-review/SKILL.md` | Walk CI findings (never commits) |
+| `/ai-diff-reviewer-address-review` | `../skills/ai-diff-reviewer/address-review/SKILL.md` | Resolve CI findings, commit, push, re-apply `Ready` (one consent) |
 
 CI trigger: apply the **`Ready`** label on a PR to `main`
 ([`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml);
-requires `CURSOR_API_KEY`).
+requires `XAI_API_KEY`; provider `grok`, Action pinned to `v3.1.1`).

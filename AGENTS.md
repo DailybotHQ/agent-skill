@@ -480,12 +480,18 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### AI Diff Reviewer (Flow B — dual-surface)
 
+[`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.1.1` for both the vendored skill and the Action.
+
 | Surface | What | How |
 |---------|------|-----|
-| **Local** | Augments DWP Security Review | [`.agents/skills/ai-diff-reviewer/`](.agents/skills/ai-diff-reviewer/) + [`.review/extension.md`](.review/extension.md). Phrase: *"Review my current branch"*. |
-| **CI** | PR merge gate | [`.github/workflows/pr-review.yml`](.github/workflows/pr-review.yml) — apply the **`Ready`** label on a PR to `main`. Check name: **`AI review gate`**. Bypass: `skip-ai-review`. |
+| **Local** | Augments DWP Security Review | [`.agents/skills/ai-diff-reviewer/`](.agents/skills/ai-diff-reviewer/) + [`.review/extension.md`](.review/extension.md). Phrase: *"Review my current branch"*. **Verified** `critical` findings from a completed pass block; an `incomplete`/`timeout` review is never a clean pass. |
+| **CI** | PR merge gate | [`.github/workflows/pr-review.yml`](.github/workflows/pr-review.yml) — apply the **`Ready`** label on a PR to `main`. Remove + re-add to re-run. Check name: **`AI review gate`**. Bypass: `skip-ai-review`. |
 
-**Secret required for CI:** `CURSOR_API_KEY` (repo Settings → Secrets).
+**Secret required for CI:** `XAI_API_KEY` (repo Settings → Secrets). Without it, applying `Ready` fails the merge gate loudly.
+
+**Provider: `grok` (xAI Grok CLI), pinned to `grok-4.5`, `agent-max-turns: 60`.** It replaced `cursor`: the Cursor CLI has no turn-count flag, so its only bound is the Action's 900-second timeout, and under v3 a timed-out review fails the gate. v3 gate semantics: a claimed `critical` blocks only once the verifier confirms it; budgets are risk-tiered (`budget-profile: auto`) and `high-risk-paths` lifts the pack's trust surface (`SKILL.md`, `TRUST.md`, `shared/`, `env/`), `setup.sh`, `scripts/` and workflows to the `critical` tier. A body saying `Recommendation: approve` is not evidence the check passed — read the tracking marker's Check status block.
+
+**After CI posts findings:** `apply-review` walks them per-finding (read-only, never commits); `address-review` closes the loop in one consented invocation (resolve, commit, push, re-apply `Ready`).
 
 Contributor-kit / tooling PRs that do **not** change `skills/dailybot/` may
 put `[skip release]` in the squash-merge commit body so auto-release does

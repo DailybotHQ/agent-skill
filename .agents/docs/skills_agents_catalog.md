@@ -28,8 +28,8 @@ Vendored at **v2.17.0** under [`.agents/skills/deepworkplan/`](../skills/deepwor
 
 ## AI Diff Reviewer (vendored from [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer))
 
-Vendored at **v2.0.0**. Flow B: local + CI gated on the **`Ready`** label.
-Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml). Secret: `CURSOR_API_KEY`.
+Vendored at **v3.1.1** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
+Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml). Provider: `grok`. Secret: `XAI_API_KEY`.
 
 | Slug | Procedure | Use when |
 |------|-----------|----------|
@@ -38,6 +38,7 @@ Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.gi
 | `ai-diff-reviewer-setup` | [`skills/ai-diff-reviewer/setup/SKILL.md`](../skills/ai-diff-reviewer/setup/SKILL.md) | Re-running the CI wizard |
 | `ai-diff-reviewer-open-pr` | [`skills/ai-diff-reviewer/open-pr/SKILL.md`](../skills/ai-diff-reviewer/open-pr/SKILL.md) | Drafting a PR from the diff |
 | `ai-diff-reviewer-apply-review` | [`skills/ai-diff-reviewer/apply-review/SKILL.md`](../skills/ai-diff-reviewer/apply-review/SKILL.md) | Walking CI findings per-finding |
+| `ai-diff-reviewer-address-review` | [`skills/ai-diff-reviewer/address-review/SKILL.md`](../skills/ai-diff-reviewer/address-review/SKILL.md) | Closing the loop: resolve findings, commit, push, re-apply `Ready` |
 
 ## Agents
 

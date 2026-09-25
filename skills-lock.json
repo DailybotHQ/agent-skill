@@ -5,7 +5,7 @@
       "source": "DailybotHQ/ai-diff-reviewer",
       "sourceType": "github",
       "skillPath": "skills/ai-diff-reviewer/SKILL.md",
-      "computedHash": "7bfe1dcc65dc8bba893b54133c7729b14a1bd2ce165d9c6cd09d875b2b22ac63"
+      "computedHash": "2704aa6503985dad11c7b88864199992b8d33a341f6d789471aae50dea011b36"
     },
     "deepworkplan": {
       "source": "DailybotHQ/deepworkplan-skill",
