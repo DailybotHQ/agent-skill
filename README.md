@@ -329,6 +329,7 @@ agent-skill/
         ├── forms/SKILL.md         — form submission (user-scoped)
         ├── workflow/SKILL.md      — workflow list, inspect, and trigger (plan-gated; CLI >= 3.9.0)
         ├── tasks/SKILL.md         — boards / tasks / projects / goals / milestones
+        ├── tasks/commands.md      — every Tasks command: args, flags, API door, example
         ├── labels/SKILL.md        — org Labels CRUD + assign/batch (CLI >= 3.9.0)
         ├── featured/SKILL.md      — private Featured stars (CLI >= 3.9.0)
         ├── env/SKILL.md           — .dailybot/env.json per-repo API keys

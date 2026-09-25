@@ -39,6 +39,7 @@ the same instructions other agents do.
 | Idempotent retries — the 24h window and the shared namespace | [skills/dailybot/shared/idempotency.md](skills/dailybot/shared/idempotency.md) |
 | Tasks delta cursor — the 7-day window and the `+00:00` trap | [skills/dailybot/shared/tasks-delta.md](skills/dailybot/shared/tasks-delta.md) |
 | Destructive previews — state the consequence, not "are you sure" | [skills/dailybot/shared/destructive-previews.md](skills/dailybot/shared/destructive-previews.md) |
+| Tasks command reference — every command, flag and API door (generated from the CLI) | [skills/dailybot/tasks/commands.md](skills/dailybot/tasks/commands.md) |
 | Context detection + opt-out | [skills/dailybot/shared/context.sh](skills/dailybot/shared/context.sh) |
 | HTTP fallback patterns | [skills/dailybot/shared/http-fallback.md](skills/dailybot/shared/http-fallback.md) |
 | Auto-activation triggers | [skills/dailybot/report/triggers.md](skills/dailybot/report/triggers.md) |
@@ -105,6 +106,7 @@ agent-skill/
     ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
     ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones;
     │                                          untrusted content is Step 0, before any command
+    │   tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
     ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
     ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)
     ├── env/SKILL.md                        ← .dailybot/env.json per-repo API keys

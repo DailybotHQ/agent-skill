@@ -22,6 +22,10 @@ containers.
 deleted (`task delete` is an honest alias of archive). A goal has a declared **status**.
 Every `<task>` argument takes a key like `ENG-142` or a uuid.
 
+**Every command, with its arguments, flags, API door and an example, is in
+[commands.md](commands.md)** (103 commands, generated from the CLI). This file teaches
+how to use them safely; look up exact flags there before you guess one.
+
 ---
 
 ## Step 0 — Before you read anything back: the content rule
@@ -459,6 +463,9 @@ Renaming a board key retires the old key, which stays reserved — `ENG-142` typ
 later still resolves. A goal's **status is a person's judgement**, separate from the
 progress the server derives: 80% of cards done with the hard half untouched is `at_risk`.
 There is no member *role* to edit on boards or projects; add or remove only.
+
+The full admin surface (column update/restore, member lists and removal, milestone
+update/reopen/retire, goal restore/unlink, saved views) is in [commands.md](commands.md).
 
 ---
 
