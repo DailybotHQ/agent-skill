@@ -74,12 +74,18 @@ only the JSON body cannot see. So every Tasks write body the CLI emits — inclu
 {"uuid": "…", "_idempotency_replayed": true,  "_idempotency_key": "5f2c…"}
 ```
 
+On a door without `+key` there is no key, only the replay flag:
+
+```json
+{"uuid": "…", "_idempotency_replayed": false}
+```
+
 `_idempotency_replayed` is **always present** and always a boolean — branch on the value, not
 on whether the key exists. `true` means the server returned the original result and wrote
 nothing.
 
-`_idempotency_key` is the key the CLI actually sent. It matters because **the CLI generates a
-fresh uuid4 on every invocation when you do not pass one**: re-running the same command after
+On a `+key` door, `_idempotency_key` is the key the CLI actually sent. It matters because
+**the CLI generates a fresh uuid4 on every invocation when you do not pass one**: re-running the same command after
 a timeout sends a key the server has never seen, and duplicates. Capture this value and pass
 it back with `--idempotency-key` to make that retry safe for the 24h window.
 
@@ -88,8 +94,8 @@ server's own.
 
 ## The timeout is the case that needs the key most
 
-A timed-out write has no response body, so there is no `_idempotency_key` to read. The CLI
-therefore puts it on the **error**: it is printed on the human path, and appears as
+A timed-out write has no response body, so there is no `_idempotency_key` to read. On a
+`+key` door the CLI therefore puts it on the **error**: it is printed on the human path, and appears as
 `idempotency_key` in the `--json` error envelope alongside `code: "transport_error"`.
 
 ```json
@@ -99,3 +105,6 @@ therefore puts it on the **error**: it is printed on the human path, and appears
 Retry that exact call with `--idempotency-key <that value>`. The server either replays the
 write it already committed or performs it once. Retrying without it mints a fresh key the
 server has never seen — which is precisely how a timeout becomes a duplicate.
+
+On a door without `+key`, the error carries no `idempotency_key`, and nothing makes a retry
+safe. Re-read the object's current state, and repeat the write only if it did not land.

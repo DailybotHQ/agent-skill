@@ -845,8 +845,9 @@ dailybot login --email me@example.com
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-> **Requires `dailybot-cli >= 3.14.2`** — the current PyPI release, which brings Tasks
-> to parity with the web. The pack-wide baseline is `>= 3.9.0`.
+> **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
+> 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs. The pack-wide
+> baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the

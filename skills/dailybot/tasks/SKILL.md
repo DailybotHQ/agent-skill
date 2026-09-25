@@ -85,11 +85,13 @@ shipped in 3.12.0; on an older CLI, `--owner`, `task set-owner`, everything in S
 Confirm by capability rather than by version, because that is what actually matters:
 
 ```bash
-dailybot task set-owner --help
+dailybot task set-owner --help               # 3.14.0+: the Tasks parity surface
+dailybot board create --help | grep -- --project   # 3.14.2+: board create works
 ```
 
-If that fails, the installed CLI predates this sub-skill — ask the developer to run
-`dailybot upgrade`. Do not work around a missing command.
+If the first fails, or the second prints nothing, the installed CLI predates what this
+sub-skill documents. Ask the developer to run `dailybot upgrade`. Do not work around a
+missing command or flag.
 
 Check the plan allows Tasks, and note the limits:
 

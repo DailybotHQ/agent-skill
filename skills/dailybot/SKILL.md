@@ -101,7 +101,7 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 
 > **Baseline: `dailybot-cli >= 3.9.0`** for every sub-skill except Tasks.
 > **`dailybot-tasks` needs `>= 3.14.2`** (Tasks Beta — owner, board admin,
-> attachments, bulk dry run). Recommended install / upgrade target: **latest
+> attachments and bulk dry run since 3.14.0; 3.14.2 adds `board create --project --key`). Recommended install / upgrade target: **latest
 > release** — `dailybot upgrade` (or `pip install --upgrade dailybot-cli`)
 > always satisfies both floors.
 >
