@@ -40,8 +40,8 @@ on:
     # Deliberately NOT `synchronize` (cost control): commits pushed after a
     # review do NOT re-trigger it, and `AI review gate` stays green while
     # unaudited commits accumulate. After every fix push, a maintainer must
-    # remove + re-apply `Ready` to force a fresh review — see
-    # docs/PR_REVIEW_WORKFLOW.md § "Re-running the review after a fix push".
+    # remove + re-apply `Ready` to force a fresh review — see AGENTS.md
+    # § "AI Diff Reviewer (Flow B — dual-surface)".
     types: [opened, labeled]
 
 concurrency:
@@ -182,7 +182,10 @@ jobs:
   review:
     name: 'AI review — grok'
     needs: [scope, labels-bootstrap]
-    if: needs.scope.outputs.should_run == 'true'
+    # Defense in depth: `scope` already rejects fork heads, but the agent-runner
+    # CLI must never run on fork-controlled content even if a later scope edit
+    # regresses — so the job re-checks it.
+    if: needs.scope.outputs.should_run == 'true' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
