@@ -491,6 +491,10 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 **Provider: `grok` (xAI Grok CLI), pinned to `grok-4.5`, `agent-max-turns: 60`.** It replaced `cursor`: the Cursor CLI has no turn-count flag, so its only bound is the Action's 900-second timeout, and under v3 a timed-out review fails the gate. v3 gate semantics: a claimed `critical` blocks only once the verifier confirms it; budgets are risk-tiered (`budget-profile: auto`) and `high-risk-paths` lifts the pack's trust surface (`SKILL.md`, `TRUST.md`, `shared/`, `env/`), `setup.sh`, `scripts/` and workflows to the `critical` tier. A body saying `Recommendation: approve` is not evidence the check passed — read the tracking marker's Check status block.
 
+**Fork PRs skip the gate by design.** GitHub does not expose repo secrets to fork `pull_request` runs, so a fork head gets a notice instead of a review and `AI review gate` is skipped — which GitHub counts as passing. Same policy as DailybotHQ/cli. To review a fork contribution, push its branch to this repository and apply `Ready` there.
+
+**Concurrency:** runs are never cancelled in progress, so toggling `Ready` while a review is still running starts a second one that races the first on comments and labels — wait for the running review to post first.
+
 **After CI posts findings:** `apply-review` walks them per-finding (read-only, never commits); `address-review` closes the loop in one consented invocation (resolve, commit, push, re-apply `Ready`).
 
 Contributor-kit / tooling PRs that do **not** change `skills/dailybot/` may
