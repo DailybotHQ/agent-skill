@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.16.1] — 2026-09-26
+
+### Changes
+
+- Merge pull request #51 from DailybotHQ/feat/tasks-open-org-member-permissions
+- docs(tasks): open-org member structure access, no admin prerequisite
+
+
 ## [3.16.0] — 2026-09-26
 
 ### Changes
