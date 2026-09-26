@@ -845,8 +845,9 @@ dailybot login --email me@example.com
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-> **Requires `dailybot-cli >= 3.14.0`** — the current PyPI release, which brings Tasks
-> to parity with the web. The pack-wide baseline is `>= 3.9.0`.
+> **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
+> 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs. The pack-wide
+> baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
@@ -942,29 +943,35 @@ ceiling of 240 delta reads per minute is yours to respect.
 
 ### Retries
 
-Writes carry an idempotency key automatically. Reusing one **within 24 hours** replays the
+Writes that accept an idempotency key carry one automatically (`commands.md` marks them
+`+key`). Many doors take none, so a retry there can repeat the write; check the state
+first. Reusing a key **within 24 hours** replays the
 original result and writes nothing; reusing it **after** 24 hours is a new write and will
 duplicate. Two API keys in one organization share the namespace, which is why generated keys
 are uuid4.
 
-Every Tasks write body carries two client-added annotations: `_idempotency_replayed`, always
-a boolean, saying whether the server replayed rather than wrote; and `_idempotency_key`, the
-key that was actually sent. The second one is the load-bearing half — the CLI mints a fresh
-uuid4 per invocation, so **re-running a command after a timeout duplicates unless you pass
-that key back** with `--idempotency-key`. Full treatment:
+Every Tasks write body carries the client-added `_idempotency_replayed` (a boolean: did the
+server replay rather than write?). On a `+key` door it also carries `_idempotency_key`, the
+key that was actually sent. That key is the load-bearing half. The CLI mints a fresh uuid4 per
+invocation, so **re-running a `+key` command after a timeout duplicates unless you pass that
+key back** with `--idempotency-key`. A door without `+key` sends no key and returns none, so
+there is nothing to pass back: check the current state before retrying it. Full treatment:
 [`../skills/dailybot/shared/idempotency.md`](../skills/dailybot/shared/idempotency.md).
 
 ### Destructive operations
 
 Archive doors are previewed with `?dry_run=true` before acting, and the CLI shows the
 server's `consequence` sentence plus the affected counts. **Surface that sentence to the
-developer** rather than summarising it. Archiving a board cascade-archives its live tasks
+developer** rather than summarising it. Archiving a project cascades to its boards and their
+tasks, and `project restore` walks back up, never down. Archiving a board cascade-archives its live tasks
 and restoring the board does not bring them back; `task delete` is an alias of archive and
 destroys nothing. `--yes` skips the prompt, not the preview. **Bulk has a real dry run**
 (`task bulk --dry-run`): the server runs the batch and rolls it back, showing each change and
 refusal, and writes nothing; the cap is 100 items. Doors with no server preview (member and
 participant removal, unlink, comment / attachment / milestone / view deletes) take a
-client-side `--dry-run` that sends nothing.
+client-side `--dry-run` that sends nothing. Saving views (`board view save`, `project view
+save`) replaces the person's whole list and has no preview at all: read the current views,
+show the developer what the new file drops, and wait before saving with `--if-match`.
 
 ### Object URLs
 
