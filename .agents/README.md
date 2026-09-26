@@ -5,7 +5,7 @@ Cross-agent home for personas, thin command aliases, and vendored skills used
 of the Dailybot skill pack — only `skills/dailybot/` is installed.
 
 - `skills/deepworkplan/` — Deep Work Plan methodology (v2.17.0)
-- `skills/ai-diff-reviewer/` — AI Diff Reviewer (v2.0.0), Flow B
+- `skills/ai-diff-reviewer/` — AI Diff Reviewer (v3.1.1), Flow B
 - `commands/` — thin `dwp-*` / author aliases
 - `agents/` — contributor personas
 - `docs/` — catalog that must match what exists on disk

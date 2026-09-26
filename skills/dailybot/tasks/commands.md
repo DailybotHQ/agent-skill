@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.0`: 115 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2`: 115 commands across
 `tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
@@ -719,14 +719,16 @@ Archive a board.
 
 ### `dailybot board create`
 
-Create a board.
+Create a board in a project.
 
-- **API:** `POST /v1/tasks/boards/ +key (tasks:admin)`
+- **API:** `POST /v1/tasks/boards/ +key (tasks:admin); body {name, project, key}`
 - **Signed-in person:** **admin** (a key exits 4)
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Board name.
+  - `--project` `<text>` **required** — The project the board belongs to (uuid).
+  - `--key` `<text>` **required** — The board's key prefix, e.g. DSN, so its tasks read DSN-1, DSN-2…
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
-- **Example:** `dailybot board create --name "Design"`
+- **Example:** `dailybot board create --name "Design" --project 00000000-0000-0000-0000-000000000002 --key DSN`
 
 ### `dailybot board get BOARD`
 
@@ -775,7 +777,7 @@ List boards.
   - `--today` — Today only.
 - **Example:** `dailybot board list --json`
 
-### `dailybot board member add BOARD [[USER]]`
+### `dailybot board member add BOARD [USER]`
 
 Give a person or a whole team sight of a board.
 

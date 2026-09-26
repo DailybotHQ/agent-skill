@@ -1,7 +1,9 @@
 name: PR review
 
-# AI-driven pre-merge review powered by `DailybotHQ/ai-diff-reviewer@v2`
-# (marketplace listing: "AI Diff Reviewer"). Cursor-only, label-gated on
+# AI-driven pre-merge review powered by `DailybotHQ/ai-diff-reviewer`
+# (marketplace listing: "AI Diff Reviewer"). The pin and the provider live on
+# the `uses:`/`with:` lines below — this header deliberately does not repeat
+# them, because the last time it did the two drifted apart. Label-gated on
 # `Ready`, gated on write-tier authorship (author-association whitelist),
 # stable-named merge gate for branch protection. Runs the same review
 # methodology as the vendored `ai-diff-reviewer` skill when
@@ -20,9 +22,11 @@ name: PR review
 # `skip-ai-review` while `Ready` is already present also re-runs (bypass).
 #
 # Secrets required (repo settings > Secrets):
-#   * CURSOR_API_KEY — Cursor subscription key (unlimited on Pro).
-#     Without it the review job is absent from the matrix and the merge gate
-#     reports "no provider secret configured".
+#   * XAI_API_KEY — xAI API key, for the Grok CLI runner.
+#     Without it the review job is skipped (should_run=false) and the merge
+#     gate fails loud ("no provider secret configured"). Fork PRs never see
+#     repo secrets (GitHub behavior on `pull_request` runs), so fork heads are
+#     skipped with their own reason instead of failing on a phantom secret.
 #
 # Labels used (auto-created on first run):
 #   * Ready          — apply to unlock the review (matched case-insensitively).
@@ -33,11 +37,20 @@ name: PR review
 on:
   pull_request:
     branches: [main]
+    # Deliberately NOT `synchronize` (cost control): commits pushed after a
+    # review do NOT re-trigger it, and `AI review gate` stays green while
+    # unaudited commits accumulate. After every fix push, a maintainer must
+    # remove + re-apply `Ready` to force a fresh review — see AGENTS.md
+    # § "AI Diff Reviewer (Flow B — dual-surface)".
     types: [opened, labeled]
 
 concurrency:
+  # No cancel-in-progress: every label event on the PR (including the
+  # `pr-reviewed` label this workflow applies itself) starts a new run in
+  # this group, and cancelling would kill an in-flight grok review. Queued
+  # runs for non-`Ready` labels are cheap no-ops (scope says should_run=false).
   group: pr-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -59,7 +72,8 @@ jobs:
           EVENT_LABEL: ${{ github.event.label.name }}
           LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
           AUTHOR_ASSOC: ${{ github.event.pull_request.author_association }}
-          HAS_CURSOR: ${{ secrets.CURSOR_API_KEY != '' }}
+          HAS_PROVIDER_KEY: ${{ secrets.XAI_API_KEY != '' }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -euo pipefail
 
@@ -108,10 +122,24 @@ jobs:
             exit 0
           fi
 
-          # Provider secret gate. If CURSOR_API_KEY is absent, the merge gate
+          # Fork gate. GitHub never exposes repo secrets to `pull_request` runs
+          # whose head lives in a fork — even for OWNER/MEMBER/COLLABORATOR
+          # authors. Without this check those PRs would fall through to the
+          # secret gate and fail with a misleading "secret not configured"
+          # error. Skip (gate job is skipped too) with an actionable notice.
+          if [ "$IS_FORK" = "true" ]; then
+            echo "::notice::PR head is a fork — repo secrets are unavailable on fork pull_request runs, so the AI review cannot execute. Push the branch to this repository and re-apply 'Ready' to get a review."
+            {
+              echo 'should_run=false'
+              echo 'empty_reason=fork-no-secrets'
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Provider secret gate. If XAI_API_KEY is absent, the merge gate
           # will fail loud (see gate job) with a clear message.
-          if [ "$HAS_CURSOR" != "true" ]; then
-            echo "::error::CURSOR_API_KEY is not configured on this repo. Set it in Settings > Secrets to unblock the merge gate."
+          if [ "$HAS_PROVIDER_KEY" != "true" ]; then
+            echo "::error::XAI_API_KEY is not configured on this repo. Set it in Settings > Secrets to unblock the merge gate."
             {
               echo 'should_run=false'
               echo 'empty_reason=no-provider-secret'
@@ -127,9 +155,11 @@ jobs:
 
   labels-bootstrap:
     name: 'Bootstrap review labels'
+    # Runs on every trigger event, NOT gated on should_run: on a clean
+    # installation the `Ready` label does not exist yet, and gating this job
+    # on `Ready` being applied would make the bootstrap unreachable
+    # (chicken-and-egg). The job is idempotent and costs ~4s.
     needs: scope
-    # Only bootstrap when we're actually going to review — no work otherwise.
-    if: needs.scope.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -150,26 +180,66 @@ jobs:
           gh label create skip-ai-review --repo "$REPO" --color b60205 --description "Emergency bypass: skip AI Diff Reviewer LLM pass" || true
 
   review:
-    name: 'AI review — cursor'
+    name: 'AI review — grok'
     needs: [scope, labels-bootstrap]
-    if: needs.scope.outputs.should_run == 'true'
+    # Defense in depth: `scope` already rejects fork heads, but the agent-runner
+    # CLI must never run on fork-controlled content even if a later scope edit
+    # regresses — so the job re-checks it.
+    if: needs.scope.outputs.should_run == 'true' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # `git diff origin/<base>...HEAD` requires the base ref locally.
           fetch-depth: 0
-          # Do NOT persist GITHUB_TOKEN into .git/config — the Cursor CLI runs
+          # Do NOT persist GITHUB_TOKEN into .git/config — the Grok CLI runs
           # with broad local access; a persisted token on disk is an exfil
           # surface. The reviewer talks to the GitHub API in-process.
           persist-credentials: false
-      - uses: DailybotHQ/ai-diff-reviewer@v2
+      # Pinned to the exact tag recorded in skills-lock.json for the vendored
+      # skill — the moving @v3 alias could change prompts/default.md while the
+      # local skill stays behind, silently breaking the parity claim above.
+      # Bump this pin and the vendored skill together, in one PR.
+      - uses: DailybotHQ/ai-diff-reviewer@v3.1.1
         with:
-          provider: cursor
-          api-key: ${{ secrets.CURSOR_API_KEY }}
+          # Grok, not Cursor. The Cursor CLI exposes no turn-count flag, so its
+          # only bound is the action's 900 s invocation timeout — and under v3
+          # a timed-out review fails the gate. The turn cap is enforced
+          # NATIVELY on grok (`--max-turns N`), so the run is bounded by work
+          # done rather than by wall clock. Same lane as DailybotHQ/cli.
+          provider: grok
+          api-key: ${{ secrets.XAI_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          model: auto
+          # Pinned, not left to the `balanced` alias (v3 default): `grok-4.5`
+          # is what `balanced` resolves to on grok today. Naming it means a
+          # later alias change cannot move this gate silently.
+          model: grok-4.5
+          # v3 risk-tiered budget (BC-13): patch bytes, verifier sample and
+          # output tokens follow the change's risk tier. Explicit as living
+          # documentation — `auto` is the default.
+          budget-profile: auto
+          # The pack's trust surface (router, TRUST.md, shared auth/boundary
+          # rules, the per-repo API key sub-skill) plus the installer and
+          # release pipeline raise the tier to `critical` (raise only).
+          high-risk-paths: |
+            skills/dailybot/SKILL.md
+            skills/dailybot/TRUST.md
+            skills/dailybot/shared/**
+            skills/dailybot/env/**
+            setup.sh
+            scripts/**
+            .github/workflows/**
+          # Overrides the tier's native turn count (8 / 20 / 30 / 40). v3 marks
+          # a review that stops at its cap `incomplete`, which is RED under
+          # block-on-critical — and large sub-skill PRs (the Tasks pack) are
+          # expected to need more than the 40-turn tier. A cap is not a target:
+          # small diffs still finish in a few turns.
+          agent-max-turns: 60
+          # v3 verified criticals (BC-07): a claimed critical blocks only once
+          # a second, code-grounded pass confirms it; unconfirmed claims stay
+          # visible as annotated warnings. Explicit — `on` is the default.
+          verifier: 'on'
           label-gate: Ready
           author-association: OWNER,MEMBER,COLLABORATOR
           applied-label: pr-reviewed
@@ -181,13 +251,14 @@ jobs:
   gate:
     # STABLE NAME — mark ONLY this as the required check in branch protection.
     # A `skipped` required check counts as passing (GitHub behavior), so PRs
-    # without `Ready` are mergeable without a review. To force reviews on every
+    # without `Ready`, from non-write-tier authors, or from fork heads
+    # (fork-no-secrets) are mergeable without a review. To force reviews on every
     # PR, pair this required check with a separate rule that enforces the
     # `Ready` label. Emergency bypass via `skip-ai-review` makes the review
     # job succeed (Action short-circuit) — protect that label with a ruleset.
     name: 'AI review gate'
     needs: [scope, review]
-    if: always() && needs.scope.outputs.empty_reason != 'no-ready-label' && needs.scope.outputs.empty_reason != 'author-association'
+    if: always() && needs.scope.outputs.empty_reason != 'no-ready-label' && needs.scope.outputs.empty_reason != 'author-association' && needs.scope.outputs.empty_reason != 'fork-no-secrets'
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -205,7 +276,7 @@ jobs:
             exit 1
           fi
           if [ "$EMPTY_REASON" = "no-provider-secret" ]; then
-            echo "::error::Review requested (via 'Ready' label) but CURSOR_API_KEY is not configured. Set it in Settings > Secrets to unblock the merge gate."
+            echo "::error::Review requested (via 'Ready' label) but XAI_API_KEY is not configured. Set it in Settings > Secrets to unblock the merge gate."
             exit 1
           fi
           if [ "$REVIEW_RESULT" != "success" ]; then

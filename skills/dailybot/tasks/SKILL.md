@@ -75,20 +75,23 @@ or chat messages (`dailybot-chat`).
 
 Follow [`../shared/auth.md`](../shared/auth.md) for install, login and API-key setup.
 
-**Requires `dailybot-cli >= 3.14.0`** — now on PyPI — the release that brings Tasks to
-parity with the web (owner, board administration, attachments, bulk dry run). The
-pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more. Tasks first
-shipped in 3.12.0; on a CLI between 3.12.0 and 3.14.0, `--owner`, `task set-owner` and
-everything in Step 8 are missing — ask the developer to run `dailybot upgrade`.
+**Requires `dailybot-cli >= 3.14.2`** (on PyPI). Tasks reached parity with the web in
+3.14.0 (owner, board administration, attachments, bulk dry run); 3.14.2 adds the
+`--project` / `--key` that `board create` needs, without which the API refuses every create.
+The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one that needs more. Tasks first
+shipped in 3.12.0; on an older CLI, `--owner`, `task set-owner`, everything in Step 8 and
+`board create` are missing or broken, so ask the developer to run `dailybot upgrade`.
 
 Confirm by capability rather than by version, because that is what actually matters:
 
 ```bash
-dailybot task set-owner --help
+dailybot task set-owner --help               # 3.14.0+: the Tasks parity surface
+dailybot board create --help | grep -- --project   # 3.14.2+: board create works
 ```
 
-If that fails, the installed CLI predates this sub-skill — ask the developer to run
-`dailybot upgrade`. Do not work around a missing command.
+If the first fails, or the second prints nothing, the installed CLI predates what this
+sub-skill documents. Ask the developer to run `dailybot upgrade`. Do not work around a
+missing command or flag.
 
 Check the plan allows Tasks, and note the limits:
 
@@ -148,8 +151,10 @@ door exits **4** (`insufficient_scope`), matching the server. [commands.md](comm
 marks each command **yes** (exit 3) or **admin** (exit 4).
 
 **Do not read a refusal on those verbs as a permissions bug.** It is the credential kind,
-not the user's role — an organization admin's own key is refused exactly the same way. The
-fix is `dailybot login`, never "ask an admin".
+not the user's role — an organization admin's own key is refused exactly the same way. With
+a key, the fix is `dailybot login`, not "ask an admin". Only once you are signed in does an
+`insufficient_scope` on a `tasks:admin` door mean a role limit that an admin can help with
+(Step 7).
 
 ---
 
@@ -538,13 +543,16 @@ dailybot task get "$KEY" --json    # confirm it exists; show its key and title t
 # only after they confirm this is the card:
 dailybot task move "$KEY" --state done --json
 dailybot task comment "$KEY" "Merged: <one line on what shipped>"
+# the project: the task's board names it (board get <board-uuid> --json → project); if none, ask
+dailybot project update-post <project-uuid> "<what shipped and what it unblocks>" --health on_track
 ```
 
 `--state done` resolves to the board's first `done` column, so it keeps working after
 someone renames the column. The pattern also matches tokens that are not task keys
 (`API-2`, `SHA-256`, `UTF-8`), so a key from a branch name is only a candidate. Confirm it
 with `task get` and the developer before moving anything. If there is no key, or `task get`
-exits 5, do not guess one; ask.
+exits 5, do not guess one; ask. Then close the loop with a project update, since moving a
+card is not communication (Step 5).
 
 ### 3. Triage my inbox (needs `dailybot login`)
 
@@ -576,7 +584,17 @@ dailybot task bulk --operation update -f sprint.json --yes --json
 ```
 
 To move the chosen cards into the sprint column, run a second batch with `--operation move`
-and `"state"` (the column's uuid from the snapshot) on each item.
+and `"state"` (the column's uuid from the snapshot) on each item, gated the same way:
+
+```bash
+dailybot task bulk --operation move -f moves.json --dry-run --json
+```
+
+Show the developer the moves, and only after they agree:
+
+```bash
+dailybot task bulk --operation move -f moves.json --yes --json
+```
 
 ### 5. Report progress against a goal
 

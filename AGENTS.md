@@ -105,7 +105,7 @@ agent-skill/
     ├── forms/SKILL.md
     ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
     ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones
-    │                                          (CLI >= 3.14.0); untrusted content is Step 0
+    │                                          (CLI >= 3.14.2); untrusted content is Step 0
     ├── tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
     ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
     ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)
@@ -480,12 +480,22 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### AI Diff Reviewer (Flow B — dual-surface)
 
+[`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.1.1` for both the vendored skill and the Action.
+
 | Surface | What | How |
 |---------|------|-----|
-| **Local** | Augments DWP Security Review | [`.agents/skills/ai-diff-reviewer/`](.agents/skills/ai-diff-reviewer/) + [`.review/extension.md`](.review/extension.md). Phrase: *"Review my current branch"*. |
-| **CI** | PR merge gate | [`.github/workflows/pr-review.yml`](.github/workflows/pr-review.yml) — apply the **`Ready`** label on a PR to `main`. Check name: **`AI review gate`**. Bypass: `skip-ai-review`. |
+| **Local** | Augments DWP Security Review | [`.agents/skills/ai-diff-reviewer/`](.agents/skills/ai-diff-reviewer/) + [`.review/extension.md`](.review/extension.md). Phrase: *"Review my current branch"*. **Verified** `critical` findings from a completed pass block; an `incomplete`/`timeout` review is never a clean pass. |
+| **CI** | PR merge gate | [`.github/workflows/pr-review.yml`](.github/workflows/pr-review.yml) — apply the **`Ready`** label on a PR to `main`. Remove + re-add to re-run. Check name: **`AI review gate`**. Bypass: `skip-ai-review`. |
 
-**Secret required for CI:** `CURSOR_API_KEY` (repo Settings → Secrets).
+**Secret required for CI:** `XAI_API_KEY` (repo Settings → Secrets). Without it, applying `Ready` fails the merge gate loudly.
+
+**Provider: `grok` (xAI Grok CLI), pinned to `grok-4.5`, `agent-max-turns: 60`.** It replaced `cursor`: the Cursor CLI has no turn-count flag, so its only bound is the Action's 900-second timeout, and under v3 a timed-out review fails the gate. v3 gate semantics: a claimed `critical` blocks only once the verifier confirms it; budgets are risk-tiered (`budget-profile: auto`) and `high-risk-paths` lifts the pack's trust surface (`SKILL.md`, `TRUST.md`, `shared/`, `env/`), `setup.sh`, `scripts/` and workflows to the `critical` tier. A body saying `Recommendation: approve` is not evidence the check passed — read the tracking marker's Check status block.
+
+**Fork PRs skip the gate by design.** GitHub does not expose repo secrets to fork `pull_request` runs, so a fork head gets a notice instead of a review and `AI review gate` is skipped — which GitHub counts as passing. Same policy as DailybotHQ/cli. To review a fork contribution, push its branch to this repository and apply `Ready` there.
+
+**Concurrency:** runs are never cancelled in progress, so toggling `Ready` while a review is still running starts a second one that races the first on comments and labels — wait for the running review to post first.
+
+**After CI posts findings:** `apply-review` walks them per-finding (read-only, never commits); `address-review` closes the loop in one consented invocation (resolve, commit, push, re-apply `Ready`).
 
 Contributor-kit / tooling PRs that do **not** change `skills/dailybot/` may
 put `[skip release]` in the squash-merge commit body so auto-release does
