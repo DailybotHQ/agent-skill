@@ -879,13 +879,14 @@ data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, curso
 | create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants` (list too), `watch`, `mute` — reveal or change **who is notified** |
 | `project update-post`, milestones (create, update, complete, reopen, retire) | `project members` (the list) — reveals **who can see** |
 | task archive & restore | saved views (`board views`, `project views`, saves), board labels, pins (`star`, `favorites`) — belong to a person |
-| | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink, project / goal attach and attachment delete — needs `tasks:admin` (exit 4) |
+| | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink, project / goal attach and attachment delete — **any non-guest member** after login; keys lack `tasks:admin` (exit 4). Privacy is invite/remove; 404 = not visible |
 
 The server answers a key on any of these with `403 insufficient_scope`; the CLI refuses
-before sending (exit 3 for a person-shaped door, 4 for a `tasks:admin` one).
-**`tasks:admin` cannot be stored on an API key at all**, so structure changes are refused
-**even to an organization admin's own key**. A refusal there is about the credential kind, not the
-user's role: the fix is `dailybot login`, never "ask an admin".
+before sending (exit 3 for a person-shaped door, 4 for a structure/membership door).
+**`tasks:admin` cannot be stored on an API key at all**, and keys cannot change membership
+or participants. Every non-guest member holds the scope on a person session — no
+organization-admin prerequisite. A key refusal is the credential kind: the fix is
+`dailybot login` as a member.
 
 ### Exit codes
 

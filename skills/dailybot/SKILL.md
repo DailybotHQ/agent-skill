@@ -52,8 +52,10 @@ Then route by intent (below).
 > signed-in person: `tasks mine` / `counts` / `inbox`, `tasks cursor`, `board mentionables`,
 > participants, watch and mute, `project members`, board labels, saved views and pins, and
 > every board / column / project / goal structure change, membership included. An
-> organization API key is refused there, and so is an organization **admin's** own key: the
-> scope involved cannot be stored on a key at all.
+> organization API key is refused there — keys never store `tasks:admin` and cannot change
+> membership or participants. **Every non-guest member** can create goals, projects, boards
+> and manage membership after `dailybot login` (no organization-admin prerequisite). A 404
+> means not visible, not not allowed.
 > If you hold only `DAILYBOT_API_KEY`, do not start a flow that ends in one of those verbs.
 > The list is in [`tasks/SKILL.md`](tasks/SKILL.md). What this skill will and will **not** do on your
 machine — permissions, consent guarantees, and a self-audit you can run — is in
