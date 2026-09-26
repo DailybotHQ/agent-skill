@@ -4,6 +4,22 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.16.0] — 2026-09-26
+
+### Changes
+
+- Merge pull request #50 from DailybotHQ/chore/ai-diff-reviewer-v3
+- Merge remote-tracking branch 'origin/fix/tasks-review-round-4' into chore/ai-diff-reviewer-v3
+- docs(review): defer grok installer pin to a lockstep follow-up
+- docs: state fork-gate policy and review concurrency in AGENTS.md
+- ci(review): guard the grok job against fork heads; fix doc pointer
+- ci(review): move AI Diff Reviewer to v3.1.1 on grok
+- fix(tasks): probe for the 3.14.2 surface; scope idempotency docs to +key doors
+- feat(tasks): require dailybot-cli >= 3.14.2 for Tasks; fix idempotency docs
+- fix(tasks): address AI review on #49
+- fix(tasks): address AI review round 4 on the Tasks sub-skill
+
+
 ## [3.15.0] — 2026-09-25
 
 ### Changes
