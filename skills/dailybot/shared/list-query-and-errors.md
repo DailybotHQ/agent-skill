@@ -189,7 +189,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `label_in_use` | `label delete` while the Label still has attachments (409). | Clear/reassign entities, then delete — or archive instead. |
 | `label_limit_exceeded` | Assign/batch would exceed the per-entity Label limit. | Remove a Label first, then retry. |
 | `duplicate_name` | Label name collides with an existing org Label (409). | Pick another `--name` or update the existing UUID. |
-| `attachment_not_ready` | A Tasks attachment was downloaded (`…/content/`) before its upload was confirmed (409). Applies to task, comment, project, goal, milestone and project-update attachments. | Wait, then retry the download. The file is not lost. |
+| `attachment_not_ready` | A Tasks attachment was downloaded (`…/content/`) before its upload was confirmed (409). Applies to task, comment, project, goal, milestone and project-update attachments. | Wait, then retry the download. The file is not lost. CLI exit 4. |
 | `invalid_color` | Label create/update color is not a valid hex color. | Fix `--color` (e.g. `#4A90E2`). |
 | `permission_denied` | Caller lacks permission for this Labels action. | Ask an admin/manager; do not retry blindly. |
 

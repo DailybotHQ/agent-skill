@@ -1154,7 +1154,7 @@ Remove an attachment from a milestone. This cannot be undone.
 Download a milestone's attachment to a file. Never overwrites without --force.
 
 - **API:** `GET /v1/tasks/projects/{p}/milestones/{m}/attachments/{a}/content/ (409 attachment_not_ready before the upload is confirmed)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Flags:**
   - `--output`, `-o` `<file>` **required** — Where to write the file.
   - `--force` — Overwrite the output file if it exists.
@@ -1173,7 +1173,7 @@ Rename a milestone's attachment (1 to 255 characters).
 List a milestone's attachments.
 
 - **API:** `GET /v1/tasks/projects/{p}/milestones/{m}/attachments/`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Example:** `dailybot project milestone-attachments 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 --json`
 
 ### `dailybot project milestone-complete PROJECT MILESTONE`
@@ -1313,7 +1313,7 @@ Remove an attachment from a project update. Its author, or an organization admin
 Download a project update's attachment. Never overwrites without --force.
 
 - **API:** `GET /v1/tasks/projects/{p}/updates/{u}/attachments/{a}/content/ (409 attachment_not_ready before the upload is confirmed)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Flags:**
   - `--output`, `-o` `<file>` **required** — Where to write the file.
   - `--force` — Overwrite the output file if it exists.
@@ -1332,7 +1332,7 @@ Rename a project update's attachment (author only; 1 to 255 characters).
 List a project update's attachments.
 
 - **API:** `GET /v1/tasks/projects/{p}/updates/{u}/attachments/`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Example:** `dailybot project update-attachments 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --json`
 
 ### `dailybot project update-delete PROJECT UPDATE`
@@ -1361,7 +1361,7 @@ Edit your project update's text and/or health. Only its author can. Pass `-` as 
 Show one project update, with its author, agent, health and attachments.
 
 - **API:** `GET /v1/tasks/projects/{p}/updates/{u}/`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Example:** `dailybot project update-get 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --json`
 
 ### `dailybot project update-post PROJECT BODY`
