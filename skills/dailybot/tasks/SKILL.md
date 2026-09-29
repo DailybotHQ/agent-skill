@@ -97,7 +97,7 @@ project update need `dailybot-cli >= 3.21.0`** (see "Project updates and milesto
 co-authored"). **Comment reactions, reply threads (`task comment --reply-to`), label edit
 and delete, recents, board visits and attachment resolve need `dailybot-cli >= 3.22.0`;
 reactions on project updates and who reacted need `>= 3.23.0`,** the release that covers
-every live Tasks API operation. `3.23.0` is the current release;
+every live Tasks API operation. `3.23.1` is the current release;
 install it. On 3.19.x the CLI still refuses a key locally on
 structure and some person doors; upgrade. The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one
 that needs more. Tasks first shipped in 3.12.0; on an older CLI, `--owner`,
@@ -482,7 +482,7 @@ exit 8.
 | Exit | Meaning | What to do |
 | --- | --- | --- |
 | **1** | partial failure (bulk rows failed, or a dry run predicts refusals), or another failure such as an attachment upload | read the per-item results, or `code` |
-| **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`, an unknown `--sort`, `invalid_identifier`, `invalid_agent_attribution`) — fix the call, do not retry |
+| **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`, an unknown `--sort`, `invalid_identifier`, `invalid_agent_attribution`) — fix the call, do not retry. `reaction_limit_reached` is a capacity limit, not bad input: remove one of your emojis first (see Error codes) |
 | **3** | needs a person (`actor_required`): an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) | `dailybot login` or a personal API key — not a permissions bug |
 | **4** | the server refused this action: `insufficient_scope` (an agent or organization key on an admin door or a person door in general), `guest_not_allowed` (a guest), or another refusal | read `code`; see below |
 | **5** | not found / not visible | the key/uuid is wrong, private without a membership grant, **or another organization** — never "not allowed" |
@@ -538,6 +538,10 @@ Codes worth recognising:
   `:shortcode:` or something that is not one emoji (1–8 code points from U+1F300–U+1FAFF and
   U+2600–U+27BF, plus U+FE0F and U+200D). The CLI refuses it locally too. Exit 2; pass the
   emoji character itself.
+- `reaction_limit_reached` — one person already holds the most **different** emojis allowed on
+  this comment or project update (20 today; `extra.limit` names it). 400, exit 2. Remove one of
+  yours (`comment-unreact` / `update-unreact`) before adding another; re-adding an emoji you
+  already hold is still a no-op. Do not retry in a loop.
 - `label_in_use` — `board label delete` on a label that tasks still use (409, exit 4, with a
   `usage_count`). Archive it instead: `board label update <label-uuid> --archive`. Do not
   strip the label from the tasks to force the delete.

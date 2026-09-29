@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.23.0**, 141 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**). They span
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.23.1**, 141 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
 **Coverage.** With `dailybot-cli >= 3.23.0`, the CLI has a command for every live
@@ -516,7 +516,8 @@ React to a comment with one emoji. Needs a person: `dailybot login` or a persona
 - **API:** `POST /v1/tasks/tasks/{t}/comments/{c}/reactions/ {"emoji": "👍"}` — answers with the whole comment, its `reactions` aggregated
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
 - **Emoji:** one emoji of 1–8 code points from U+1F300–U+1FAFF and U+2600–U+27BF, plus U+FE0F (variation selector) and U+200D (zero-width joiner). Text and `:shortcodes:` are refused locally and by the server with `reaction_invalid_emoji` (400, exit 2).
-- **Idempotent:** reacting twice with the same emoji changes nothing, so a retry is safe without an idempotency key.
+- **Idempotent:** reacting twice with the same emoji changes nothing, so a retry of the *same* emoji is safe without an idempotency key.
+- **Limit:** one person holds at most 20 **different** emojis on one comment or update; the next new one is 400 `reaction_limit_reached` (exit 2, `extra.limit`). Re-adding an emoji you hold stays a no-op. Remove one with `task comment-unreact` before adding another; do not retry new emojis in a loop. The CLI explains it from `dailybot-cli >= 3.23.1`.
 - **Example:** `dailybot task comment-react ENG-142 00000000-0000-0000-0000-000000000007 '👍' --json`
 - **Reaction entry** (on a comment and on a project update): `{emoji, count, reacted, users}`. `count` is always the true total; `users` holds the first 10 reactors, oldest first (`{kind, uuid, name, avatar_url, has_photo, executed_by_agent}`), so the list was cut exactly when `count > len(users)`. `reacted` means **you** reacted. `executed_by_agent` is the agent that reacted for that person — an object `{uuid, name, username, avatar}` — or `null`. Names are user-authored data. Reactors need `dailybot-cli >= 3.23.0` to render; older CLIs pass the array through in `--json`.
 
@@ -1479,6 +1480,7 @@ React to a project update with one emoji. Needs a person: `dailybot login` or a 
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
 - **Emoji:** the same rule as `task comment-react`; text and `:shortcodes:` are refused locally (exit 2) and by the server (`reaction_invalid_emoji`).
 - **Idempotent:** reacting twice with the same emoji changes nothing. A person outside a members project gets 404 (exit 5).
+- **Limit:** one person holds at most 20 **different** emojis on one comment or update; the next new one is 400 `reaction_limit_reached` (exit 2, `extra.limit`). Re-adding an emoji you hold stays a no-op. Remove one with `project update-unreact` before adding another; do not retry new emojis in a loop. The CLI explains it from `dailybot-cli >= 3.23.1`.
 - **Agent stamp:** `--agent-name` / `DAILYBOT_AGENT_NAME` names the agent that reacted for the person.
 - **Example:** `dailybot project update-react 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000004 '👍' --json`
 

@@ -847,7 +847,7 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.23.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
+> **Recommended: `3.23.1`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
@@ -872,10 +872,10 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 141 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.23.0**; comment reactions,
+from the CLI's command definitions (aligned with **dailybot-cli 3.23.1**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
 **dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**).
-With 3.23.0 the CLI covers every live operation in
+Since 3.23.0 the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
 (`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 
