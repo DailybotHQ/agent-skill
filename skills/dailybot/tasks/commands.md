@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.0**, 137 commands; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.0**, 137 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
 **Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live
@@ -129,7 +129,7 @@ Resolve the current download URLs for `attachment:<uuid>` references in descript
 
 - **API:** `GET /v1/tasks/attachments/resolve/?ids=a,b`
 - **Signed-in person:** no
-- **Answer:** one entry per attachment you can see. An id you cannot see, or that does not exist, is simply absent: never read absence as "deleted". A returned `url` is opaque: a signed link that expires, or a permanent link anyone holding it can open (never paste it anywhere public). `url_expires_at` is null or an ISO timestamp. Use it, never store it; keep the uuid and resolve again the next time you need it. For downloads prefer `task attachment get --download`, which goes through the API content door.
+- **Answer:** one entry per attachment you can see. An id you cannot see, or that does not exist, is simply absent: never read absence as "deleted". A returned `url` is opaque: a signed link that expires, or a permanent link anyone holding it can open. Never store it, and never paste the raw `url` into comments, project updates, chat messages, logs or any other shared text: keep only the attachment uuid and resolve again the next time you need it. `url_expires_at` is null or an ISO timestamp. For downloads prefer `task attachment get -o <file>` (or `task brief --download <dir>` for every file on the card), which goes through the API content door.
 - **Example:** `dailybot tasks attachments-resolve 00000000-0000-0000-0000-000000000009 00000000-0000-0000-0000-000000000010 --json`
 
 ### `dailybot tasks changes BOARD`
@@ -723,7 +723,7 @@ Make someone the task's owner — the accountable person.
 - **Flags:**
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task set-owner ENG-142 me`
-- **Alias:** `dailybot task assign` is a deprecated alias of this command. Use `set-owner`.
+- **Alias:** `dailybot task assign` is a deprecated alias of this command. Use `set-owner`. Deprecated aliases are documented under their canonical command and are not counted separately.
 
 ### `dailybot task unlink TASK RELATION`
 
