@@ -875,7 +875,7 @@ and an example) ships in the pack at
 from the CLI's command definitions (aligned with **dailybot-cli 3.23.1**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
 **dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**).
-With 3.23.0 the CLI covers every live operation in
+Since 3.23.0 the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
 (`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 

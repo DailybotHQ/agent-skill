@@ -482,7 +482,7 @@ exit 8.
 | Exit | Meaning | What to do |
 | --- | --- | --- |
 | **1** | partial failure (bulk rows failed, or a dry run predicts refusals), or another failure such as an attachment upload | read the per-item results, or `code` |
-| **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`, an unknown `--sort`, `invalid_identifier`, `invalid_agent_attribution`) — fix the call, do not retry |
+| **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`, an unknown `--sort`, `invalid_identifier`, `invalid_agent_attribution`) — fix the call, do not retry. `reaction_limit_reached` is a capacity limit, not bad input: remove one of your emojis first (see Error codes) |
 | **3** | needs a person (`actor_required`): an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) | `dailybot login` or a personal API key — not a permissions bug |
 | **4** | the server refused this action: `insufficient_scope` (an agent or organization key on an admin door or a person door in general), `guest_not_allowed` (a guest), or another refusal | read `code`; see below |
 | **5** | not found / not visible | the key/uuid is wrong, private without a membership grant, **or another organization** — never "not allowed" |
