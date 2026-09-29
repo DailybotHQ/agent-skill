@@ -4,6 +4,13 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.21.0] — 2026-09-29
+
+### Changes
+
+- feat(tasks): reactions on project updates and who reacted (dailybot-cli 3.23.0) (#59)
+
+
 ## [3.20.1] — 2026-09-29
 
 ### Changes
