@@ -872,7 +872,7 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 137 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.22.0**; comment reactions,
+from the CLI's command definitions (aligned with **dailybot-cli 3.22.1**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
 **dailybot-cli >= 3.22.0**). With that release the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation

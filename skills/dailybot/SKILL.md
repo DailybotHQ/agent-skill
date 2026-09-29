@@ -126,7 +126,7 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 >
 > Requires **Python >= 3.10**. The wheel is `py3-none-any` (pure Python), MIT-licensed.
 >
-> **Current published version: `dailybot-cli 3.22.0`** on
+> **Current published version: `dailybot-cli 3.22.1`** on
 > [PyPI](https://pypi.org/project/dailybot-cli/) — what `pip install
 > --upgrade dailybot-cli` (or `dailybot upgrade`) installs today; run
 > `dailybot version --check` to confirm. Everything this pack documents —
@@ -167,7 +167,7 @@ working on older CLIs; only `dailybot-tasks` asks for the newer floor.
 If `dailybot --version` reports below 3.9.0, ask the developer to run
 `dailybot upgrade` (or `pip install --upgrade 'dailybot-cli>=3.9.0'`)
 before using any sub-skill. If it reports below 3.14.2, the same upgrade
-unlocks Tasks. Prefer **latest** (`3.22.0`) before structure or membership work so
+unlocks Tasks. Prefer **latest** (`3.22.1`) before structure or membership work so
 help text and refusal messages match this pack.
 
 ### Checking the installed version
@@ -175,7 +175,7 @@ help text and refusal messages match this pack.
 ```bash
 # Single-line, scriptable
 dailybot --version
-# → dailybot 3.22.0 (Python 3.12.4)
+# → dailybot 3.22.1 (Python 3.12.4)
 
 # Multi-line panel: version, Python runtime, install path, release notes link
 dailybot version

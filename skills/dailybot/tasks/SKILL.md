@@ -635,7 +635,8 @@ published but answers 501 until its runtime ships). Look up flags in
   `member add` / `remove`; who is notified: `task participants`, `watch`, `mute`.
 - **Attachments** — `attach` and `attachment get` / `delete` on tasks, comments, projects,
   goals, milestones and updates; `tasks attachments-resolve` turns `attachment:<uuid>`
-  references into current URLs (use them, never store them).
+  references into current URLs (use them, never store them, and never paste a raw URL
+  into comments, updates, chat or logs: a URL can be a permanent link; keep the uuid).
 - **Views** — `board views` / `view save`, `project views` / `view save`, `tasks view get` /
   `update` / `delete`.
 - **Pins** — `board star` / `unstar`, `tasks view star` / `unstar`, `tasks favorites`.
