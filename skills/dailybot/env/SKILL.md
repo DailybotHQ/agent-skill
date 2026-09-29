@@ -145,7 +145,7 @@ dailybot env off                    # REQUIRED before dailybot agent update
 dailybot agent update "…"           # production dashboard
 ```
 
-Do **not** `dailybot login` while a testing profile is active. Full rules: [`../shared/env-json.md` § Dual session](../shared/env-json.md#dual-session--production-reports--testing-profiles).
+Do **not** `dailybot login` while a testing profile is active. A login token only travels to the API host that issued it, so a testing profile never receives the production session, not even as a fallback; a Tasks structure write refused for the testing key ends as exit 4 `insufficient_scope`. Full rules: [`../shared/env-json.md` § Dual session](../shared/env-json.md#dual-session--production-reports--testing-profiles).
 
 ### Delete a profile
 
@@ -181,6 +181,7 @@ Precedence order (full table in [`../shared/env-json.md` § Auth resolution orde
 - **"The CLI is not using my env.json."** → `dailybot env show`; check `disabled`, `active`, and the walk-up path. Are you overriding with `--profile` / `--api-url` / `--app-url` flags?
 - **"The CLI refuses to run and complains about tracked env.json."** → run the exact fix printed in the error message. Staged-but-uncommitted counts as tracked. (`dailybot hook *` commands print the error but still run and exit 0 — by design, per their harness contract.)
 - **"I edited env.json by hand and now nothing works."** → `dailybot env show` surfaces schema warnings; if unrecoverable, delete the file and re-add profiles via `dailybot env add`.
+- **"A Tasks structure write fails with `insufficient_scope` on my testing profile, but I'm logged in."** → expected. Your login belongs to the production host; the CLI never sends it to another host, so the testing key alone answered (no key holds `tasks:admin`). Sign in against that host if you need structure writes there.
 - **"I set `disabled: "true"` and it's still active."** → `disabled` must be a JSON boolean; the CLI warns and treats a string as `false`. Use `dailybot env off`.
 
 ## See also
