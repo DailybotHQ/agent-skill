@@ -847,14 +847,14 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.22.1`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
+> **Recommended: `3.23.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
 > some person doors, so upgrade. **Milestone files, milestone restore and editable,
 > co-authored project updates need `>= 3.21.0`.** Comment reactions, reply threads
 > (`task comment --reply-to`), label edit and delete, recents, board visits and attachment
-> resolve need `>= 3.22.0`.
+> resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`.
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
@@ -872,7 +872,7 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 137 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.22.1**; comment reactions,
+from the CLI's command definitions (aligned with **dailybot-cli 3.23.0**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
 **dailybot-cli >= 3.22.0**). With that release the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
@@ -901,7 +901,7 @@ one person; the API treats it as that person, exactly like their login session),
 The CLI never refuses a key before the request; the server decides. An agent or organization
 key gets 403 `insufficient_scope` (exit 4) on admin doors and on person doors in general;
 400 `actor_required` (exit 3) appears on `owner=me`-style person filters (`tasks mine`,
-`tasks counts`, inbox, cursor) and on comment reactions (`task comment-react` / `comment-unreact`). A guest's personal key is limited
+`tasks counts`, inbox, cursor) and on reactions (`task comment-react` / `comment-unreact`, `project update-react` / `update-unreact`). A guest's personal key is limited
 like the guest's session: `guest_not_allowed` (exit 4). A key that carries explicit
 `tasks:*` scopes is a ceiling its person chose (`tasks:read` alone stays read-only). An
 expired key is 401 `credential_expired`. Privacy is invite/remove; 404 = not visible,
@@ -921,7 +921,7 @@ agent or organization key, is refused with `invalid_agent_attribution` (exit 2).
 | --- | --- |
 | 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals; or another failure (`preview_not_honoured`, an attachment upload) — read `code` |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a comment reaction |
+| 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) |
 | 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door or a person door in general) and `guest_not_allowed` (a guest) |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |

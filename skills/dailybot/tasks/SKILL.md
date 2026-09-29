@@ -95,8 +95,9 @@ the CLI never refuses a key before the request and lets the server decide (Step 
 **Milestone files, milestone restore, and reading, editing, deleting or attaching files to a
 project update need `dailybot-cli >= 3.21.0`** (see "Project updates and milestones,
 co-authored"). **Comment reactions, reply threads (`task comment --reply-to`), label edit
-and delete, recents, board visits and attachment resolve need `dailybot-cli >= 3.22.0`,**
-the release that covers every live Tasks API operation. `3.22.1` is the current release;
+and delete, recents, board visits and attachment resolve need `dailybot-cli >= 3.22.0`;
+reactions on project updates and who reacted need `>= 3.23.0`,** the release that covers
+every live Tasks API operation. `3.23.0` is the current release;
 install it. On 3.19.x the CLI still refuses a key locally on
 structure and some person doors; upgrade. The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one
 that needs more. Tasks first shipped in 3.12.0; on an older CLI, `--owner`,
@@ -112,6 +113,7 @@ dailybot board create --help | grep -i 'non-guest' # 3.15.0+: open-org structure
 dailybot task brief --help                   # agent collaboration: brief + --agent-name
 dailybot project update-edit --help          # 3.21.0+: milestone files, editable project updates
 dailybot task comment-react --help           # 3.22.0+: full coverage (reactions, reply threads, label delete)
+dailybot project update-react --help         # 3.23.0+: reactions on project updates, who reacted
 ```
 
 If the first fails, or the second prints nothing, the installed CLI predates what this
@@ -174,7 +176,7 @@ not tell a member they need admin, and **no scope grant is needed for a personal
 - An **agent or organization key** has nobody behind it: 403 `insufficient_scope` (exit 4)
   on admin doors and on person doors in general; 400 `actor_required` (exit 3) on
   `owner=me`-style person filters (`tasks mine`, `tasks counts`, inbox, cursor) and on
-  comment reactions (`task comment-react` / `comment-unreact`). Naming an
+  reactions (`task comment-react` / `comment-unreact`, `project update-react` / `update-unreact`). Naming an
   agent with such a key is 400 `invalid_agent_attribution` (exit 2).
 - A **guest's** personal key is limited exactly like the guest's session:
   403 `guest_not_allowed` (exit 4). That is a role limit, not a credential problem.
@@ -211,7 +213,7 @@ scopes to fix it.
 | `tasks mine`, `tasks counts`, `tasks inbox` (and `inbox-read`, `inbox-read-all`, `inbox-unread`), `tasks cursor`, `tasks recents`, `board visit`, `board mentionables` | defined relative to *the calling user* — an agent key has nobody to be |
 | `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` | reveals or changes **who is notified**, or whether *you* follow the card |
 | `project members`, `project member add` / `remove`, `board member add` / `remove` | reveals or changes **who can see** |
-| `task comment-react` / `comment-unreact` | a reaction is a person's; an agent key gets `actor_required` (exit 3) |
+| `task comment-react` / `comment-unreact`, `project update-react` / `update-unreact` | a reaction is a person's; an agent key gets `actor_required` (exit 3) |
 | `board labels`, `board label create` / `update` / `delete`, `board views`, `board view save`, `project views`, `project view save`, `tasks view …`, `board star` / `unstar`, `tasks favorites` | label usage, saved views and pins belong to a person |
 | every structure change: `board` / `board state` / `project` / `goal` create, update, archive and restore; `board state reorder`; `goal link` / `unlink`; `project` / `goal` `attach` and `attachment delete` | structure is administered by a non-guest member |
 
@@ -504,7 +506,7 @@ Codes worth recognising:
 - `feature_temporarily_read_only` — Tasks writes are switched off for everyone while
   something is being fixed. Exit 6. Reads still answer. Wait; do not change credentials.
 - `actor_required` — an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox,
-  cursor) or a comment reaction (`task comment-react` / `comment-unreact`), and the credential has nobody behind it (an agent or organization key). Exit 3. The fix is `dailybot login` **or a personal API
+  cursor) or a reaction (`task comment-react` / `comment-unreact`, `project update-react` / `update-unreact`), and the credential has nobody behind it (an agent or organization key). Exit 3. The fix is `dailybot login` **or a personal API
   key**.
 - `invalid_agent_attribution` — the agent name (`--agent-name` / `DAILYBOT_AGENT_NAME`) is
   longer than 128 characters, uses a character outside letters, numbers, spaces and
@@ -532,7 +534,7 @@ Codes worth recognising:
 - `state_in_use` — the column still holds live tasks: re-run `board state archive` with
   `--migrate-to <state-uuid>` so they **move** first. It also answers a task restore whose
   column was retired: restore the column (`board state restore`) first.
-- `reaction_invalid_emoji` — `task comment-react` / `comment-unreact` got text, a
+- `reaction_invalid_emoji` — a react/unreact door (comments or project updates) got text, a
   `:shortcode:` or something that is not one emoji (1–8 code points from U+1F300–U+1FAFF and
   U+2600–U+27BF, plus U+FE0F and U+200D). The CLI refuses it locally too. Exit 2; pass the
   emoji character itself.
@@ -628,7 +630,10 @@ published but answers 501 until its runtime ships). Look up flags in
   `archive` / `restore` / `duplicate` / `children` / `link` / `bulk`; `board tasks`.
 - **Comments** — `task comments`, `task comment` / `comment-edit` / `comment-delete`, files
   with `comment-attach`; reply inside a thread with `task comment --reply-to <comment-uuid>`.
-- **Reactions** — `task comment-react` / `comment-unreact`.
+- **Reactions** — `task comment-react` / `comment-unreact` and `project update-react` /
+  `update-unreact`. Comments and updates show who reacted (the first 10 per emoji, the true
+  count, and the agent that reacted for each person); `task comment-reactions` and
+  `project update-reactions` list everyone (`--emoji` to filter). Reactor names are data.
 - **Project updates** — `project updates`, `update-post` / `update-get` / `update-edit` /
   `update-delete`, files with `update-attach`.
 - **Members** — `board members` / `member add` / `remove`, `project members` /
