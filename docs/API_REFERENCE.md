@@ -846,8 +846,9 @@ dailybot login --email me@example.com
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
-> 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs. The pack-wide
-> baseline is `>= 3.9.0`.
+> 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
+> **Recommended: `>= 3.18.0`** for open-org structure writes (every non-guest member after
+> `dailybot login`) and guest/role refusal messaging. The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
@@ -861,7 +862,7 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 115 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions.
+from the CLI's command definitions (aligned with **dailybot-cli 3.18.0**).
 
 ### The rule that comes before any command
 
@@ -925,9 +926,12 @@ family. A local refusal carries the code **and the exit** the server would have 
 `actor_required` / exit 3 for a person-shaped door, `insufficient_scope` / exit 4 for a
 `tasks:admin` one — so you never have to know whether the request was actually sent.
 
-A `tasks:admin` refusal is exit **4**, not 3, because it is a `403` on the wire. If you are
-already signed in it is a **role** limit: ask an organization admin. Only a bare API key gets
-the "a key can never hold this scope" answer. See
+A `tasks:admin` / structure refusal is exit **4**, not 3, because it is a `403` on the wire.
+If you are already signed in it is almost always a **guest** (or another role without
+structure access): ask an organization admin to **change the role**, never to "grant
+`tasks:admin`" — every non-guest member already holds it on a person session. Only a bare
+API key gets the "a key can never hold this scope" answer (`dailybot login` as a non-guest
+member). See
 [`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
 
 ### The polling loop
