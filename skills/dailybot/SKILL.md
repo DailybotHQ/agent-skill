@@ -35,7 +35,8 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    recommended install is the latest CLI — currently **`3.21.0`**. Tasks
    agent collaboration needs `>= 3.19.0`; administering Tasks with a personal
    API key needs `>= 3.20.0`; milestone files and co-authored project updates
-   need `>= 3.21.0`).
+   need `>= 3.21.0`; comment reactions, label edit and delete, recents, board
+   visits and attachment resolve need `>= {{CLI_FLOOR}}`).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.
@@ -59,8 +60,8 @@ Then route by intent (below).
 > attachments). **Every non-guest member** can do it — no organization-admin prerequisite and
 > no scope grant (personal-key administration needs `dailybot-cli >= 3.20.0`). An agent or
 > organization key cannot act as a person: the server answers `insufficient_scope` (exit 4)
-> on admin and person doors, and `actor_required` (exit 3) only on `owner=me`-style person
-> filters (`tasks mine`, `tasks counts`, inbox, cursor). A guest's key is limited like the guest's session
+> on admin and person doors, and `actor_required` (exit 3) on `owner=me`-style person
+> filters (`tasks mine`, `tasks counts`, inbox, cursor) and comment reactions. A guest's key is limited like the guest's session
 > (`guest_not_allowed`). A 404 means not visible, not not allowed.
 > If you hold only an agent or organization key, do not start a flow that ends in one of
 > those person doors.
