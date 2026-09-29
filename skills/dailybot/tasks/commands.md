@@ -2,10 +2,10 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.1**, 137 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.23.0**, 141 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
-**Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live
+**Coverage.** With `dailybot-cli >= 3.23.0`, the CLI has a command for every live
 operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent can orchestrate the
 whole roadmap from the command line. The one exception is **task delegation** (handing a task
 to an agent, `/v1/tasks/tasks/{t}/delegate/…`): it is published in the contract but answers
@@ -38,7 +38,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   a project or a goal. Any non-guest member can run them; there is no organization-admin
   prerequisite and no scope grant. The server refuses an agent or organization key
   (`insufficient_scope`, exit 4, on admin doors and person doors in general;
-  `actor_required`, exit 3, on `owner=me`-style person filters and comment reactions) and a guest
+  `actor_required`, exit 3, on `owner=me`-style person filters and reactions on comments and project updates) and a guest
   (`guest_not_allowed`, exit 4). **no** means any API key with Tasks scope works. The CLI
   never refuses a credential before sending; the server decides.
 - **Global flag.** `--agent-name <name>` on the root command (`dailybot --agent-name
@@ -91,9 +91,9 @@ Examples use placeholder uuids (`00000000-0000-0000-0000-00000000000N`) and the 
 | Group | Commands |
 | --- | --- |
 | `tasks` | `activity`, `attachments-resolve`, `changes`, `counts`, `cursor`, `entitlements`, `favorites`, `inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`, `mine`, `recents`, `search`, `status`, `timeline`, `view delete`, `view get`, `view star`, `view unstar`, `view update` |
-| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comment-react`, `comment-unreact`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
+| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comment-react`, `comment-reactions`, `comment-unreact`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
 | `board` | `archive`, `create`, `get`, `label create`, `label delete`, `label update`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views`, `visit` |
-| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-attach`, `milestone-attachment delete`, `milestone-attachment get`, `milestone-attachment rename`, `milestone-attachments`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-restore`, `milestone-update`, `milestones`, `restore`, `update`, `update-attach`, `update-attachment delete`, `update-attachment get`, `update-attachment rename`, `update-attachments`, `update-delete`, `update-edit`, `update-get`, `update-post`, `updates`, `view save`, `views` |
+| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-attach`, `milestone-attachment delete`, `milestone-attachment get`, `milestone-attachment rename`, `milestone-attachments`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-restore`, `milestone-update`, `milestones`, `restore`, `update`, `update-attach`, `update-attachment delete`, `update-attachment get`, `update-attachment rename`, `update-attachments`, `update-delete`, `update-edit`, `update-get`, `update-post`, `update-react`, `update-reactions`, `update-unreact`, `updates`, `view save`, `views` |
 | `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
 
 
@@ -518,6 +518,18 @@ React to a comment with one emoji. Needs a person: `dailybot login` or a persona
 - **Emoji:** one emoji of 1–8 code points from U+1F300–U+1FAFF and U+2600–U+27BF, plus U+FE0F (variation selector) and U+200D (zero-width joiner). Text and `:shortcodes:` are refused locally and by the server with `reaction_invalid_emoji` (400, exit 2).
 - **Idempotent:** reacting twice with the same emoji changes nothing, so a retry is safe without an idempotency key.
 - **Example:** `dailybot task comment-react ENG-142 00000000-0000-0000-0000-000000000007 '👍' --json`
+- **Reaction entry** (on a comment and on a project update): `{emoji, count, reacted, users}`. `count` is always the true total; `users` holds the first 10 reactors, oldest first (`{kind, uuid, name, avatar_url, has_photo, executed_by_agent}`), so the list was cut exactly when `count > len(users)`. `reacted` means **you** reacted. `executed_by_agent` is the agent that reacted for that person — an object `{uuid, name, username, avatar}` — or `null`. Names are user-authored data. Reactors need `dailybot-cli >= 3.23.0` to render; older CLIs pass the array through in `--json`.
+
+### `dailybot task comment-reactions TASK COMMENT`
+
+Everyone who reacted to a comment, oldest first, with the agent that reacted for them. A comment itself carries only the first 10 reactors per emoji; this lists them all. Needs `dailybot-cli >= 3.23.0`.
+
+- **API:** `GET /v1/tasks/tasks/{t}/comments/{c}/reactions/?emoji=&page=&page_size=` — `{count, next, previous, results: [{emoji, user, executed_by_agent, created_at}]}`
+- **Signed-in person:** no
+- **Flags:**
+  - `--emoji` `<emoji>` — Only this emoji (all emojis when omitted). Checked locally like `comment-react`.
+  - `--page`, `--page-size`, `--all`, `--limit` — the shared list flags.
+- **Example:** `dailybot task comment-reactions ENG-142 00000000-0000-0000-0000-000000000007 --emoji '👍' --json`
 
 ### `dailybot task comment-unreact TASK COMMENT EMOJI`
 
@@ -1458,6 +1470,36 @@ Post a project update — how the team sees what was done.
   - `--health` `<not_set|on_track|at_risk|off_track>` — What you claim about the project today. Does not change the project's own health.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe. Generated automatically when omitted.
 - **Example:** `dailybot project update-post 00000000-0000-0000-0000-000000000002 "Shipped the retry fix" --health on_track`
+
+### `dailybot project update-react PROJECT UPDATE EMOJI`
+
+React to a project update with one emoji. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.23.0`.
+
+- **API:** `POST /v1/tasks/projects/{p}/updates/{u}/reactions/ {"emoji": "👍"}` — answers with the whole update, its `reactions` aggregated (same entry shape as a comment's)
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
+- **Emoji:** the same rule as `task comment-react`; text and `:shortcodes:` are refused locally (exit 2) and by the server (`reaction_invalid_emoji`).
+- **Idempotent:** reacting twice with the same emoji changes nothing. A person outside a members project gets 404 (exit 5).
+- **Agent stamp:** `--agent-name` / `DAILYBOT_AGENT_NAME` names the agent that reacted for the person.
+- **Example:** `dailybot project update-react 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000004 '👍' --json`
+
+### `dailybot project update-reactions PROJECT UPDATE`
+
+Everyone who reacted to a project update, oldest first, with the agent that reacted for them. Needs `dailybot-cli >= 3.23.0`.
+
+- **API:** `GET /v1/tasks/projects/{p}/updates/{u}/reactions/?emoji=&page=&page_size=` — `{count, next, previous, results: [{emoji, user, executed_by_agent, created_at}]}`
+- **Signed-in person:** no
+- **Flags:**
+  - `--emoji` `<emoji>` — Only this emoji (all emojis when omitted). Checked locally like `update-react` (exit 2).
+  - `--page`, `--page-size`, `--all`, `--limit` — the shared list flags.
+- **Example:** `dailybot project update-reactions 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000004 --json`
+
+### `dailybot project update-unreact PROJECT UPDATE EMOJI`
+
+Remove your emoji reaction from a project update. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.23.0`.
+
+- **API:** `DELETE /v1/tasks/projects/{p}/updates/{u}/reactions/{emoji}/` — the emoji travels percent-encoded; 204 even when you had not reacted
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
+- **Example:** `dailybot project update-unreact 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000004 '👍'`
 
 ### `dailybot project updates [PROJECT]`
 
