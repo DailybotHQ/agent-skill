@@ -121,6 +121,7 @@ The skill pack is **production-first**: `dailybot login` (or a live API key) is 
 2. Do **not** `dailybot login` while a testing profile is active — OTP would hit that profile's `api_url`.
 3. Switching is the same command as always: `env use`. Mix `kind: live` and `kind: testing` in one file; only one `active` at a time.
 4. Never print raw `env.json`.
+5. A testing profile never borrows the production login: the session token only travels to the host that issued it (see the precision notes under the auth resolution order).
 
 Worked flow: Example 5 below. CLI docs: [CONFIGURATION.md Dual session](https://github.com/DailybotHQ/cli/blob/main/docs/CONFIGURATION.md#dual-session--production-default--testing-profiles).
 
@@ -185,6 +186,7 @@ When `env.json::disabled` is `true`, or `active` is empty/null/unknown, the file
 Two precision notes (CLI >= 3.7.0):
 
 - **Layer 2 holds on the wire, not just in resolution.** When the key comes from `env.json`, the HTTP client sends `X-API-KEY` on the **first** attempt even if a Bearer login session exists — the per-repo key wins even against a server that would have accepted the Bearer, and the global session token is never transmitted to the env.json server. Keys from layers 5–6 keep the historical Bearer-first wire order.
+- **A login token only travels to the API host that issued it.** A testing profile whose `api_url` points at another host never receives the production session — not even as a fallback when its key is refused. On Tasks, a structure write refused for a testing key (an agent or organization key) therefore ends as `insufficient_scope` (exit 4), not as a silent retry under the production login. Sign in against that host, or use a personal API key that host issued (`dailybot-cli >= 3.20.0`).
 - **Layer 1 vs layer 2 for `agent *` commands:** a keyed `agents.json` profile beats `env.json` only when selected with an explicit `--profile` flag. The same profile resolved implicitly (via `profile.json::profile` or as the `agents.json` default) yields to `env.json`. `dailybot agent profiles --resolve` always shows exactly what will be sent.
 
 ---
