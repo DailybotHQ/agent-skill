@@ -2,8 +2,16 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.21.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**): 130 commands across
-`tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.0**, 137 commands; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
+`tasks`, `task`, `board`, `project` and `goal`.
+
+**Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live
+operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent can orchestrate the
+whole roadmap from the command line. The one exception is **task delegation** (handing a task
+to an agent, `/v1/tasks/tasks/{t}/delegate/…`): it is published in the contract but answers
+501 until its runtime ships, so no command exists for it yet.
+
+**This file** is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
 destructive previews, refusals). Use this file to look up *what exists* and *what each
@@ -30,7 +38,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   a project or a goal. Any non-guest member can run them; there is no organization-admin
   prerequisite and no scope grant. The server refuses an agent or organization key
   (`insufficient_scope`, exit 4, on admin doors and person doors in general;
-  `actor_required`, exit 3, only on `owner=me`-style person filters) and a guest
+  `actor_required`, exit 3, on `owner=me`-style person filters and comment reactions) and a guest
   (`guest_not_allowed`, exit 4). **no** means any API key with Tasks scope works. The CLI
   never refuses a credential before sending; the server decides.
 - **Global flag.** `--agent-name <name>` on the root command (`dailybot --agent-name
@@ -82,16 +90,16 @@ Examples use placeholder uuids (`00000000-0000-0000-0000-00000000000N`) and the 
 
 | Group | Commands |
 | --- | --- |
-| `tasks` | `activity`, `changes`, `counts`, `cursor`, `entitlements`, `favorites`, `inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`, `mine`, `search`, `status`, `timeline`, `view delete`, `view get`, `view star`, `view unstar`, `view update` |
-| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
-| `board` | `archive`, `create`, `get`, `label create`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views` |
+| `tasks` | `activity`, `attachments-resolve`, `changes`, `counts`, `cursor`, `entitlements`, `favorites`, `inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`, `mine`, `recents`, `search`, `status`, `timeline`, `view delete`, `view get`, `view star`, `view unstar`, `view update` |
+| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comment-react`, `comment-unreact`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
+| `board` | `archive`, `create`, `get`, `label create`, `label delete`, `label update`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views`, `visit` |
 | `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-attach`, `milestone-attachment delete`, `milestone-attachment get`, `milestone-attachment rename`, `milestone-attachments`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-restore`, `milestone-update`, `milestones`, `restore`, `update`, `update-attach`, `update-attachment delete`, `update-attachment get`, `update-attachment rename`, `update-attachments`, `update-delete`, `update-edit`, `update-get`, `update-post`, `updates`, `view save`, `views` |
 | `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
 
 
 ## Workspace — `dailybot tasks`
 
-Workspace pulse, search, activity, inbox, favorites and saved views.
+Workspace pulse, search, activity, inbox, favorites, recents, saved views and attachment references.
 
 ### `dailybot tasks activity`
 
@@ -114,6 +122,15 @@ Show the workspace activity feed — the catch-up read after an absence.
   - `--page-size`, `-z` `<int>` — Items per page (max 100).
   - `--limit`, `-l` `<int>` — Stop after collecting N items.
 - **Example:** `dailybot tasks activity --last-week --json`
+
+### `dailybot tasks attachments-resolve ATTACHMENT…`
+
+Resolve the current download URLs for `attachment:<uuid>` references in descriptions, comments and update bodies. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `GET /v1/tasks/attachments/resolve/?ids=a,b`
+- **Signed-in person:** no
+- **Answer:** one entry per attachment you can see. An id you cannot see, or that does not exist, is simply absent: never read absence as "deleted". A returned `url` can be short-lived: use it, never store it; resolve again the next time you need it.
+- **Example:** `dailybot tasks attachments-resolve 00000000-0000-0000-0000-000000000009 00000000-0000-0000-0000-000000000010 --json`
 
 ### `dailybot tasks changes BOARD`
 
@@ -215,6 +232,14 @@ List the tasks that are yours.
   - `--page-size`, `-z` `<int>` — Items per page (max 100).
   - `--limit`, `-l` `<int>` — Stop after collecting N items.
 - **Example:** `dailybot tasks mine --scope owned --json`
+
+### `dailybot tasks recents`
+
+List the boards you opened most recently (`board visit` feeds it). Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `GET /v1/tasks/me/recents/`
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Example:** `dailybot tasks recents --json`
 
 ### `dailybot tasks search`
 
@@ -418,9 +443,12 @@ Comment on a task. Pass `-` as the body to read it from stdin.
 
 - **API:** `POST /v1/tasks/tasks/{t}/comments/ +key`
 - **Signed-in person:** no
+- **API (reply):** with `--reply-to`, the body carries `{"parent_comment": "<comment-uuid>"}` and the comment lands inside that comment's thread. Needs `dailybot-cli >= 3.22.0`.
 - **Flags:**
+  - `--reply-to` `<COMMENT>` — Reply in the thread of this comment (its uuid).
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task comment ENG-142 "Deployed. <@DB@00000000-0000-0000-0000-000000000004> can you verify?"`
+- **Example (reply):** `dailybot task comment ENG-142 "Confirmed, looks good." --reply-to 00000000-0000-0000-0000-000000000007`
 
 ### `dailybot task comment-attach TASK COMMENT FILE`
 
@@ -480,6 +508,25 @@ Replace a comment's text. `-` reads the new body from stdin.
 - **API:** `PATCH /v1/tasks/tasks/{t}/comments/{c}/`
 - **Signed-in person:** no
 - **Example:** `dailybot task comment-edit ENG-142 00000000-0000-0000-0000-000000000007 "Deployed to prod"`
+
+### `dailybot task comment-react TASK COMMENT EMOJI`
+
+React to a comment with one emoji. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `POST /v1/tasks/tasks/{t}/comments/{c}/reactions/ {"emoji": "👍"}` — answers with the whole comment, its `reactions` aggregated
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
+- **Emoji:** one emoji of 1–8 code points from U+1F300–U+1FAFF and U+2600–U+27BF, plus U+FE0F (variation selector) and U+200D (zero-width joiner). Text and `:shortcodes:` are refused locally and by the server with `reaction_invalid_emoji` (400, exit 2).
+- **Idempotent:** reacting twice with the same emoji changes nothing, so a retry is safe without an idempotency key.
+- **Example:** `dailybot task comment-react ENG-142 00000000-0000-0000-0000-000000000007 '👍' --json`
+
+### `dailybot task comment-unreact TASK COMMENT EMOJI`
+
+Remove your emoji reaction from a comment. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `DELETE /v1/tasks/tasks/{t}/comments/{c}/reactions/{emoji}/` — the emoji travels percent-encoded in the path; 204 even when you had not reacted
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
+- **Idempotent:** removing a reaction you did not leave changes nothing. Same emoji rule as `comment-react`.
+- **Example:** `dailybot task comment-unreact ENG-142 00000000-0000-0000-0000-000000000007 '👍'`
 
 ### `dailybot task comments TASK`
 
@@ -731,7 +778,7 @@ Follow a task's notifications without being on it. Needs a person: `dailybot log
 
 ## Boards — `dailybot board`
 
-Boards, columns (states), members, labels, views, pins and the snapshot.
+Boards, columns (states), members, labels, views, pins, visits and the snapshot.
 
 ### `dailybot board archive BOARD`
 
@@ -777,6 +824,34 @@ Create an organization label from this board.
   - `--color` `<text>` — Label color, e.g. #ef4444.
   - `--description`, `-d` `<text>` — What the label means.
 - **Example:** `dailybot board label create 00000000-0000-0000-0000-000000000001 -n bug --color "#ef4444"`
+
+### `dailybot board label delete LABEL`
+
+Delete an organization label for good. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `DELETE /v1/tasks/labels/{l}/`
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Who:** only an elevated user (organization admin, organization manager or team admin).
+- **Refusal:** a label that tasks still use answers 409 `label_in_use` (exit 4) with a `usage_count`. Do not strip it from the tasks to force the delete: archive it instead with `board label update LABEL --archive`.
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot board label delete 00000000-0000-0000-0000-000000000012 --dry-run`
+
+### `dailybot board label update LABEL`
+
+Edit or archive an organization label. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `PATCH /v1/tasks/labels/{l}/ {name, color, description, is_archived}`
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Who:** the label's creator, or an elevated user (organization admin, organization manager or team admin).
+- **Refusal:** a name another label already uses answers 400 `invalid_filter_value` (exit 2); pick another name. This is the Tasks label code; organization Labels (`dailybot label`) answer `duplicate_name` instead.
+- **Flags:**
+  - `--name`, `-n` `<text>` — New name (max 64).
+  - `--color` `<text>` — New color, a #rrggbb hex (empty clears it).
+  - `--description`, `-d` `<text>` — New description (max 255).
+  - `--archive` / `--unarchive` — Archive the label, or bring it back.
+- **Example:** `dailybot board label update 00000000-0000-0000-0000-000000000012 -n needs-design --color "#8b5cf6"`
 
 ### `dailybot board labels BOARD`
 
@@ -993,6 +1068,14 @@ List your saved views on a board, with the ETag a save needs.
 - **Flags:**
   - `--etag` — Print only the ETag `board view save --if-match` needs, and nothing else.
 - **Example:** `ETAG=$(dailybot board views 00000000-0000-0000-0000-000000000001 --etag)`
+
+### `dailybot board visit BOARD`
+
+Record that you opened a board, so it shows in `tasks recents`. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+
+- **API:** `POST /v1/tasks/boards/{b}/visit/`
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Example:** `dailybot board visit 00000000-0000-0000-0000-000000000001`
 
 
 ## Projects — `dailybot project`

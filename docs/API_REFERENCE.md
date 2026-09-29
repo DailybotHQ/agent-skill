@@ -847,12 +847,14 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.21.0`** (the current release). Agent attribution (`--agent-name` /
+> **Recommended: `3.22.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
 > some person doors, so upgrade. **Milestone files, milestone restore and editable,
-> co-authored project updates need `>= 3.21.0`.**
+> co-authored project updates need `>= 3.21.0`.** Comment reactions, reply threads
+> (`task comment --reply-to`), label edit and delete, recents, board visits and attachment
+> resolve need `>= 3.22.0`.
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
@@ -867,10 +869,14 @@ This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 130 Tasks commands, with every argument, flag, API door
+The complete command list (all 137 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.21.0**).
+from the CLI's command definitions (aligned with **dailybot-cli 3.22.0**; comment reactions,
+reply threads, label edit and delete, recents, board visits and attachment resolve need
+**dailybot-cli >= 3.22.0**). With that release the CLI covers every live operation in
+the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
+(`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 
 ### The rule that comes before any command
 
@@ -888,14 +894,14 @@ one person; the API treats it as that person, exactly like their login session),
 
 | Any API key with scope | Needs a person: login or personal API key |
 | --- | --- |
-| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones, milestone and update attachment lists and downloads, `project update-get` | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
+| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones, milestone and update attachment lists and downloads, `project update-get`, `tasks attachments-resolve` | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks recents`, `board visit`, `task comment-react` / `comment-unreact`, `board label update` / `delete`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
 | create / update / move / set the owner / comment / link / labels / attach / bulk | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership** (by user or team), goal link / unlink, project / goal attach and attachment delete, milestone files and restore, project update read / edit / delete and update files (edits and file changes by the update's author only) — **any non-guest member**, no organization-admin prerequisite and no scope grant |
 | `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | |
 
 The CLI never refuses a key before the request; the server decides. An agent or organization
 key gets 403 `insufficient_scope` (exit 4) on admin doors and on person doors in general;
-400 `actor_required` (exit 3) appears only on `owner=me`-style person filters (`tasks mine`,
-`tasks counts`, inbox, cursor). A guest's personal key is limited
+400 `actor_required` (exit 3) appears on `owner=me`-style person filters (`tasks mine`,
+`tasks counts`, inbox, cursor) and on comment reactions (`task comment-react` / `comment-unreact`). A guest's personal key is limited
 like the guest's session: `guest_not_allowed` (exit 4). A key that carries explicit
 `tasks:*` scopes is a ceiling its person chose (`tasks:read` alone stays read-only). An
 expired key is 401 `credential_expired`. Privacy is invite/remove; 404 = not visible,
@@ -915,7 +921,7 @@ agent or organization key, is refused with `invalid_agent_attribution` (exit 2).
 | --- | --- |
 | 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals; or another failure (`preview_not_honoured`, an attachment upload) — read `code` |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) |
+| 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a comment reaction |
 | 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door or a person door in general) and `guest_not_allowed` (a guest) |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
