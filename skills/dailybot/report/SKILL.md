@@ -245,6 +245,15 @@ Model identifier examples: `"claude-sonnet-4-6"`, `"o3"`, `"gemini-2.5-pro"`, `"
 >
 > **Timeout**: Allow at least 30 seconds for CLI commands to complete. Do not use a shorter timeout.
 
+> ### Target org — production unless asked otherwise
+>
+> Reports belong on the team's **production** Dailybot org. If
+> `.dailybot/env.json` has a **testing** profile active (`dailybot env show`
+> lists `kind: testing` or a local `api_url`), run `dailybot env off` first
+> so `agent update` uses the login session / live key. Switch back with
+> `dailybot env on` only if you still need that testing profile. Full
+> dual-session rules: [`../shared/env-json.md` § Dual session](../shared/env-json.md#dual-session--production-reports--testing-profiles).
+
 > ### Pre-flight (mandatory) — respect the repo profile
 >
 > **Before constructing the command, do the repo-profile pre-flight from the router:** [`../SKILL.md` § Mandatory pre-flight](../SKILL.md#mandatory-pre-flight-respect-the-repo-profile). Full procedure in [`../shared/repo-profile.md`](../shared/repo-profile.md). One-liner detection:
