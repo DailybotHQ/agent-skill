@@ -96,7 +96,7 @@ the CLI never refuses a key before the request and lets the server decide (Step 
 project update need `dailybot-cli >= 3.21.0`** (see "Project updates and milestones,
 co-authored"). **Comment reactions, reply threads (`task comment --reply-to`), label edit
 and delete, recents, board visits and attachment resolve need `dailybot-cli >= 3.22.0`,**
-the release that covers every live Tasks API operation. `3.22.0` is the current release;
+the release that covers every live Tasks API operation. `3.22.1` is the current release;
 install it. On 3.19.x the CLI still refuses a key locally on
 structure and some person doors; upgrade. The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one
 that needs more. Tasks first shipped in 3.12.0; on an older CLI, `--owner`,

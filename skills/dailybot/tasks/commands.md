@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.0**, 137 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.1**, 137 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
 **Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live

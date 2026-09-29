@@ -847,7 +847,7 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.22.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
+> **Recommended: `3.22.1`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
