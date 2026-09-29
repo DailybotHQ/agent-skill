@@ -140,6 +140,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 |--------|---------|------------|
 | `actor_required` | Not a 403 on Tasks: an agent or organization key on an admin or person door gets 403 `insufficient_scope` (next row). `actor_required` is the 400 in the table below; the CLI maps it to exit 3 whatever the status. | See the 400 table. |
 | `insufficient_scope` | **HTTP 403, CLI exit 4.** On a Tasks admin door or a person door in general (structure, membership, participants, mute, saved views, pins, …) with a missing `tasks:admin`: the credential is an **agent or organization key** (nobody behind it), or a personal key whose own `tasks:*` scopes are a narrower ceiling its person chose (`tasks:read` only). A personal key with no `tasks:*` scopes is that person and needs no grant. | `dailybot login` or a personal API key of a non-guest member. For a narrowed personal key, the person issues a key with `tasks:write` (or no Tasks scopes at all). Not an organization-admin problem. |
+| `update_not_author` | **HTTP 403, CLI exit 4.** A Tasks project update was edited (`project update-edit`), or had a file attached or renamed (`update-attach`, `update-attachment rename`), by someone other than its author; or deleted (`update-delete`, `update-attachment delete`) by someone who is neither its author nor an organization admin. Only the update's author can edit it or change its attachments; an org admin may delete. | Do not retry with another credential. Post a new update (`project update-post`) instead, or ask the author (or an org admin, to delete). |
 | `plan_upgrade_required` | The feature isn't on the org's current plan. Carries an `upgrade_url`. | Tell the developer the feature needs a plan upgrade; surface the `upgrade_url`. Do not retry. |
 | `plan_free_api_keys_forbidden` | API keys are fully blocked on the FREE plan. | Suggest `dailybot login` (a Bearer session) instead of an API key. |
 | `plan_missing_core_api_integrations` | The org's plan lacks the core API integration this call needs. | Explain the integration/plan gap; do not retry. |
@@ -188,6 +189,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `label_in_use` | `label delete` while the Label still has attachments (409). | Clear/reassign entities, then delete — or archive instead. |
 | `label_limit_exceeded` | Assign/batch would exceed the per-entity Label limit. | Remove a Label first, then retry. |
 | `duplicate_name` | Label name collides with an existing org Label (409). | Pick another `--name` or update the existing UUID. |
+| `attachment_not_ready` | A Tasks attachment was downloaded (`…/content/`) before its upload was confirmed (409). Applies to task, comment, project, goal, milestone and project-update attachments. | Wait, then retry the download. The file is not lost. CLI exit 4. |
 | `invalid_color` | Label create/update color is not a valid hex color. | Fix `--color` (e.g. `#4A90E2`). |
 | `permission_denied` | Caller lacks permission for this Labels action. | Ask an admin/manager; do not retry blindly. |
 

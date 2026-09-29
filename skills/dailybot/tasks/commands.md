@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.20.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**): 116 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.21.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**): 130 commands across
 `tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
@@ -85,7 +85,7 @@ Examples use placeholder uuids (`00000000-0000-0000-0000-00000000000N`) and the 
 | `tasks` | `activity`, `changes`, `counts`, `cursor`, `entitlements`, `favorites`, `inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`, `mine`, `search`, `status`, `timeline`, `view delete`, `view get`, `view star`, `view unstar`, `view update` |
 | `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
 | `board` | `archive`, `create`, `get`, `label create`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views` |
-| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-update`, `milestones`, `restore`, `update`, `update-post`, `updates`, `view save`, `views` |
+| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-attach`, `milestone-attachment delete`, `milestone-attachment get`, `milestone-attachment rename`, `milestone-attachments`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-restore`, `milestone-update`, `milestones`, `restore`, `update`, `update-attach`, `update-attachment delete`, `update-attachment get`, `update-attachment rename`, `update-attachments`, `update-delete`, `update-edit`, `update-get`, `update-post`, `updates`, `view save`, `views` |
 | `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
 
 
@@ -1128,6 +1128,54 @@ List who can see a project — people and whole teams. Needs a person: `dailybot
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
 - **Example:** `dailybot project members 00000000-0000-0000-0000-000000000002`
 
+### `dailybot project milestone-attach PROJECT MILESTONE FILE`
+
+Attach a file to a milestone. Reference it in the milestone description with `![alt](attachment:<uuid>)` to show it inline.
+
+- **API:** `POST /v1/tasks/projects/{p}/milestones/{m}/attachments/ (multipart, ≤5 MiB)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--caption` `<text>` — Short caption shown with the file.
+- **Example:** `dailybot project milestone-attach 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 ./spec.pdf`
+
+### `dailybot project milestone-attachment delete PROJECT MILESTONE ATTACHMENT`
+
+Remove an attachment from a milestone. This cannot be undone.
+
+- **API:** `DELETE /v1/tasks/projects/{p}/milestones/{m}/attachments/{a}/`
+- **Signed-in person:** no
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot project milestone-attachment delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 00000000-0000-0000-0000-000000000009 --dry-run`
+
+### `dailybot project milestone-attachment get PROJECT MILESTONE ATTACHMENT`
+
+Download a milestone's attachment to a file. Never overwrites without --force.
+
+- **API:** `GET /v1/tasks/projects/{p}/milestones/{m}/attachments/{a}/content/ (409 attachment_not_ready before the upload is confirmed)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--output`, `-o` `<file>` **required** — Where to write the file.
+  - `--force` — Overwrite the output file if it exists.
+- **Example:** `dailybot project milestone-attachment get 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 00000000-0000-0000-0000-000000000009 -o ./spec.pdf`
+
+### `dailybot project milestone-attachment rename PROJECT MILESTONE ATTACHMENT FILENAME`
+
+Rename a milestone's attachment (1 to 255 characters).
+
+- **API:** `PATCH /v1/tasks/projects/{p}/milestones/{m}/attachments/{a}/ {filename}`
+- **Signed-in person:** no
+- **Example:** `dailybot project milestone-attachment rename 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 00000000-0000-0000-0000-000000000009 spec-v2.pdf`
+
+### `dailybot project milestone-attachments PROJECT MILESTONE`
+
+List a milestone's attachments.
+
+- **API:** `GET /v1/tasks/projects/{p}/milestones/{m}/attachments/`
+- **Signed-in person:** no
+- **Example:** `dailybot project milestone-attachments 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 --json`
+
 ### `dailybot project milestone-complete PROJECT MILESTONE`
 
 Mark a milestone complete.
@@ -1172,6 +1220,14 @@ Reopen a completed milestone.
 - **Flags:**
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot project milestone-reopen 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006`
+
+### `dailybot project milestone-restore PROJECT MILESTONE`
+
+Bring a retired milestone back. Safe to repeat.
+
+- **API:** `POST /v1/tasks/projects/{p}/milestones/{m}/restore/ (idempotent)`
+- **Signed-in person:** no
+- **Example:** `dailybot project milestone-restore 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006`
 
 ### `dailybot project milestone-update PROJECT MILESTONE`
 
@@ -1230,6 +1286,83 @@ Change a project's name, lead, health, dates or visibility.
   - `--target-date` `<date>` — YYYY-MM-DD.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot project update 00000000-0000-0000-0000-000000000002 --health at_risk`
+
+### `dailybot project update-attach PROJECT UPDATE FILE`
+
+Attach a file to your project update. Only its author can. For an inline image: post the update, attach the file, then `update-edit` the body with `attachment:<uuid>`.
+
+- **API:** `POST /v1/tasks/projects/{p}/updates/{u}/attachments/ (multipart, ≤5 MiB; author only, else 403 update_not_author)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--caption` `<text>` — Short caption shown with the file.
+- **Example:** `dailybot project update-attach 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 ./chart.png`
+
+### `dailybot project update-attachment delete PROJECT UPDATE ATTACHMENT`
+
+Remove an attachment from a project update. Its author, or an organization admin. Cannot be undone.
+
+- **API:** `DELETE /v1/tasks/projects/{p}/updates/{u}/attachments/{a}/ (author or org admin, else 403 update_not_author)`
+- **Signed-in person:** no — the author or an organization admin (anyone else: 403 `update_not_author`)
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot project update-attachment delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 00000000-0000-0000-0000-000000000009 --dry-run`
+
+### `dailybot project update-attachment get PROJECT UPDATE ATTACHMENT`
+
+Download a project update's attachment. Never overwrites without --force.
+
+- **API:** `GET /v1/tasks/projects/{p}/updates/{u}/attachments/{a}/content/ (409 attachment_not_ready before the upload is confirmed)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--output`, `-o` `<file>` **required** — Where to write the file.
+  - `--force` — Overwrite the output file if it exists.
+- **Example:** `dailybot project update-attachment get 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 00000000-0000-0000-0000-000000000009 -o ./chart.png`
+
+### `dailybot project update-attachment rename PROJECT UPDATE ATTACHMENT FILENAME`
+
+Rename a project update's attachment (author only; 1 to 255 characters).
+
+- **API:** `PATCH /v1/tasks/projects/{p}/updates/{u}/attachments/{a}/ {filename} (author only, else 403 update_not_author)`
+- **Signed-in person:** no
+- **Example:** `dailybot project update-attachment rename 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 00000000-0000-0000-0000-000000000009 chart-q4.png`
+
+### `dailybot project update-attachments PROJECT UPDATE`
+
+List a project update's attachments.
+
+- **API:** `GET /v1/tasks/projects/{p}/updates/{u}/attachments/`
+- **Signed-in person:** no
+- **Example:** `dailybot project update-attachments 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --json`
+
+### `dailybot project update-delete PROJECT UPDATE`
+
+Delete a project update. Its author or an organization admin can. Cannot be undone.
+
+- **API:** `DELETE /v1/tasks/projects/{p}/updates/{u}/ (author or org admin, else 403 update_not_author)`
+- **Signed-in person:** no — the author or an organization admin (anyone else: 403 `update_not_author`)
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
+- **Example:** `dailybot project update-delete 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --dry-run`
+
+### `dailybot project update-edit PROJECT UPDATE [BODY]`
+
+Edit your project update's text and/or health. Only its author can. Pass `-` as the body to read it from stdin. To show an attached image inline, put `attachment:<uuid>` in the body.
+
+- **API:** `PATCH /v1/tasks/projects/{p}/updates/{u}/ {body, health} (author only, else 403 update_not_author)`
+- **Signed-in person:** no
+- **Flags:**
+  - `--health` `<not_set|on_track|at_risk|off_track>` — Change the health this update claims.
+- **Example:** `dailybot project update-edit 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --health at_risk`
+
+### `dailybot project update-get PROJECT UPDATE`
+
+Show one project update, with its author, agent, health and attachments.
+
+- **API:** `GET /v1/tasks/projects/{p}/updates/{u}/`
+- **Signed-in person:** no
+- **Example:** `dailybot project update-get 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --json`
 
 ### `dailybot project update-post PROJECT BODY`
 
