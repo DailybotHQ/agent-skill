@@ -1133,7 +1133,7 @@ List who can see a project — people and whole teams. Needs a person: `dailybot
 Attach a file to a milestone. Needs a person: `dailybot login` or a personal API key. Reference it in the milestone description with `![alt](attachment:<uuid>)` to show it inline.
 
 - **API:** `POST /v1/tasks/projects/{p}/milestones/{m}/attachments/ (multipart, ≤5 MiB)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Flags:**
   - `--caption` `<text>` — Short caption shown with the file.
 - **Example:** `dailybot project milestone-attach 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 ./spec.pdf`
@@ -1143,7 +1143,7 @@ Attach a file to a milestone. Needs a person: `dailybot login` or a personal API
 Remove an attachment from a milestone. This cannot be undone.
 
 - **API:** `DELETE /v1/tasks/projects/{p}/milestones/{m}/attachments/{a}/`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
@@ -1165,7 +1165,7 @@ Download a milestone's attachment to a file. Never overwrites without --force.
 Rename a milestone's attachment (1 to 255 characters).
 
 - **API:** `PATCH /v1/tasks/projects/{p}/milestones/{m}/attachments/{a}/ {filename}`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Example:** `dailybot project milestone-attachment rename 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 00000000-0000-0000-0000-000000000009 spec-v2.pdf`
 
 ### `dailybot project milestone-attachments PROJECT MILESTONE`
@@ -1226,7 +1226,7 @@ Reopen a completed milestone.
 Bring a retired milestone back. Safe to repeat.
 
 - **API:** `POST /v1/tasks/projects/{p}/milestones/{m}/restore/ (idempotent)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no
 - **Example:** `dailybot project milestone-restore 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006`
 
 ### `dailybot project milestone-update PROJECT MILESTONE`
@@ -1292,7 +1292,7 @@ Change a project's name, lead, health, dates or visibility.
 Attach a file to your project update. Only its author can. For an inline image: post the update, attach the file, then `update-edit` the body with `attachment:<uuid>`.
 
 - **API:** `POST /v1/tasks/projects/{p}/updates/{u}/attachments/ (multipart, ≤5 MiB; author only, else 403 update_not_author)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no — author only (403 `update_not_author` for anyone else; an organization admin may delete)
 - **Flags:**
   - `--caption` `<text>` — Short caption shown with the file.
 - **Example:** `dailybot project update-attach 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 ./chart.png`
@@ -1302,7 +1302,7 @@ Attach a file to your project update. Only its author can. For an inline image: 
 Remove an attachment from a project update. Its author, or an organization admin. Cannot be undone.
 
 - **API:** `DELETE /v1/tasks/projects/{p}/updates/{u}/attachments/{a}/ (author or org admin, else 403 update_not_author)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no — author only (403 `update_not_author` for anyone else; an organization admin may delete)
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
@@ -1324,7 +1324,7 @@ Download a project update's attachment. Never overwrites without --force.
 Rename a project update's attachment (author only; 1 to 255 characters).
 
 - **API:** `PATCH /v1/tasks/projects/{p}/updates/{u}/attachments/{a}/ {filename} (author only, else 403 update_not_author)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no — author only (403 `update_not_author` for anyone else; an organization admin may delete)
 - **Example:** `dailybot project update-attachment rename 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 00000000-0000-0000-0000-000000000009 chart-q4.png`
 
 ### `dailybot project update-attachments PROJECT UPDATE`
@@ -1340,7 +1340,7 @@ List a project update's attachments.
 Delete a project update. Its author or an organization admin can. Cannot be undone.
 
 - **API:** `DELETE /v1/tasks/projects/{p}/updates/{u}/ (author or org admin, else 403 update_not_author)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no — author only (403 `update_not_author` for anyone else; an organization admin may delete)
 - **Flags:**
   - `--dry-run` — Say what would happen and send nothing.
   - `--yes`, `-y` — Skip the confirmation.
@@ -1351,7 +1351,7 @@ Delete a project update. Its author or an organization admin can. Cannot be undo
 Edit your project update's text and/or health. Only its author can. Pass `-` as the body to read it from stdin. To show an attached image inline, put `attachment:<uuid>` in the body.
 
 - **API:** `PATCH /v1/tasks/projects/{p}/updates/{u}/ {body, health} (author only, else 403 update_not_author)`
-- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Signed-in person:** no — author only (403 `update_not_author` for anyone else; an organization admin may delete)
 - **Flags:**
   - `--health` `<not_set|on_track|at_risk|off_track>` — Change the health this update claims.
 - **Example:** `dailybot project update-edit 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000015 --health at_risk`
