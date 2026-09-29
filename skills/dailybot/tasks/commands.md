@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **{{CLI_FLOOR}}**): 116 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.19.0**): 116 commands across
 `tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
