@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.19.0**; personal-key administration needs **3.20.0**): 116 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.20.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**): 116 commands across
 `tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
@@ -29,15 +29,17 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   projects and goals, linking goals to projects, and attaching files to or deleting them from
   a project or a goal. Any non-guest member can run them; there is no organization-admin
   prerequisite and no scope grant. The server refuses an agent or organization key
-  (`actor_required`, exit 3, on `owner=me`-style doors; `insufficient_scope`, exit 4, on
-  admin and person doors) and a guest (`guest_not_allowed`, exit 4). **no** means any API
-  key with Tasks scope works. The CLI never refuses a credential before sending; the server
-  decides (`dailybot-cli >= 3.20.0`).
+  (`insufficient_scope`, exit 4, on admin doors and person doors in general;
+  `actor_required`, exit 3, only on `owner=me`-style person filters) and a guest
+  (`guest_not_allowed`, exit 4). **no** means any API key with Tasks scope works. The CLI
+  never refuses a credential before sending; the server decides.
 - **Global flag.** `--agent-name <name>` on the root command (`dailybot --agent-name
   "Claude Code" task comment …`), or `DAILYBOT_AGENT_NAME` in the environment, names the
   agent acting for the person. Every Tasks write stays the credential's person's and records
-  the agent as the one who executed it. It is a label, not a credential: it never changes
-  what a command may do. Reads ignore it. See SKILL.md, "Work a task you were handed".
+  the agent as the one who executed it. It is a label, not a credential: it never changes authorization or
+  visibility. Set it only with a login session or a personal API key; an agent or
+  organization key that sends it is refused with `invalid_agent_attribution` (exit 2).
+  Reads ignore it. See SKILL.md, "Work a task you were handed".
 - **Flags.** `<type>` is the value type; `a|b|c` lists the accepted values. **required**
   flags must be passed; **repeatable** flags may be given several times. Short aliases are
   listed with the long name.
@@ -53,8 +55,8 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   file drops, and wait before saving with `--if-match`.
   Exit 7 means a person declined. Stop, and never re-run with `--yes`.
 - **Exit codes.** 0 ok · 1 partial bulk, predicted refusals, `preview_not_honoured`, or another failure (read
-  `code`) · 2 bad input, including `invalid_identifier` · 3 needs a person (`actor_required`: `dailybot login` or a personal API key) ·
-  4 refused, including `insufficient_scope` (an agent or organization key on a person door) and `guest_not_allowed` · 5 not found or not visible · 6 transient,
+  `code`) · 2 bad input, including `invalid_identifier` · 3 needs a person (`actor_required`, `owner=me`-style filters: `dailybot login` or a personal API key) ·
+  4 refused, including `insufficient_scope` (an agent or organization key on an admin or person door) and `guest_not_allowed` · 5 not found or not visible · 6 transient,
   back off and retry (except `attachment_storage_unavailable`, which will not change) ·
   7 declined · 8 transport (a write may have been applied) · 9 delta cursor expired.
 - **Identifiers.** A `TASK` or uuid argument may contain only letters, digits, `-` and `_`.

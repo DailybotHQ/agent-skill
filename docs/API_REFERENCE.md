@@ -847,10 +847,11 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `>= 3.19.0`** for agent attribution (`--agent-name` /
+> **Recommended: `3.20.0`** (the current release). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
-> and guest/role refusal messaging. **Administering Tasks with a personal API key needs
-> `>= 3.20.0`**: from that release the CLI never refuses a key before the request.
+> and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
+> API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
+> some person doors, so upgrade.
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
@@ -865,7 +866,7 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 116 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.19.0**).
+from the CLI's command definitions (aligned with **dailybot-cli 3.20.0**).
 
 ### The rule that comes before any command
 
@@ -888,8 +889,9 @@ one person; the API treats it as that person, exactly like their login session),
 | `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | |
 
 The CLI never refuses a key before the request; the server decides. An agent or organization
-key on a person door gets `actor_required` (exit 3) on `owner=me`-style filters and
-`insufficient_scope` (exit 4) on admin and person doors. A guest's personal key is limited
+key gets 403 `insufficient_scope` (exit 4) on admin doors and on person doors in general;
+400 `actor_required` (exit 3) appears only on `owner=me`-style person filters (`tasks mine`,
+`tasks counts`, inbox, cursor). A guest's personal key is limited
 like the guest's session: `guest_not_allowed` (exit 4). A key that carries explicit
 `tasks:*` scopes is a ceiling its person chose (`tasks:read` alone stays read-only). An
 expired key is 401 `credential_expired`. Privacy is invite/remove; 404 = not visible,
@@ -901,7 +903,7 @@ executing agent (JSON writes: body `agent_name`; multipart and body-less writes:
 `X-Dailybot-Agent-Name`, percent-encoded UTF-8). The person stays the author; the card's
 `executors` lists every agent that worked it. Plain names only (letters, numbers, spaces and
 `. - _ ( ) ' # + / & , :`, at most 128). A deactivated agent's name, or any name sent with an
-agent key, is refused with `invalid_agent_attribution` (exit 2).
+agent or organization key, is refused with `invalid_agent_attribution` (exit 2).
 
 ### Exit codes
 
@@ -909,8 +911,8 @@ agent key, is refused with `invalid_agent_attribution` (exit 2).
 | --- | --- |
 | 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals; or another failure (`preview_not_honoured`, an attachment upload) — read `code` |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a person (`actor_required`) — an agent or organization key on a person door |
-| 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door) and `guest_not_allowed` |
+| 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) |
+| 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door or a person door in general) and `guest_not_allowed` (a guest) |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
 | 7 | a human declined the confirmation — stop; never re-run with `--yes` |
@@ -935,9 +937,7 @@ The error envelope is the same shape for every Tasks door, reads and writes alik
 ```
 
 `status` is always the literal `"error"`, never an HTTP number, so one parser covers the
-family. From `dailybot-cli 3.20.0` the CLI never refuses a credential locally; the server
-answers `actor_required` / exit 3 on an `owner=me`-style door and `insufficient_scope` /
-exit 4 on an admin or person door.
+family.
 
 A `tasks:admin` / structure refusal is exit **4**, not 3, because it is a `403` on the wire.
 With a login session or a personal API key it is almost always a **guest**
