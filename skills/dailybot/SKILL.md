@@ -36,7 +36,7 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    agent collaboration needs `>= 3.19.0`; administering Tasks with a personal
    API key needs `>= 3.20.0`; milestone files and co-authored project updates
    need `>= 3.21.0`; comment reactions, label edit and delete, recents, board
-   visits and attachment resolve need `>= {{CLI_FLOOR}}`).
+   visits and attachment resolve need `>= 3.22.0`).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.

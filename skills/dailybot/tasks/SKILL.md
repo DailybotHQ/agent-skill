@@ -28,7 +28,7 @@ Every `<task>` argument takes a key like `ENG-142` or a uuid.
 [commands.md](commands.md)** (137 commands, generated from the CLI). This file teaches
 how to use them safely; look up exact flags there before you guess one.
 
-**Nothing on the web is out of reach.** With `dailybot-cli >= {{CLI_FLOOR}}`, the CLI has a
+**Nothing on the web is out of reach.** With `dailybot-cli >= 3.22.0`, the CLI has a
 command for every live operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent
 can orchestrate the whole roadmap from the command line — see
 [Orchestrate the whole roadmap](#orchestrate-the-whole-roadmap). The one exception is **task

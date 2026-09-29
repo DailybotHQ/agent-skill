@@ -872,7 +872,7 @@ and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
 from the CLI's command definitions (aligned with **dailybot-cli 3.21.0**; comment reactions,
 label edit and delete, recents, board visits and attachment resolve need
-**dailybot-cli >= {{CLI_FLOOR}}**). With that release the CLI covers every live operation in
+**dailybot-cli >= 3.22.0**). With that release the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
 (`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 

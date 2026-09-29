@@ -2,10 +2,10 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.21.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, label edit and delete, recents, board visits and attachment resolve **{{CLI_FLOOR}}**): 137 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.21.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, label edit and delete, recents, board visits and attachment resolve **3.22.0**): 137 commands across
 `tasks`, `task`, `board`, `project` and `goal`.
 
-**Coverage.** With `dailybot-cli >= {{CLI_FLOOR}}`, the CLI has a command for every live
+**Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live
 operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent can orchestrate the
 whole roadmap from the command line. The one exception is **task delegation** (handing a task
 to an agent, `/v1/tasks/tasks/{t}/delegate/…`): it is published in the contract but answers
@@ -123,7 +123,7 @@ Show the workspace activity feed — the catch-up read after an absence.
 
 ### `dailybot tasks attachments-resolve ATTACHMENT…`
 
-Resolve the current download URLs for `attachment:<uuid>` references in descriptions, comments and update bodies. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+Resolve the current download URLs for `attachment:<uuid>` references in descriptions, comments and update bodies. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `GET /v1/tasks/attachments/resolve/?ids=a,b`
 - **Signed-in person:** no
@@ -233,7 +233,7 @@ List the tasks that are yours.
 
 ### `dailybot tasks recents`
 
-List the boards you opened most recently (`board visit` feeds it). Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+List the boards you opened most recently (`board visit` feeds it). Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `GET /v1/tasks/me/recents/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -506,7 +506,7 @@ Replace a comment's text. `-` reads the new body from stdin.
 
 ### `dailybot task comment-react TASK COMMENT EMOJI`
 
-React to a comment with one emoji. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+React to a comment with one emoji. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `POST /v1/tasks/tasks/{t}/comments/{c}/reactions/ {"emoji": "👍"}` — answers with the whole comment, its `reactions` aggregated
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
@@ -516,7 +516,7 @@ React to a comment with one emoji. Needs a person: `dailybot login` or a persona
 
 ### `dailybot task comment-unreact TASK COMMENT EMOJI`
 
-Remove your emoji reaction from a comment. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+Remove your emoji reaction from a comment. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/comments/{c}/reactions/{emoji}/` — the emoji travels percent-encoded in the path; 204 even when you had not reacted
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
@@ -822,7 +822,7 @@ Create an organization label from this board.
 
 ### `dailybot board label delete LABEL`
 
-Delete an organization label for good. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+Delete an organization label for good. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `DELETE /v1/tasks/labels/{l}/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -835,7 +835,7 @@ Delete an organization label for good. Needs a person: `dailybot login` or a per
 
 ### `dailybot board label update LABEL`
 
-Edit or archive an organization label. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+Edit or archive an organization label. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `PATCH /v1/tasks/labels/{l}/ {name, color, description, is_archived}`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -1066,7 +1066,7 @@ List your saved views on a board, with the ETag a save needs.
 
 ### `dailybot board visit BOARD`
 
-Record that you opened a board, so it shows in `tasks recents`. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= {{CLI_FLOOR}}`.
+Record that you opened a board, so it shows in `tasks recents`. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
 
 - **API:** `POST /v1/tasks/boards/{b}/visit/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
