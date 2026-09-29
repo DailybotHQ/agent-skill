@@ -25,10 +25,10 @@ text. A goal has a declared **status**.
 Every `<task>` argument takes a key like `ENG-142` or a uuid.
 
 **Every command, with its arguments, flags, API door and an example, is in
-[commands.md](commands.md)** (137 commands, generated from the CLI). This file teaches
+[commands.md](commands.md)** (141 commands, generated from the CLI). This file teaches
 how to use them safely; look up exact flags there before you guess one.
 
-**Nothing on the web is out of reach.** With `dailybot-cli >= 3.22.0`, the CLI has a
+**Nothing on the web is out of reach.** With `dailybot-cli >= 3.23.0`, the CLI has a
 command for every live operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent
 can orchestrate the whole roadmap from the command line — see
 [Orchestrate the whole roadmap](#orchestrate-the-whole-roadmap). The one exception is **task
@@ -112,8 +112,8 @@ dailybot board create --help | grep -- --project   # 3.14.2+: board create works
 dailybot board create --help | grep -i 'non-guest' # 3.15.0+: open-org structure wording
 dailybot task brief --help                   # agent collaboration: brief + --agent-name
 dailybot project update-edit --help          # 3.21.0+: milestone files, editable project updates
-dailybot task comment-react --help           # 3.22.0+: full coverage (reactions, reply threads, label delete)
-dailybot project update-react --help         # 3.23.0+: reactions on project updates, who reacted
+dailybot task comment-react --help           # 3.22.0+: comment reactions, reply threads, label delete
+dailybot project update-react --help         # 3.23.0+: full coverage (update reactions, who reacted)
 ```
 
 If the first fails, or the second prints nothing, the installed CLI predates what this
@@ -155,7 +155,7 @@ An agent or organization key cannot act as a person. Guests are limited by their
 | --- | --- | --- |
 | Login session (`dailybot login`) | a person | everything a non-guest member may do: reads, task writes, structure and membership |
 | Personal API key | a key bound to a person; the API treats it as that person | exactly the same as that person's login session, on every Tasks door |
-| Agent or organization key | nobody behind it | organization-scoped reads and task writes only; admin and person doors get `insufficient_scope` (exit 4); `owner=me`-style person filters and comment reactions get `actor_required` (exit 3) |
+| Agent or organization key | nobody behind it | organization-scoped reads and task writes only; admin and person doors get `insufficient_scope` (exit 4); `owner=me`-style person filters and reactions get `actor_required` (exit 3) |
 
 **Any API key with Tasks scope can:** read everything organization-scoped — pulse, search,
 activity, timeline, boards, columns, board members, tasks, projects, goals, milestones — and
@@ -476,14 +476,14 @@ error shape is the same for every Tasks door, reads and writes alike:
 family. The CLI never refuses a credential before the request: on the "needs a person"
 doors the call is sent, and the server answers an agent or organization key with
 `insufficient_scope` (exit 4) on admin doors and person doors in general, and with
-`actor_required` (exit 3) on `owner=me`-style person filters and comment reactions. An unreachable host is `code: "transport_error"` with
+`actor_required` (exit 3) on `owner=me`-style person filters and reactions (comments and project updates). An unreachable host is `code: "transport_error"` with
 exit 8.
 
 | Exit | Meaning | What to do |
 | --- | --- | --- |
 | **1** | partial failure (bulk rows failed, or a dry run predicts refusals), or another failure such as an attachment upload | read the per-item results, or `code` |
 | **2** | the invocation was bad input | a flag value the door rejects (`too_many_items`, `invalid_filter_value`, an unknown `--sort`, `invalid_identifier`, `invalid_agent_attribution`) — fix the call, do not retry |
-| **3** | needs a person (`actor_required`): an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a comment reaction | `dailybot login` or a personal API key — not a permissions bug |
+| **3** | needs a person (`actor_required`): an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) | `dailybot login` or a personal API key — not a permissions bug |
 | **4** | the server refused this action: `insufficient_scope` (an agent or organization key on an admin door or a person door in general), `guest_not_allowed` (a guest), or another refusal | read `code`; see below |
 | **5** | not found / not visible | the key/uuid is wrong, private without a membership grant, **or another organization** — never "not allowed" |
 | **6** | transient — back off | rate limiting, or Tasks writes switched off org-wide during an incident (`feature_temporarily_read_only`). Wait and retry; change nothing |

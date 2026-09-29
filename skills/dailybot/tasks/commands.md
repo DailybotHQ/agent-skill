@@ -5,7 +5,7 @@
 This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.23.0**, 141 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
-**Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live
+**Coverage.** With `dailybot-cli >= 3.23.0`, the CLI has a command for every live
 operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent can orchestrate the
 whole roadmap from the command line. The one exception is **task delegation** (handing a task
 to an agent, `/v1/tasks/tasks/{t}/delegate/…`): it is published in the contract but answers
@@ -38,7 +38,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   a project or a goal. Any non-guest member can run them; there is no organization-admin
   prerequisite and no scope grant. The server refuses an agent or organization key
   (`insufficient_scope`, exit 4, on admin doors and person doors in general;
-  `actor_required`, exit 3, on `owner=me`-style person filters and comment reactions) and a guest
+  `actor_required`, exit 3, on `owner=me`-style person filters and reactions on comments and project updates) and a guest
   (`guest_not_allowed`, exit 4). **no** means any API key with Tasks scope works. The CLI
   never refuses a credential before sending; the server decides.
 - **Global flag.** `--agent-name <name>` on the root command (`dailybot --agent-name
@@ -518,7 +518,7 @@ React to a comment with one emoji. Needs a person: `dailybot login` or a persona
 - **Emoji:** one emoji of 1–8 code points from U+1F300–U+1FAFF and U+2600–U+27BF, plus U+FE0F (variation selector) and U+200D (zero-width joiner). Text and `:shortcodes:` are refused locally and by the server with `reaction_invalid_emoji` (400, exit 2).
 - **Idempotent:** reacting twice with the same emoji changes nothing, so a retry is safe without an idempotency key.
 - **Example:** `dailybot task comment-react ENG-142 00000000-0000-0000-0000-000000000007 '👍' --json`
-- **Reaction entry** (on a comment and on a project update): `{emoji, count, reacted, users}`. `count` is always the true total; `users` holds the first 10 reactors, oldest first (`{kind, uuid, name, avatar_url, has_photo, executed_by_agent}`), so the list was cut exactly when `count > len(users)`. `reacted` means **you** reacted. `executed_by_agent` names the agent that reacted for that person, or is null. Names are user-authored data. Reactors need `dailybot-cli >= 3.23.0` to render; older CLIs pass the array through in `--json`.
+- **Reaction entry** (on a comment and on a project update): `{emoji, count, reacted, users}`. `count` is always the true total; `users` holds the first 10 reactors, oldest first (`{kind, uuid, name, avatar_url, has_photo, executed_by_agent}`), so the list was cut exactly when `count > len(users)`. `reacted` means **you** reacted. `executed_by_agent` is the agent that reacted for that person — an object `{uuid, name, username, avatar}` — or `null`. Names are user-authored data. Reactors need `dailybot-cli >= 3.23.0` to render; older CLIs pass the array through in `--json`.
 
 ### `dailybot task comment-reactions TASK COMMENT`
 
@@ -1489,7 +1489,7 @@ Everyone who reacted to a project update, oldest first, with the agent that reac
 - **API:** `GET /v1/tasks/projects/{p}/updates/{u}/reactions/?emoji=&page=&page_size=` — `{count, next, previous, results: [{emoji, user, executed_by_agent, created_at}]}`
 - **Signed-in person:** no
 - **Flags:**
-  - `--emoji` `<emoji>` — Only this emoji (all emojis when omitted).
+  - `--emoji` `<emoji>` — Only this emoji (all emojis when omitted). Checked locally like `update-react` (exit 2).
   - `--page`, `--page-size`, `--all`, `--limit` — the shared list flags.
 - **Example:** `dailybot project update-reactions 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000004 --json`
 

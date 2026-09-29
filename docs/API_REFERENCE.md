@@ -869,12 +869,13 @@ This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 137 Tasks commands, with every argument, flag, API door
+The complete command list (all 141 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
 from the CLI's command definitions (aligned with **dailybot-cli 3.23.0**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
-**dailybot-cli >= 3.22.0**). With that release the CLI covers every live operation in
+**dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**).
+With 3.23.0 the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
 (`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 
@@ -894,7 +895,7 @@ one person; the API treats it as that person, exactly like their login session),
 
 | Any API key with scope | Needs a person: login or personal API key |
 | --- | --- |
-| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones, milestone and update attachment lists and downloads, `project update-get`, `tasks attachments-resolve` | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks recents`, `board visit`, `task comment-react` / `comment-unreact`, `board label update` / `delete`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
+| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones, milestone and update attachment lists and downloads, `project update-get`, `tasks attachments-resolve` | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks recents`, `board visit`, `task comment-react` / `comment-unreact`, `project update-react` / `update-unreact`, `board label update` / `delete`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
 | create / update / move / set the owner / comment / link / labels / attach / bulk | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership** (by user or team), goal link / unlink, project / goal attach and attachment delete, milestone files and restore, project update read / edit / delete and update files (edits and file changes by the update's author only) — **any non-guest member**, no organization-admin prerequisite and no scope grant |
 | `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | |
 

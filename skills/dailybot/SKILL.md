@@ -62,7 +62,7 @@ Then route by intent (below).
 > no scope grant (personal-key administration needs `dailybot-cli >= 3.20.0`). An agent or
 > organization key cannot act as a person: the server answers `insufficient_scope` (exit 4)
 > on admin and person doors, and `actor_required` (exit 3) on `owner=me`-style person
-> filters (`tasks mine`, `tasks counts`, inbox, cursor) and comment reactions. A guest's key is limited like the guest's session
+> filters (`tasks mine`, `tasks counts`, inbox, cursor) and reactions (comments and project updates). A guest's key is limited like the guest's session
 > (`guest_not_allowed`). A 404 means not visible, not not allowed.
 > If you hold only an agent or organization key, do not start a flow that ends in one of
 > those person doors.
@@ -92,7 +92,7 @@ Seventeen coordinated capabilities, with smart routing between them:
 | **Per-repo API keys** | `dailybot-env` | Configure `.dailybot/env.json` — an **opt-in, gitignored** file that carries API keys + URLs for one or more environments. Profiles may be `kind: live` or `kind: testing`; switch with `env use`, fall through to production login with `env off`. Pack baseline (`>= 3.9.0`) |
 | **Organization Labels** | `dailybot-labels` | Full org Labels lifecycle (`dailybot label entitlement/list/get/create/update/archive/delete/assign/batch`) — shared taxonomy for forms, check-ins, and workflows/automations; web chip-picker parity. Requires CLI `>= 3.9.0` |
 | **Featured stars** | `dailybot-featured` | Private per-user stars on Forms, Automations, Check-ins (`dailybot featured …`) |
-| **Tasks** (Beta) | `dailybot-tasks` | Boards, tasks, projects, goals and milestones. Read the workspace in one call (`tasks status`), poll what changed (`tasks changes`), create / move / set the owner / comment with @mentions / attach, bulk operations with a server-side dry run, archive with a previewed consequence, **create and manage structure as any non-guest member** (goals, projects, boards, columns, membership — no org-admin prerequisite), **post project updates** so the team sees what an agent did (co-authored: stamped with the agent, editable by their author, with inline files; milestones carry files too), and **work a task you were handed** (`task brief` reads the whole card; writes are the person's, attributed to the agent via `DAILYBOT_AGENT_NAME` with a login session or a personal API key). A login session or a personal API key can do everything that person can, structure included; an agent or organization key cannot act as a person — see the sub-skill's credential table. Current release `3.23.0`, which covers every live Tasks API operation; collaboration needs `>= 3.19.0`, personal-key administration `>= 3.20.0`, milestone files and co-authored updates `>= 3.21.0`, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve `>= 3.22.0` |
+| **Tasks** (Beta) | `dailybot-tasks` | Boards, tasks, projects, goals and milestones. Read the workspace in one call (`tasks status`), poll what changed (`tasks changes`), create / move / set the owner / comment with @mentions / attach, bulk operations with a server-side dry run, archive with a previewed consequence, **create and manage structure as any non-guest member** (goals, projects, boards, columns, membership — no org-admin prerequisite), **post project updates** so the team sees what an agent did (co-authored: stamped with the agent, editable by their author, with inline files; milestones carry files too), and **work a task you were handed** (`task brief` reads the whole card; writes are the person's, attributed to the agent via `DAILYBOT_AGENT_NAME` with a login session or a personal API key). A login session or a personal API key can do everything that person can, structure included; an agent or organization key cannot act as a person — see the sub-skill's credential table. Current release `3.23.0`, which covers every live Tasks API operation; collaboration needs `>= 3.19.0`, personal-key administration `>= 3.20.0`, milestone files and co-authored updates `>= 3.21.0`, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve `>= 3.22.0`, reactions on project updates and who reacted `>= 3.23.0` |
 
 ## Install
 
@@ -137,7 +137,7 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 > workflows), interactive chat buttons (approvals, workflow triggers, modals,
 > callbacks), `workflow trigger`, the shared list query flags, machine-readable
 > error codes, **and Tasks Beta (including open-org structure writes and
-> personal-key administration, milestone files, co-authored project updates, comment reactions and reply threads)** — is available at that release. On 3.19.x the
+> personal-key administration, milestone files, co-authored project updates, comment reactions and reply threads, reactions on project updates and who reacted)** — is available at that release. On 3.19.x the
 > CLI still refuses a key locally on structure and some person doors; upgrade.
 
 ### Why this minimum
@@ -161,10 +161,11 @@ the person-shaped doors, and binds a login token to the host that issued it.
 and membership included: the CLI never refuses a key before the request, and the
 server decides. **`3.21.0`** adds milestone files and restore, and co-authored
 project updates: read one, edit or delete your own, and attach files inline. **`3.22.0`**
-covers every live Tasks API operation: comment reactions, reply threads
+adds comment reactions, reply threads
 (`task comment --reply-to`), label edit and delete, recents, board visits and
 attachment resolve. **`3.23.0`** adds reactions on project updates and shows who reacted
-(with the agent that reacted for each person). The pack baseline stays `3.9.0` so report / chat / forms keep
+(with the agent that reacted for each person); it covers every live Tasks API operation.
+The pack baseline stays `3.9.0` so report / chat / forms keep
 working on older CLIs; only `dailybot-tasks` asks for the newer floor.
 
 If `dailybot --version` reports below 3.9.0, ask the developer to run
