@@ -129,7 +129,7 @@ Resolve the current download URLs for `attachment:<uuid>` references in descript
 
 - **API:** `GET /v1/tasks/attachments/resolve/?ids=a,b`
 - **Signed-in person:** no
-- **Answer:** one entry per attachment you can see. An id you cannot see, or that does not exist, is simply absent: never read absence as "deleted". A returned `url` can be short-lived: use it, never store it; resolve again the next time you need it.
+- **Answer:** one entry per attachment you can see. An id you cannot see, or that does not exist, is simply absent: never read absence as "deleted". A returned `url` is opaque: a signed link that expires, or a permanent link anyone holding it can open (never paste it anywhere public). `url_expires_at` is null or an ISO timestamp. Use it, never store it; keep the uuid and resolve again the next time you need it. For downloads prefer `task attachment get --download`, which goes through the API content door.
 - **Example:** `dailybot tasks attachments-resolve 00000000-0000-0000-0000-000000000009 00000000-0000-0000-0000-000000000010 --json`
 
 ### `dailybot tasks changes BOARD`
@@ -723,6 +723,7 @@ Make someone the task's owner — the accountable person.
 - **Flags:**
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task set-owner ENG-142 me`
+- **Alias:** `dailybot task assign` is a deprecated alias of this command. Use `set-owner`.
 
 ### `dailybot task unlink TASK RELATION`
 
