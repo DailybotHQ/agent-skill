@@ -52,8 +52,9 @@ Then route by intent (below).
 
 > **One credential note that spans sub-skills:** Tasks tells three credentials apart — a
 > login session, a **personal API key** (bound to a person), and an **agent or organization
-> key**. Person-shaped verbs (`tasks mine` / `counts` / `inbox`, `tasks cursor`,
-> `board mentionables`, `project members`, board labels, saved views and pins, watch) answer
+> key**. Person-shaped verbs (`tasks mine` / `counts`, `tasks inbox` / `inbox-read` /
+> `inbox-read-all` / `inbox-unread`, `tasks cursor`, `tasks favorites`, `board mentionables`,
+> `project members`, `task participants list`, board labels, saved views and pins, watch) answer
 > for a login or a personal key; an agent or organization key gets `actor_required`.
 > Changing participants or mute, project saved views, and every board / column / project /
 > goal structure change (membership included) need `dailybot login` — no key ever stores

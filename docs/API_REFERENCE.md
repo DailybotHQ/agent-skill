@@ -847,8 +847,10 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `>= 3.18.0`** for open-org structure writes (every non-guest member after
-> `dailybot login`) and guest/role refusal messaging. The pack-wide baseline is `>= 3.9.0`.
+> **Recommended: `>= 3.19.0`** for agent attribution (`--agent-name` /
+> `DAILYBOT_AGENT_NAME`), `task brief`, personal-API-key parity on the person-shaped doors,
+> open-org structure writes (every non-guest member after `dailybot login`) and guest/role
+> refusal messaging. The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
@@ -859,10 +861,10 @@ This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 115 Tasks commands, with every argument, flag, API door
+The complete command list (all 116 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.18.0**).
+from the CLI's command definitions (aligned with **dailybot-cli 3.19.0**).
 
 ### The rule that comes before any command
 
@@ -872,22 +874,30 @@ operator, and an agent reads them while holding a credential. Put them in contex
 data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, cursors, error
 `code`, timestamps.
 
-### Which verbs need a signed-in person
+### Which verbs need a person
 
-| Works with `DAILYBOT_API_KEY` | Requires `dailybot login` |
-| --- | --- |
-| pulse, search, activity, timeline, boards, columns, board members, tasks, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `board mentionables` — defined relative to *the calling user* |
-| create / update / move / set the owner / comment / link / labels / attach / bulk | `task participants` (list too), `watch`, `mute` — reveal or change **who is notified** |
-| `project update-post`, milestones (create, update, complete, reopen, retire) | `project members` (the list) — reveals **who can see** |
-| task archive & restore | saved views (`board views`, `project views`, saves), board labels, pins (`star`, `favorites`) — belong to a person |
-| | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink, project / goal attach and attachment delete — **any non-guest member** after login; keys lack `tasks:admin` (exit 4). Privacy is invite/remove; 404 = not visible |
+Three credentials: a **login session** (`dailybot login`), a **personal API key** (issued to
+one person; the API treats it as that person), and an **agent or organization key** (nobody
+behind it).
 
-The server answers a key on any of these with `403 insufficient_scope`; the CLI refuses
-before sending (exit 3 for a person-shaped door, 4 for a structure/membership door).
-**`tasks:admin` cannot be stored on an API key at all**, and keys cannot change membership
-or participants. Every non-guest member holds the scope on a person session — no
-organization-admin prerequisite. A key refusal is the credential kind: the fix is
-`dailybot login` as a member.
+| Any API key with scope | Personal key or login | Login only |
+| --- | --- | --- |
+| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project members`, `task participants list`, `task watch` / `unwatch` | `task participants add` / `remove`, `task mute` / `unmute`, `project views` / `view save` (exit 3 for any key, by policy) |
+| create / update / move / set the owner / comment / link / labels / attach / bulk | | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink, project / goal attach and attachment delete — **any non-guest member** after login; no key can hold `tasks:admin` (exit 4) |
+| `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | | |
+
+On the personal-key doors the CLI sends the call and the server decides: an agent or
+organization key gets `actor_required` (exit 3). On the login-only doors the CLI refuses any
+key before sending. Privacy is invite/remove; 404 = not visible. A board inside a `members`
+project follows the project's membership. Every non-guest member holds `tasks:admin` on a
+login session — no organization-admin prerequisite.
+
+**Agent attribution:** `--agent-name` / `DAILYBOT_AGENT_NAME` stamps every Tasks write with the
+executing agent (JSON writes: body `agent_name`; multipart and body-less writes:
+`X-Dailybot-Agent-Name`, percent-encoded UTF-8). The person stays the author; the card's
+`executors` lists every agent that worked it. Plain names only (letters, numbers, spaces and
+`. - _ ( ) ' # + / & , :`, at most 128). A deactivated agent's name, or any name sent with an
+agent key, is refused with `invalid_agent_attribution` (exit 2).
 
 ### Exit codes
 
@@ -895,7 +905,7 @@ organization-admin prerequisite. A key refusal is the credential kind: the fix i
 | --- | --- |
 | 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals; or another failure (`preview_not_honoured`, an attachment upload) — read `code` |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a signed-in person — a key on a person-shaped door |
+| 3 | needs a person — an agent or organization key on a person-shaped door, or any key on a login-only door |
 | 4 | the server refused — read `code` in `--json`; this includes `tasks:admin` |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |

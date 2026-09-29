@@ -32,9 +32,9 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   **person** means the answer is about a person (their inbox, pins, saved views, label
   usage, who can see, whether they watch a card): a login session or a personal API key
   works. The CLI sends the call; the server refuses an agent or organization key with
-  `actor_required` and the CLI exits 3. **login** means login only: the call changes who is
-  notified (`tasks:write`, which no key holds) or is a project's saved views, so the CLI
-  refuses any key before sending and exits 3. **no** means any API key with the right
+  `actor_required` and the CLI exits 3. **login** means login only, by policy: the call changes who is
+  notified (participants, mute) or is a project's saved views, so the CLI refuses **every**
+  key before sending and exits 3. The fix is `dailybot login`, never a scope grant. **no** means any API key with the right
   scope works.
 - **Global flag.** `--agent-name <name>` on the root command (`dailybot --agent-name
   "Claude Code" task comment …`), or `DAILYBOT_AGENT_NAME` in the environment, names the
@@ -56,7 +56,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   file drops, and wait before saving with `--if-match`.
   Exit 7 means a person declined. Stop, and never re-run with `--yes`.
 - **Exit codes.** 0 ok · 1 partial bulk, predicted refusals, `preview_not_honoured`, or another failure (read
-  `code`) · 2 bad input, including `invalid_identifier` · 3 needs a person (login or personal key) ·
+  `code`) · 2 bad input, including `invalid_identifier` · 3 needs a person (a personal key fixes **person** doors; **login** doors still need `dailybot login`) ·
   4 refused, including `insufficient_scope` · 5 not found or not visible · 6 transient,
   back off and retry (except `attachment_storage_unavailable`, which will not change) ·
   7 declined · 8 transport (a write may have been applied) · 9 delta cursor expired.
