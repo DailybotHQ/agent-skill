@@ -105,8 +105,10 @@ agent-skill/
     ├── forms/SKILL.md
     ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
     ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones
-    │                                          (CLI >= 3.14.2); untrusted content is Step 0
+    │                                          (CLI >= 3.14.2, recommended >= 3.18.0 open-org);
+    │                                          untrusted content is Step 0
     ├── tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
+    │                                          regenerated from dailybot-cli --help
     ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
     ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)
     ├── env/SKILL.md                        ← .dailybot/env.json per-repo API keys

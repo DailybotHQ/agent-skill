@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2`: 115 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.18.0**): 115 commands across
 `tasks`, `task`, `board`, `project` and `goal`. It is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
@@ -77,9 +77,10 @@ Examples use placeholder uuids (`00000000-0000-0000-0000-00000000000N`) and the 
 | `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-update`, `milestones`, `restore`, `update`, `update-post`, `updates`, `view save`, `views` |
 | `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
 
+
 ## Workspace — `dailybot tasks`
 
-Workspace-level reads, the delta cursor, the signed-in person's inbox and lists, saved views and pins.
+Workspace pulse, search, activity, inbox, favorites and saved views.
 
 ### `dailybot tasks activity`
 
@@ -144,7 +145,7 @@ Show what this organization's plan allows for Tasks.
 
 ### `dailybot tasks favorites`
 
-List your pinned boards and saved views.
+List your pinned boards and saved views. Needs `dailybot login`.
 
 - **API:** `GET /v1/tasks/me/favorites/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -166,7 +167,7 @@ Show your Tasks notifications.
 
 ### `dailybot tasks inbox-read ITEM`
 
-Mark an inbox item — and everything older — as read.
+Mark an inbox item — and everything older — as read. Needs `dailybot login`.
 
 - **API:** `POST /v1/tasks/inbox/{item}/read/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -174,7 +175,7 @@ Mark an inbox item — and everything older — as read.
 
 ### `dailybot tasks inbox-read-all`
 
-Mark your whole Tasks inbox as read.
+Mark your whole Tasks inbox as read. Needs `dailybot login`.
 
 - **API:** `POST /v1/tasks/inbox/read-all/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -182,7 +183,7 @@ Mark your whole Tasks inbox as read.
 
 ### `dailybot tasks inbox-unread`
 
-How many Tasks notifications you have not read.
+How many Tasks notifications you have not read. Needs `dailybot login`.
 
 - **API:** `GET /v1/tasks/inbox/unread-count/ (?mentioned=true&type=, same filters as the list)`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -244,7 +245,7 @@ Show a dated view of the workspace.
 
 ### `dailybot tasks view delete VIEW`
 
-Delete one saved view.
+Delete one saved view. This is permanent.
 
 - **API:** `DELETE /v1/tasks/views/{v}/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -279,7 +280,7 @@ Unpin a saved view from your favorites.
 
 ### `dailybot tasks view update VIEW`
 
-Edit one saved view.
+Edit one saved view. Only the fields you pass change.
 
 - **API:** `PATCH /v1/tasks/views/{v}/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -289,12 +290,13 @@ Edit one saved view.
   - `--group-by` `<state|owner|priority|category>`
   - `--sort` `<text>` — Sort expression, as the web app saves it.
   - `--visibility` `<personal|shared|board_default>` — `shared` and `board_default` need a board manager.
-  - `--filters-file` `<file (`-` = stdin)>` — JSON object of filters (`-` reads stdin); replaces the view's filters.
+  - `--filters-file` `<file>` — JSON object of filters (`-` reads stdin); replaces the view's filters.
 - **Example:** `dailybot tasks view update 00000000-0000-0000-0000-000000000013 --view-mode kanban --group-by owner`
+
 
 ## One task — `dailybot task`
 
-Everything about a single task (`TASK` is a key such as `ENG-142`, or a uuid), plus the bulk door.
+Read and change a single task. `TASK` is a key (`ENG-142`) or a uuid.
 
 ### `dailybot task activity TASK`
 
@@ -312,7 +314,7 @@ Show one task's activity feed — what changed, who changed it, from and to.
 
 ### `dailybot task archive TASK`
 
-Archive a task.
+Archive a task. Reversible.
 
 - **API:** `POST /v1/tasks/tasks/{t}/archive/?dry_run=true then POST …/archive/ +key`
 - **Signed-in person:** no
@@ -334,7 +336,7 @@ Attach a file to a task.
 
 ### `dailybot task attachment delete TASK ATTACHMENT`
 
-Remove an attachment from a task.
+Remove an attachment from a task. This cannot be undone.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/attachments/{a}/`
 - **Signed-in person:** no
@@ -345,7 +347,7 @@ Remove an attachment from a task.
 
 ### `dailybot task attachment get TASK ATTACHMENT`
 
-Download an attachment to a file.
+Download an attachment to a file. Never overwrites without --force.
 
 - **API:** `GET /v1/tasks/tasks/{t}/attachments/{a}/content/ (follows one redirect to storage, no credentials)`
 - **Signed-in person:** no
@@ -370,7 +372,7 @@ Apply one operation to up to 100 tasks in a single call.
 - **Signed-in person:** no
 - **Flags:**
   - `--operation` `<create|move|update|archive|restore|set_labels|set_owner|set_priority|set_due_date|set_parent|delete>` **required** — Operation to apply to every item. `delete` is the archive alias: soft and restorable, like `task delete`.
-  - `--file`, `-f` `<file (`-` = stdin)>` **required** — JSON file with the item list, or `-` for stdin.
+  - `--file`, `-f` `<file>` **required** — JSON file with the item list, or `-` for stdin.
   - `--board` `<text>` — Board (uuid or key) every created task lands on. Required for --operation create.
   - `--dry-run` — Run the batch on the server and roll it back: shows each change, writes nothing.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
@@ -387,7 +389,7 @@ List a task's direct sub-tasks.
 
 ### `dailybot task comment TASK BODY`
 
-Comment on a task.
+Comment on a task. Pass `-` as the body to read it from stdin.
 
 - **API:** `POST /v1/tasks/tasks/{t}/comments/ +key`
 - **Signed-in person:** no
@@ -397,7 +399,7 @@ Comment on a task.
 
 ### `dailybot task comment-attach TASK COMMENT FILE`
 
-Attach a file to a comment.
+Attach a file to a comment. Only the comment's author can.
 
 - **API:** `POST /v1/tasks/tasks/{t}/comments/{c}/attachments/ (multipart, ≤5 MiB; the comment's author only)`
 - **Signed-in person:** no
@@ -407,7 +409,7 @@ Attach a file to a comment.
 
 ### `dailybot task comment-attachment delete TASK COMMENT ATTACHMENT`
 
-Remove an attachment from a comment.
+Remove an attachment from a comment. This cannot be undone.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/comments/{c}/attachments/{a}/ (uploader, comment author or an org admin)`
 - **Signed-in person:** no
@@ -418,7 +420,7 @@ Remove an attachment from a comment.
 
 ### `dailybot task comment-attachment get TASK COMMENT ATTACHMENT`
 
-Download a comment's attachment to a file.
+Download a comment's attachment to a file. Never overwrites without --force.
 
 - **API:** `GET /v1/tasks/tasks/{t}/comments/{c}/attachments/{a}/content/`
 - **Signed-in person:** no
@@ -437,7 +439,7 @@ List a comment's attachments.
 
 ### `dailybot task comment-delete TASK COMMENT`
 
-Delete a comment.
+Delete a comment. Its text is blanked; the entry stays so history resolves.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/comments/{c}/`
 - **Signed-in person:** no
@@ -448,7 +450,7 @@ Delete a comment.
 
 ### `dailybot task comment-edit TASK COMMENT BODY`
 
-Replace a comment's text.
+Replace a comment's text. `-` reads the new body from stdin.
 
 - **API:** `PATCH /v1/tasks/tasks/{t}/comments/{c}/`
 - **Signed-in person:** no
@@ -486,13 +488,13 @@ Create a task.
   - `--state` `<text>` — Initial workflow state.
   - `--owner` `<text>` — Owner: a user uuid, or `me`.
   - `--due` `<text>` — Due date (YYYY-MM-DD).
-  - `--priority` `<int 1–5>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
+  - `--priority` `<int>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe. Generated automatically when omitted. The server keeps it for 24h: reusing it inside that window replays the original result, reusing it after duplicates.
 - **Example:** `dailybot task create -t "Fix the flaky test" -b 00000000-0000-0000-0000-000000000001 --owner me --priority 2`
 
 ### `dailybot task delete TASK`
 
-Archive a task.
+Archive a task. An alias of `task archive` — nothing is destroyed.
 
 - **API:** `alias of archive (same doors)`
 - **Signed-in person:** no
@@ -541,7 +543,7 @@ Add, remove or replace a task's labels.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task labels ENG-142 --mode add --label 00000000-0000-0000-0000-000000000012`
 
-### `dailybot task link TASK OTHER_TASK`
+### `dailybot task link TASK OTHER`
 
 Relate one task to another.
 
@@ -585,13 +587,13 @@ Move a task to another column, or to another board.
 
 ### `dailybot task mute TASK`
 
-Stop notifications from a task while staying on it.
+Stop notifications from a task while staying on it. Needs `dailybot login`.
 
 - **API:** `GET /v1/me/ then POST /v1/tasks/tasks/{t}/participants/ {user_uuid: me, is_muted: true}`
 - **Signed-in person:** **yes** (a key exits 3)
 - **Example:** `dailybot task mute ENG-142`
 
-### `dailybot task participants add TASK`
+### `dailybot task participants add TASK USER`
 
 Add a participant to a task.
 
@@ -613,7 +615,7 @@ List who is on a task and who watches it.
 
 ### `dailybot task participants remove TASK USER`
 
-Take someone off a task.
+Take someone off a task. To stay on it quietly, use `task mute` instead.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/participants/{u}/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -640,7 +642,7 @@ Restore an archived task.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task restore ENG-142`
 
-### `dailybot task set-owner TASK USER`
+### `dailybot task set-owner TASK OWNER`
 
 Make someone the task's owner — the accountable person.
 
@@ -652,7 +654,7 @@ Make someone the task's owner — the accountable person.
 
 ### `dailybot task unlink TASK RELATION`
 
-Remove a link between two tasks.
+Remove a link between two tasks. Recreate it with `task link`.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/relations/{r}/`
 - **Signed-in person:** no
@@ -663,7 +665,7 @@ Remove a link between two tasks.
 
 ### `dailybot task unmute TASK`
 
-Resume notifications from a task you muted.
+Resume notifications from a task you muted. Needs `dailybot login`.
 
 - **API:** `GET /v1/me/ then POST /v1/tasks/tasks/{t}/participants/ {user_uuid: me, is_muted: false}`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -671,7 +673,7 @@ Resume notifications from a task you muted.
 
 ### `dailybot task unwatch TASK`
 
-Stop following a task.
+Stop following a task. Needs `dailybot login`.
 
 - **API:** `DELETE /v1/tasks/tasks/{t}/subscription/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -688,26 +690,27 @@ Change fields on a task.
   - `--description`, `-d` `<text>` — New description.
   - `--state` `<text>` — New workflow state.
   - `--due` `<text>` — New due date (YYYY-MM-DD).
-  - `--priority` `<int 1–5>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
+  - `--priority` `<int>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
   - `--owner` `<text>` — Owner: a user uuid, or `me`.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task update ENG-142 --priority 1 --due 2026-10-01`
 
 ### `dailybot task watch TASK`
 
-Follow a task's notifications without being on it.
+Follow a task's notifications without being on it. Needs `dailybot login`.
 
 - **API:** `POST /v1/tasks/tasks/{t}/subscription/`
 - **Signed-in person:** **yes** (a key exits 3)
 - **Example:** `dailybot task watch ENG-142`
 
+
 ## Boards — `dailybot board`
 
-Boards, their states (columns), members, labels, views and pins.
+Boards, columns (states), members, labels, views, pins and the snapshot.
 
 ### `dailybot board archive BOARD`
 
-Archive a board.
+Archive a board. Every live task on it is cascade-archived.
 
 - **API:** `POST /v1/tasks/boards/{b}/archive/?dry_run=true then …/archive/ +key (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -719,7 +722,7 @@ Archive a board.
 
 ### `dailybot board create`
 
-Create a board in a project.
+Create a board in a project. Needs a signed-in person (any non-guest member).
 
 - **API:** `POST /v1/tasks/boards/ +key (member); body {name, project, key}`
 - **Signed-in person:** **member** (a key exits 4)
@@ -752,7 +755,7 @@ Create an organization label from this board.
 
 ### `dailybot board labels BOARD`
 
-List the labels available on a board.
+List the labels available on a board. Needs `dailybot login`.
 
 - **API:** `GET /v1/tasks/boards/{b}/labels/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -779,7 +782,7 @@ List boards.
 
 ### `dailybot board member add BOARD [USER]`
 
-Give a person or a whole team sight of a board.
+Give a person or a whole team sight of a board. Adding an existing member is a no-op.
 
 - **API:** `POST /v1/tasks/boards/{b}/members/ +key (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -809,7 +812,7 @@ List who can see a board, and their role on it.
 
 ### `dailybot board mentionables BOARD`
 
-Who you can @mention on this board, with the token to write.
+Who you can @mention on this board, with the token to write. Needs `dailybot login`.
 
 - **API:** `GET /v1/tasks/boards/{b}/mentionables/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -837,7 +840,7 @@ Show the whole board in one request — the cold-context read.
 
 ### `dailybot board star BOARD`
 
-Pin a board to your favorites.
+Pin a board to your favorites. Needs `dailybot login`.
 
 - **API:** `POST /v1/tasks/me/favorites/ {target_type: board, target_uuid} +Idempotency-Key`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -845,7 +848,7 @@ Pin a board to your favorites.
 
 ### `dailybot board state archive BOARD STATE`
 
-Retire a column.
+Retire a column. Reversible with `board state restore`.
 
 - **API:** `POST /v1/tasks/boards/{b}/states/{s}/archive/?dry_run=true then …/archive/ {migrate_to} (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -864,13 +867,13 @@ Add a column to a board.
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Column name (max 48 characters).
   - `--category` `<backlog|todo|in_progress|done|canceled>` **required** — Fixed meaning of the column; it survives renames and never changes.
-  - `--position` `<int ≥ 0>` — Insert at this 1-based place among live columns (0 counts as 1; past the end goes last; omitted appends). Later columns shift right.
+  - `--position` `<int>` — Insert at this 1-based place among live columns (0 counts as 1; past the end goes last; omitted appends). Later columns shift right.
   - `--color` `<text>` — Column color, e.g. #3b82f6.
   - `--default` — New tasks land in this column.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot board state create 00000000-0000-0000-0000-000000000001 -n "In review" --category in_progress --position 3`
 
-### `dailybot board state reorder BOARD STATE...`
+### `dailybot board state reorder BOARD STATE…`
 
 Set the left-to-right order of every live column in one call.
 
@@ -880,7 +883,7 @@ Set the left-to-right order of every live column in one call.
 
 ### `dailybot board state restore BOARD STATE`
 
-Bring a retired column back, after the live ones.
+Bring a retired column back, after the live ones. A live column is a no-op.
 
 - **API:** `POST /v1/tasks/boards/{b}/states/{s}/restore/ (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -888,14 +891,14 @@ Bring a retired column back, after the live ones.
 
 ### `dailybot board state update BOARD STATE`
 
-Rename, recolor or move one column.
+Rename, recolor or move one column. Its category cannot change.
 
 - **API:** `PATCH /v1/tasks/boards/{b}/states/{s}/ (member)`
 - **Signed-in person:** **member** (a key exits 4)
 - **Flags:**
   - `--name`, `-n` `<text>` — New column name.
   - `--color` `<text>` — New column color.
-  - `--position` `<int ≥ 0>` — Move the column to this 1-based place among live columns (0 counts as 1; past the end goes last).
+  - `--position` `<int>` — Move the column to this 1-based place among live columns (0 counts as 1; past the end goes last).
 - **Example:** `dailybot board state update 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000005 --name Shipped`
 
 ### `dailybot board states BOARD`
@@ -922,7 +925,7 @@ List the tasks on one board.
 
 ### `dailybot board unstar BOARD`
 
-Unpin a board from your favorites.
+Unpin a board from your favorites. Needs `dailybot login`.
 
 - **API:** `GET /v1/tasks/me/favorites/ then DELETE /v1/tasks/me/favorites/{f}/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -939,7 +942,7 @@ Change a board's name, key, visibility or settings.
   - `--key` `<text>` — New key prefix. The old key is retired and stays reserved, so old links still resolve.
   - `--visibility` `<org|members>` — `members` makes it private; you are seated as its first member.
   - `--estimate-scale` `<none|fibonacci|linear>`
-  - `--archive-after-days` `<int ≥ 1>` — Auto-archive done tasks after this many days.
+  - `--archive-after-days` `<int>` — Auto-archive done tasks after this many days.
   - `--project` `<text>` — Move the board under this project (uuid).
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot board update 00000000-0000-0000-0000-000000000001 --key DSN --visibility members`
@@ -951,7 +954,7 @@ Replace your saved views on a board with the array in a file.
 - **API:** `PUT /v1/tasks/boards/{b}/views/ +If-Match (required); replaces the whole list, no preview`
 - **Signed-in person:** **yes** (a key exits 3)
 - **Flags:**
-  - `--file`, `-f` `<file (`-` = stdin)>` **required** — JSON array of views (`-` reads stdin). It REPLACES your whole list.
+  - `--file`, `-f` `<file>` **required** — JSON array of views (`-` reads stdin). It REPLACES your whole list.
   - `--if-match` `<text>` — The ETag `board views` showed. Protects against overwriting a concurrent save.
   - `--fetch-etag` — Read the current ETag first instead of passing --if-match (narrower protection).
 - **Example:** `dailybot board view save 00000000-0000-0000-0000-000000000001 -f views.json --if-match "$ETAG"   # only after the developer saw what it replaces`
@@ -965,6 +968,7 @@ List your saved views on a board, with the ETag a save needs.
 - **Flags:**
   - `--etag` — Print only the ETag `board view save --if-match` needs, and nothing else.
 - **Example:** `ETAG=$(dailybot board views 00000000-0000-0000-0000-000000000001 --etag)`
+
 
 ## Projects — `dailybot project`
 
@@ -984,7 +988,7 @@ Archive a project.
 
 ### `dailybot project attach PROJECT FILE`
 
-Attach a file to a project.
+Attach a file to a project. Needs a signed-in person (any non-guest member).
 
 - **API:** `POST /v1/tasks/projects/{p}/attachments/ (multipart, ≤5 MiB) (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -994,7 +998,7 @@ Attach a file to a project.
 
 ### `dailybot project attachment delete PROJECT ATTACHMENT`
 
-Remove an attachment from a project.
+Remove an attachment from a project. This cannot be undone. Needs a signed-in person.
 
 - **API:** `DELETE /v1/tasks/projects/{p}/attachments/{a}/ (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1005,7 +1009,7 @@ Remove an attachment from a project.
 
 ### `dailybot project attachment get PROJECT ATTACHMENT`
 
-Download a project's attachment to a file.
+Download a project's attachment to a file. Never overwrites without --force.
 
 - **API:** `GET /v1/tasks/projects/{p}/attachments/{a}/content/`
 - **Signed-in person:** no
@@ -1024,7 +1028,7 @@ List a project's attachments.
 
 ### `dailybot project create`
 
-Create a project.
+Create a project. Needs a signed-in person (any non-guest member).
 
 - **API:** `POST /v1/tasks/projects/ +key (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1034,8 +1038,8 @@ Create a project.
   - `--visibility` `<org|members>` — `members` makes it private: you plus whoever you invite. It only narrows.
   - `--lead` `<text>` — Lead (user uuid).
   - `--health` `<not_set|on_track|at_risk|off_track>` — Declared health — separate from the derived progress.
-  - `--start-date` `<YYYY-MM-DD>` — YYYY-MM-DD.
-  - `--target-date` `<YYYY-MM-DD>` — YYYY-MM-DD.
+  - `--start-date` `<date>` — YYYY-MM-DD.
+  - `--target-date` `<date>` — YYYY-MM-DD.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot project create -n "Apollo" --target-date 2026-12-15`
 
@@ -1080,7 +1084,7 @@ Invite a person or a whole team into a project.
   - `--team` `<text>` — A whole team (uuid); membership follows the team live.
 - **Example:** `dailybot project member add 00000000-0000-0000-0000-000000000002 --team 00000000-0000-0000-0000-000000000011`
 
-### `dailybot project member remove PROJECT USER`
+### `dailybot project member remove PROJECT`
 
 Remove someone from a project.
 
@@ -1093,7 +1097,7 @@ Remove someone from a project.
 
 ### `dailybot project members PROJECT`
 
-List who can see a project — people and whole teams.
+List who can see a project — people and whole teams. Needs `dailybot login`.
 
 - **API:** `GET /v1/tasks/projects/{p}/members/`
 - **Signed-in person:** **yes** (a key exits 3)
@@ -1119,13 +1123,13 @@ Commit a project to a dated milestone.
 - **Signed-in person:** no
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Milestone name.
-  - `--date` `<YYYY-MM-DD>` **required** — Due date (YYYY-MM-DD).
+  - `--date` `<date>` **required** — Due date (YYYY-MM-DD).
   - `--description`, `-d` `<text>` — What the milestone commits to.
 - **Example:** `dailybot project milestone-create 00000000-0000-0000-0000-000000000002 -n Beta --date 2026-11-01`
 
 ### `dailybot project milestone-delete PROJECT MILESTONE`
 
-Retire a milestone.
+Retire a milestone. Its tasks keep pointing at it; nothing is hard-deleted.
 
 - **API:** `DELETE /v1/tasks/projects/{p}/milestones/{m}/ (retires)`
 - **Signed-in person:** no
@@ -1152,7 +1156,7 @@ Rename a milestone or move its date.
 - **Signed-in person:** no
 - **Flags:**
   - `--name`, `-n` `<text>` — New name.
-  - `--date` `<YYYY-MM-DD>` — New date (YYYY-MM-DD).
+  - `--date` `<date>` — New date (YYYY-MM-DD).
   - `--description`, `-d` `<text>` — New description.
 - **Example:** `dailybot project milestone-update 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000006 --date 2026-11-15`
 
@@ -1177,7 +1181,7 @@ List milestones, for one project or across the organization.
 
 ### `dailybot project restore PROJECT`
 
-Bring an archived project back.
+Bring an archived project back. A live project is a no-op.
 
 - **API:** `POST /v1/tasks/projects/{p}/restore/ +key (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1197,8 +1201,8 @@ Change a project's name, lead, health, dates or visibility.
   - `--visibility` `<org|members>` — `members` makes it private: you plus whoever you invite. It only narrows.
   - `--lead` `<text>` — Lead (user uuid).
   - `--health` `<not_set|on_track|at_risk|off_track>` — Declared health — separate from the derived progress.
-  - `--start-date` `<YYYY-MM-DD>` — YYYY-MM-DD.
-  - `--target-date` `<YYYY-MM-DD>` — YYYY-MM-DD.
+  - `--start-date` `<date>` — YYYY-MM-DD.
+  - `--target-date` `<date>` — YYYY-MM-DD.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot project update 00000000-0000-0000-0000-000000000002 --health at_risk`
 
@@ -1239,7 +1243,7 @@ Replace your saved views on a project with the array in a file.
 - **API:** `PUT /v1/tasks/projects/{p}/views/ +If-Match (required); replaces the whole list, no preview`
 - **Signed-in person:** **yes** (a key exits 3)
 - **Flags:**
-  - `--file`, `-f` `<file (`-` = stdin)>` **required** — JSON array of views (`-` reads stdin). It REPLACES your whole list.
+  - `--file`, `-f` `<file>` **required** — JSON array of views (`-` reads stdin). It REPLACES your whole list.
   - `--if-match` `<text>` — The ETag `project views` showed.
   - `--fetch-etag` — Read the current ETag first (narrower).
 - **Example:** `dailybot project view save 00000000-0000-0000-0000-000000000002 -f views.json --if-match "$ETAG"   # only after the developer saw what it replaces`
@@ -1254,13 +1258,14 @@ List your saved views on a project, with the ETag a save needs.
   - `--etag` — Print only the ETag `project view save --if-match` needs.
 - **Example:** `dailybot project views 00000000-0000-0000-0000-000000000002 --etag`
 
+
 ## Goals — `dailybot goal`
 
-Goals, their status and the projects linked to them.
+Goals and the projects that count toward them.
 
 ### `dailybot goal archive GOAL`
 
-Archive a goal.
+Archive a goal. Its projects are NOT archived with it.
 
 - **API:** `POST /v1/tasks/goals/{g}/archive/?dry_run=true then …/archive/ +key (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1272,7 +1277,7 @@ Archive a goal.
 
 ### `dailybot goal attach GOAL FILE`
 
-Attach a file to a goal.
+Attach a file to a goal. Needs a signed-in person (any non-guest member).
 
 - **API:** `POST /v1/tasks/goals/{g}/attachments/ (multipart, ≤5 MiB) (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1282,7 +1287,7 @@ Attach a file to a goal.
 
 ### `dailybot goal attachment delete GOAL ATTACHMENT`
 
-Remove an attachment from a goal.
+Remove an attachment from a goal. This cannot be undone. Needs a signed-in person.
 
 - **API:** `DELETE /v1/tasks/goals/{g}/attachments/{a}/ (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1293,7 +1298,7 @@ Remove an attachment from a goal.
 
 ### `dailybot goal attachment get GOAL ATTACHMENT`
 
-Download a goal's attachment to a file.
+Download a goal's attachment to a file. Never overwrites without --force.
 
 - **API:** `GET /v1/tasks/goals/{g}/attachments/{a}/content/`
 - **Signed-in person:** no
@@ -1312,14 +1317,14 @@ List a goal's attachments.
 
 ### `dailybot goal create`
 
-Create a goal.
+Create a goal. Needs a signed-in person (any non-guest member).
 
 - **API:** `POST /v1/tasks/goals/ +key (member)`
 - **Signed-in person:** **member** (a key exits 4)
 - **Flags:**
   - `--name`, `-n` `<text>` **required** — Goal name.
-  - `--period-start` `<YYYY-MM-DD>` **required** — First day of the goal's period (YYYY-MM-DD).
-  - `--period-end` `<YYYY-MM-DD>` **required** — Last day of the goal's period (YYYY-MM-DD).
+  - `--period-start` `<date>` **required** — First day of the goal's period (YYYY-MM-DD).
+  - `--period-end` `<date>` **required** — Last day of the goal's period (YYYY-MM-DD).
   - `--description`, `-d` `<text>` — Goal description.
   - `--owner` `<text>` — Accountable person (user uuid).
   - `--team` `<text>` — Team the goal belongs to (uuid).
@@ -1364,7 +1369,7 @@ List goals.
 
 ### `dailybot goal restore GOAL`
 
-Bring an archived goal back.
+Bring an archived goal back. A live goal is a no-op.
 
 - **API:** `POST /v1/tasks/goals/{g}/restore/ (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1372,7 +1377,7 @@ Bring an archived goal back.
 
 ### `dailybot goal unlink GOAL PROJECT`
 
-Stop a project counting toward a goal.
+Stop a project counting toward a goal. The project itself is untouched.
 
 - **API:** `DELETE /v1/tasks/goals/{g}/projects/{p}/ (member)`
 - **Signed-in person:** **member** (a key exits 4)
@@ -1390,8 +1395,8 @@ Change a goal, or declare its status.
 - **Flags:**
   - `--name`, `-n` `<text>` — New goal name.
   - `--description`, `-d` `<text>` — New description.
-  - `--period-start` `<YYYY-MM-DD>` — YYYY-MM-DD.
-  - `--period-end` `<YYYY-MM-DD>` — YYYY-MM-DD.
+  - `--period-start` `<date>` — YYYY-MM-DD.
+  - `--period-end` `<date>` — YYYY-MM-DD.
   - `--owner` `<text>` — Accountable person (user uuid).
   - `--team` `<text>` — Team (uuid).
   - `--status` `<not_started|on_track|at_risk|off_track|achieved|missed>` — Declare where the goal stands. Not derived from progress.
