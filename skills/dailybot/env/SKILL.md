@@ -29,6 +29,8 @@ Route here when the developer says any of:
 - *"Can I be in org A in this repo and org B in another repo?"*
 - *"Set up per-project Dailybot credentials for me."*
 - *"Switch this repo to my localhost Dailybot instance."*
+- *"Keep production login for reports but test Tasks locally."*
+- *"Switch env profiles / live vs testing."*
 
 **Do not** route here when:
 
@@ -71,7 +73,7 @@ Route here when the developer says any of:
 
 ```bash
 # CREATE a profile (creates the file if needed; first profile auto-becomes active)
-dailybot env add --name NAME --key KEY [--api-url URL] [--app-url URL]
+dailybot env add --name NAME --key KEY [--api-url URL] [--app-url URL] [--kind live|testing]
 
 # SWITCH active profile
 dailybot env use NAME       # switch active
@@ -128,6 +130,22 @@ dailybot env on    # restores the previously active profile
 ```
 
 `env off` sets `disabled: true` at the top level; `active` is preserved so `env on` instantly restores the previous selection.
+
+### Dual session — production reports, local testing (recommended)
+
+The pack is production-first. Keep OTP (or a `kind: live` profile) for **reports**. Put local/dev keys in the **same** `env.json` as `kind: testing` and switch with `env use` — nothing new to learn.
+
+```bash
+dailybot env off                    # production login for agent update / default CLI
+dailybot env add --name local --key sk_local_xxxxxxxx \
+  --api-url http://localhost:8000   # infers --kind testing
+dailybot env use local              # this repo now talks to local
+# ... Tasks / API probes ...
+dailybot env off                    # REQUIRED before dailybot agent update
+dailybot agent update "…"           # production dashboard
+```
+
+Do **not** `dailybot login` while a testing profile is active. Full rules: [`../shared/env-json.md` § Dual session](../shared/env-json.md#dual-session--production-reports--testing-profiles).
 
 ### Delete a profile
 
