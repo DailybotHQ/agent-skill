@@ -848,9 +848,10 @@ dailybot login --email me@example.com
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
 > **Recommended: `>= 3.19.0`** for agent attribution (`--agent-name` /
-> `DAILYBOT_AGENT_NAME`), `task brief`, personal-API-key parity on the person-shaped doors,
-> open-org structure writes (every non-guest member after `dailybot login`) and guest/role
-> refusal messaging. The pack-wide baseline is `>= 3.9.0`.
+> `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
+> and guest/role refusal messaging. **Administering Tasks with a personal API key needs
+> `>= 3.20.0`**: from that release the CLI never refuses a key before the request.
+> The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
@@ -877,20 +878,23 @@ data. The only trusted fields are server-generated: `uuid`, `key`, `rank`, curso
 ### Which verbs need a person
 
 Three credentials: a **login session** (`dailybot login`), a **personal API key** (issued to
-one person; the API treats it as that person), and an **agent or organization key** (nobody
-behind it).
+one person; the API treats it as that person, exactly like their login session), and an
+**agent or organization key** (nobody behind it).
 
-| Any API key with scope | Personal key or login | Login only |
-| --- | --- | --- |
-| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project members`, `task participants list`, `task watch` / `unwatch` | `task participants add` / `remove`, `task mute` / `unmute`, `project views` / `view save` (exit 3 for any key, by policy) |
-| create / update / move / set the owner / comment / link / labels / attach / bulk | | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership**, goal link / unlink, project / goal attach and attachment delete — **any non-guest member** after login; no key can hold `tasks:admin` (exit 4) |
-| `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | | |
+| Any API key with scope | Needs a person: login or personal API key |
+| --- | --- |
+| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
+| create / update / move / set the owner / comment / link / labels / attach / bulk | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership** (by user or team), goal link / unlink, project / goal attach and attachment delete — **any non-guest member**, no organization-admin prerequisite and no scope grant |
+| `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | |
 
-On the personal-key doors the CLI sends the call and the server decides: an agent or
-organization key gets `actor_required` (exit 3). On the login-only doors the CLI refuses any
-key before sending. Privacy is invite/remove; 404 = not visible. A board inside a `members`
-project follows the project's membership. Every non-guest member holds `tasks:admin` on a
-login session — no organization-admin prerequisite.
+The CLI never refuses a key before the request; the server decides. An agent or organization
+key on a person door gets `actor_required` (exit 3) on `owner=me`-style filters and
+`insufficient_scope` (exit 4) on admin and person doors. A guest's personal key is limited
+like the guest's session: `guest_not_allowed` (exit 4). A key that carries explicit
+`tasks:*` scopes is a ceiling its person chose (`tasks:read` alone stays read-only). An
+expired key is 401 `credential_expired`. Privacy is invite/remove; 404 = not visible,
+including in search and lists. A board inside a `members` project follows the project's
+membership (`effective_visibility`).
 
 **Agent attribution:** `--agent-name` / `DAILYBOT_AGENT_NAME` stamps every Tasks write with the
 executing agent (JSON writes: body `agent_name`; multipart and body-less writes:
@@ -905,8 +909,8 @@ agent key, is refused with `invalid_agent_attribution` (exit 2).
 | --- | --- |
 | 1 | partial failure — bulk rows failed, or a bulk dry run predicts refusals; or another failure (`preview_not_honoured`, an attachment upload) — read `code` |
 | 2 | bad input — the call itself is wrong; fix it, do not retry |
-| 3 | needs a person — an agent or organization key on a person-shaped door, or any key on a login-only door |
-| 4 | the server refused — read `code` in `--json`; this includes `tasks:admin` |
+| 3 | needs a person (`actor_required`) — an agent or organization key on a person door |
+| 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door) and `guest_not_allowed` |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
 | 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
 | 7 | a human declined the confirmation — stop; never re-run with `--yes` |
@@ -924,23 +928,23 @@ Reads and writes agree on both.
 Under `--json`, stdout carries exactly one parseable document on every path — the result, the
 dry-run preview, or an error envelope. Prompts and consequence panels go to stderr.
 
-The error envelope is the same shape for every Tasks door, reads and writes alike, including
-the refusals the CLI makes locally before spending a request:
+The error envelope is the same shape for every Tasks door, reads and writes alike:
 
 ```json
 {"status": "error", "code": "not_found", "detail": "…", "message": "…"}
 ```
 
 `status` is always the literal `"error"`, never an HTTP number, so one parser covers the
-family. A local refusal carries the code **and the exit** the server would have used —
-`actor_required` / exit 3 for a person-shaped door, `insufficient_scope` / exit 4 for a
-`tasks:admin` one — so you never have to know whether the request was actually sent.
+family. From `dailybot-cli 3.20.0` the CLI never refuses a credential locally; the server
+answers `actor_required` / exit 3 on an `owner=me`-style door and `insufficient_scope` /
+exit 4 on an admin or person door.
 
 A `tasks:admin` / structure refusal is exit **4**, not 3, because it is a `403` on the wire.
-If you are already signed in it is almost always a **guest** (or another role without
-structure access): ask an organization admin to **change the role**, never to "grant
-`tasks:admin`" — every non-guest member already holds it on a person session. Only a bare
-API key gets the "a key can never hold this scope" answer (`dailybot login` as a non-guest
+With a login session or a personal API key it is almost always a **guest**
+(`guest_not_allowed`, or another role without structure access): ask an organization admin
+to **change the role**, never to "grant `tasks:admin`" — every non-guest member already
+holds it, on a session and on their personal key. Only an agent or organization key gets the
+"nobody is behind this key" answer (`dailybot login` or a personal API key of a non-guest
 member). See
 [`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
 

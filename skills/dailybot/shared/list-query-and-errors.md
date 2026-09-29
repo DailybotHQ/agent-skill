@@ -139,6 +139,7 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `code` | Meaning | What to do |
 |--------|---------|------------|
 | `actor_required` | Sometimes seen as a 403 on person-shaped Tasks doors. Same meaning and fix as the row in the 400 table below: CLI exit 3; `dailybot login` or a personal API key. | See the 400 table. |
+| `insufficient_scope` | **CLI exit 4.** On a Tasks admin or person door (structure, membership, participants, mute, saved views, …) with a missing `tasks:admin`: the credential is an **agent or organization key** (nobody behind it), or a personal key whose own `tasks:*` scopes are a narrower ceiling its person chose (`tasks:read` only). A personal key with no `tasks:*` scopes is that person and needs no grant. | `dailybot login` or a personal API key of a non-guest member. For a narrowed personal key, the person issues a key with `tasks:write` (or no Tasks scopes at all). Not an organization-admin problem. |
 | `plan_upgrade_required` | The feature isn't on the org's current plan. Carries an `upgrade_url`. | Tell the developer the feature needs a plan upgrade; surface the `upgrade_url`. Do not retry. |
 | `plan_free_api_keys_forbidden` | API keys are fully blocked on the FREE plan. | Suggest `dailybot login` (a Bearer session) instead of an API key. |
 | `plan_missing_core_api_integrations` | The org's plan lacks the core API integration this call needs. | Explain the integration/plan gap; do not retry. |
@@ -180,15 +181,21 @@ In `--json` mode the error surfaces as `{ error, status, code, detail }`.
 | `workflow_trigger_payload_invalid` | `workflow trigger --payload` is not a valid JSON object or exceeds 8 KiB. | Fix the payload — must be a JSON object ≤8 KiB (measured as sent on the wire). |
 | `invalid_owner_user_id` | `--owner` value isn't a valid UUID (after resolution). | Fix the UUID or name. |
 | `too_many_owner_user_ids` | More than 50 `--owner` values. | Narrow the filter — max 50 owners per request. |
-| `actor_required` | **CLI exit 3; HTTP may be 400 or 403.** A Tasks door that is about a person (inbox, `tasks mine`, pins, saved views, `project members`, …) was called with an agent or organization key — nobody is behind it. The CLI exits 3. | `dailybot login` **or a personal API key** (a key bound to a person). A few doors are login-only; see the Tasks sub-skill, Step 2. Not a permissions bug. |
+| `actor_required` | **CLI exit 3; HTTP may be 400 or 403.** A Tasks door that is about a person (inbox, `tasks mine`, pins, saved views, `project members`, …) was called with an agent or organization key — nobody is behind it. The CLI exits 3. | `dailybot login` **or a personal API key** (a key bound to a person); see the Tasks sub-skill, Step 2. Not a permissions bug. |
 | `invalid_agent_attribution` | The agent name on a Tasks write (`--agent-name` / `DAILYBOT_AGENT_NAME`) is longer than 128 characters, undecodable, uses a character outside letters, numbers, spaces and `. - _ ( ) ' # + / & , :`, or belongs to a deactivated agent, or an agent or organization key sent a name. Refused, never truncated. | Shorten or drop the name, or use a person-bound credential (`dailybot login` or a personal API key). |
 | `archived_label` | `label assign` / `label batch` used an archived Label. | Create a new Label or stop assigning that UUID. |
-| `guest_not_allowed` | Guest caller hit a Labels endpoint, or a Tasks structure door their role cannot use. | Stop; this is a **role** limit. Labels and Tasks structure need a non-guest member — ask an organization admin to change the role, not a new credential. |
+| `guest_not_allowed` | Guest caller (login session or the guest's own personal API key) hit a Labels endpoint, or a Tasks structure door their role cannot use. | Stop; this is a **role** limit. Labels and Tasks structure need a non-guest member — ask an organization admin to change the role, not a new credential. |
 | `label_in_use` | `label delete` while the Label still has attachments (409). | Clear/reassign entities, then delete — or archive instead. |
 | `label_limit_exceeded` | Assign/batch would exceed the per-entity Label limit. | Remove a Label first, then retry. |
 | `duplicate_name` | Label name collides with an existing org Label (409). | Pick another `--name` or update the existing UUID. |
 | `invalid_color` | Label create/update color is not a valid hex color. | Fix `--color` (e.g. `#4A90E2`). |
 | `permission_denied` | Caller lacks permission for this Labels action. | Ask an admin/manager; do not retry blindly. |
+
+### 401 — credential
+
+| `code` | Meaning | What to do |
+|--------|---------|------------|
+| `credential_expired` | The API key has expired. | Create a new key in the Dailybot web app (or run `dailybot login`). A revoked key, or one whose owner was deactivated, answers a plain 401. |
 
 ### 429 — rate limit
 
