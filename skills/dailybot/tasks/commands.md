@@ -2,14 +2,16 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.21.0**; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, label edit and delete, recents, board visits and attachment resolve **3.22.0**): 137 commands across
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.22.0**, 137 commands; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
 **Coverage.** With `dailybot-cli >= 3.22.0`, the CLI has a command for every live
 operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent can orchestrate the
 whole roadmap from the command line. The one exception is **task delegation** (handing a task
 to an agent, `/v1/tasks/tasks/{t}/delegate/…`): it is published in the contract but answers
-501 until its runtime ships, so no command exists for it yet. It is generated from the CLI's own command
+501 until its runtime ships, so no command exists for it yet.
+
+**This file** is generated from the CLI's own command
 definitions, so the arguments and flags here match `--help` exactly. [SKILL.md](SKILL.md)
 explains *when* and *how* to use them (untrusted content, credentials, delta cursors,
 destructive previews, refusals). Use this file to look up *what exists* and *what each
@@ -441,9 +443,12 @@ Comment on a task. Pass `-` as the body to read it from stdin.
 
 - **API:** `POST /v1/tasks/tasks/{t}/comments/ +key`
 - **Signed-in person:** no
+- **API (reply):** with `--reply-to`, the body carries `{"parent_comment": "<comment-uuid>"}` and the comment lands inside that comment's thread. Needs `dailybot-cli >= 3.22.0`.
 - **Flags:**
+  - `--reply-to` `<COMMENT>` — Reply in the thread of this comment (its uuid).
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot task comment ENG-142 "Deployed. <@DB@00000000-0000-0000-0000-000000000004> can you verify?"`
+- **Example (reply):** `dailybot task comment ENG-142 "Confirmed, looks good." --reply-to 00000000-0000-0000-0000-000000000007`
 
 ### `dailybot task comment-attach TASK COMMENT FILE`
 
@@ -512,7 +517,7 @@ React to a comment with one emoji. Needs a person: `dailybot login` or a persona
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
 - **Emoji:** one emoji of 1–8 code points from U+1F300–U+1FAFF and U+2600–U+27BF, plus U+FE0F (variation selector) and U+200D (zero-width joiner). Text and `:shortcodes:` are refused locally and by the server with `reaction_invalid_emoji` (400, exit 2).
 - **Idempotent:** reacting twice with the same emoji changes nothing, so a retry is safe without an idempotency key.
-- **Example:** `dailybot task comment-react ENG-142 00000000-0000-0000-0000-000000000007 👍 --json`
+- **Example:** `dailybot task comment-react ENG-142 00000000-0000-0000-0000-000000000007 '👍' --json`
 
 ### `dailybot task comment-unreact TASK COMMENT EMOJI`
 
@@ -521,7 +526,7 @@ Remove your emoji reaction from a comment. Needs a person: `dailybot login` or a
 - **API:** `DELETE /v1/tasks/tasks/{t}/comments/{c}/reactions/{emoji}/` — the emoji travels percent-encoded in the path; 204 even when you had not reacted
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
 - **Idempotent:** removing a reaction you did not leave changes nothing. Same emoji rule as `comment-react`.
-- **Example:** `dailybot task comment-unreact ENG-142 00000000-0000-0000-0000-000000000007 👍`
+- **Example:** `dailybot task comment-unreact ENG-142 00000000-0000-0000-0000-000000000007 '👍'`
 
 ### `dailybot task comments TASK`
 
@@ -840,7 +845,7 @@ Edit or archive an organization label. Needs a person: `dailybot login` or a per
 - **API:** `PATCH /v1/tasks/labels/{l}/ {name, color, description, is_archived}`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
 - **Who:** the label's creator, or an elevated user (organization admin, organization manager or team admin).
-- **Refusal:** a name another label already uses answers 400 `invalid_filter_value` (exit 2); pick another name.
+- **Refusal:** a name another label already uses answers 400 `invalid_filter_value` (exit 2); pick another name. This is the Tasks label code; organization Labels (`dailybot label`) answer `duplicate_name` instead.
 - **Flags:**
   - `--name`, `-n` `<text>` — New name (max 64).
   - `--color` `<text>` — New color, a #rrggbb hex (empty clears it).

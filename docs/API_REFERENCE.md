@@ -847,12 +847,14 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.21.0`** (the current release). Agent attribution (`--agent-name` /
+> **Recommended: `3.22.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
 > some person doors, so upgrade. **Milestone files, milestone restore and editable,
-> co-authored project updates need `>= 3.21.0`.**
+> co-authored project updates need `>= 3.21.0`.** Comment reactions, reply threads
+> (`task comment --reply-to`), label edit and delete, recents, board visits and attachment
+> resolve need `>= 3.22.0`.
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
@@ -870,8 +872,8 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 137 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.21.0**; comment reactions,
-label edit and delete, recents, board visits and attachment resolve need
+from the CLI's command definitions (aligned with **dailybot-cli 3.22.0**; comment reactions,
+reply threads, label edit and delete, recents, board visits and attachment resolve need
 **dailybot-cli >= 3.22.0**). With that release the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
 (`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
@@ -892,7 +894,7 @@ one person; the API treats it as that person, exactly like their login session),
 
 | Any API key with scope | Needs a person: login or personal API key |
 | --- | --- |
-| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones, milestone and update attachment lists and downloads, `project update-get` | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks recents`, `board visit`, `task comment-react` / `comment-unreact`, `board label update` / `delete`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
+| pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones, milestone and update attachment lists and downloads, `project update-get`, `tasks attachments-resolve` | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks recents`, `board visit`, `task comment-react` / `comment-unreact`, `board label update` / `delete`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
 | create / update / move / set the owner / comment / link / labels / attach / bulk | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership** (by user or team), goal link / unlink, project / goal attach and attachment delete, milestone files and restore, project update read / edit / delete and update files (edits and file changes by the update's author only) — **any non-guest member**, no organization-admin prerequisite and no scope grant |
 | `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | |
 

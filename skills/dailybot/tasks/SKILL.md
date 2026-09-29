@@ -94,7 +94,10 @@ refusal messages that match Step 2 and Step 7. **Administering Tasks with a pers
 the CLI never refuses a key before the request and lets the server decide (Step 2).
 **Milestone files, milestone restore, and reading, editing, deleting or attaching files to a
 project update need `dailybot-cli >= 3.21.0`** (see "Project updates and milestones,
-co-authored"). `3.21.0` is the current release; install it. On 3.19.x the CLI still refuses a key locally on
+co-authored"). **Comment reactions, reply threads (`task comment --reply-to`), label edit
+and delete, recents, board visits and attachment resolve need `dailybot-cli >= 3.22.0`,**
+the release that covers every live Tasks API operation. `3.22.0` is the current release;
+install it. On 3.19.x the CLI still refuses a key locally on
 structure and some person doors; upgrade. The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one
 that needs more. Tasks first shipped in 3.12.0; on an older CLI, `--owner`,
 `task set-owner`, everything in Step 8 and `board create` are missing or broken, so ask
@@ -108,6 +111,7 @@ dailybot board create --help | grep -- --project   # 3.14.2+: board create works
 dailybot board create --help | grep -i 'non-guest' # 3.15.0+: open-org structure wording
 dailybot task brief --help                   # agent collaboration: brief + --agent-name
 dailybot project update-edit --help          # 3.21.0+: milestone files, editable project updates
+dailybot task comment-react --help           # 3.22.0+: full coverage (reactions, reply threads, label delete)
 ```
 
 If the first fails, or the second prints nothing, the installed CLI predates what this
@@ -604,7 +608,8 @@ update/reopen/retire/restore, milestone files, goal restore/unlink, saved views)
 
 ## Orchestrate the whole roadmap
 
-Every capability of Tasks in the web app has a CLI command. Look up flags in
+Every **live** Tasks capability of the web app has a CLI command (task delegation is
+published but answers 501 until its runtime ships). Look up flags in
 [commands.md](commands.md); Step 2 says which need a person.
 
 - **Goals** — `goal list` / `get` / `create` / `update` / `archive` / `restore`; tie projects
@@ -614,14 +619,15 @@ Every capability of Tasks in the web app has a CLI command. Look up flags in
   `board snapshot` for the cold read.
 - **Columns** — `board states`, `board state create` / `update` / `reorder` / `archive` /
   `restore`.
-- **Labels** — `board labels`, `board label create` / `update` (edit, archive) / `delete`;
-  put them on a task with `task labels`.
+- **Labels** — `board labels`, `board label create` / `update` (edit, archive) / `delete`
+  (delete: elevated users only; otherwise archive with `--archive`); put them on a task
+  with `task labels`.
 - **Milestones** — `project milestones`, `milestone-create` / `update` / `complete` /
   `reopen` / `delete` / `restore`, files with `milestone-attach`.
 - **Tasks** — `task list` / `get` / `brief` / `create` / `update` / `move` / `set-owner` /
   `archive` / `restore` / `duplicate` / `children` / `link` / `bulk`; `board tasks`.
 - **Comments** — `task comments`, `task comment` / `comment-edit` / `comment-delete`, files
-  with `comment-attach`.
+  with `comment-attach`; reply inside a thread with `task comment --reply-to <comment-uuid>`.
 - **Reactions** — `task comment-react` / `comment-unreact`.
 - **Project updates** — `project updates`, `update-post` / `update-get` / `update-edit` /
   `update-delete`, files with `update-attach`.
