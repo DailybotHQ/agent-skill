@@ -847,26 +847,30 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.20.0`** (the current release). Agent attribution (`--agent-name` /
+> **Recommended: `3.21.0`** (the current release). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
-> some person doors, so upgrade.
+> some person doors, so upgrade. **Milestone files, milestone restore and editable,
+> co-authored project updates need `>= 3.21.0`.**
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
 workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
 containers. A task has an **owner** (never "assignee"; `--owner`, `task set-owner`) and a
-**state** (its column). Every task argument takes a key (`ENG-142`) or a uuid.
+**state** (its column). Every task argument takes a key (`ENG-142`) or a uuid. Milestones
+carry files (`project milestone-attach`, shown inline as `attachment:<uuid>`), and project
+updates are co-authored: stamped with the agent that wrote them, editable and deletable
+(`project update-edit` / `update-delete`, author only for edits: `update_not_author`).
 
 This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 116 Tasks commands, with every argument, flag, API door
+The complete command list (all 130 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.20.0**).
+from the CLI's command definitions (aligned with **dailybot-cli 3.21.0**).
 
 ### The rule that comes before any command
 
@@ -885,7 +889,7 @@ one person; the API treats it as that person, exactly like their login session),
 | Any API key with scope | Needs a person: login or personal API key |
 | --- | --- |
 | pulse, search, activity, timeline, boards, columns, board members, tasks, `task brief`, projects, goals, milestones | `tasks mine` / `counts` / `inbox…`, `tasks cursor`, `tasks favorites`, `tasks view …`, `board mentionables`, `board labels` / `label create`, `board views` / `view save`, `board star` / `unstar`, `project views` / `view save`, `project members`, `task participants list` / `add` / `remove`, `task watch` / `unwatch`, `task mute` / `unmute` |
-| create / update / move / set the owner / comment / link / labels / attach / bulk | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership** (by user or team), goal link / unlink, project / goal attach and attachment delete — **any non-guest member**, no organization-admin prerequisite and no scope grant |
+| create / update / move / set the owner / comment / link / labels / attach / bulk | every board / column / project / goal structure change, incl. create, update, archive, restore, board & project **membership** (by user or team), goal link / unlink, project / goal attach and attachment delete, milestone files and restore, project update read / edit / delete and update files (edits and file changes by the update's author only) — **any non-guest member**, no organization-admin prerequisite and no scope grant |
 | `project update-post`, milestones (create, update, complete, reopen, retire), task archive & restore | |
 
 The CLI never refuses a key before the request; the server decides. An agent or organization
