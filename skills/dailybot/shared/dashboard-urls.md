@@ -97,10 +97,10 @@ standalone page (no sidebar navigation).
 
 ---
 
-### Plan (formerly Tasks)
+### Plan
 
-The web app lives under `/plan` (confirmed by the web team when Plan was renamed). A task payload
-still carries no `url` field, so build these from ids you already hold; never invent other shapes.
+The web app lives under `/plan`. A task payload
+carries no `url` field, so build these from ids you already hold; never invent other shapes.
 
 | Page | Path |
 |------|------|

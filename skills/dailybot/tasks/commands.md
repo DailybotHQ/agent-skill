@@ -1,21 +1,18 @@
-# Plan (formerly Tasks) — complete command reference
+# Plan — complete command reference
 
-> **Renamed.** The product formerly called Tasks is now **Dailybot Plan**, and the public API root is
-> `/v1/plan/` (it replaces `/v1/tasks/` with no fallback). `dailybot-cli >= 3.25.0` calls `/v1/plan/`;
-> earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
-> changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
-> (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
-> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
-> removed with no alias. Every command in this skill needs `dailybot-cli >= 3.25.0`; on an older CLI run `dailybot upgrade` first (the old form is not documented here). The sub-skill keeps the name
-> `dailybot-tasks` (registry name).
+> **Names.** Every command lives under `dailybot plan` and calls the `/v1/plan/` public API. Scopes keep
+> the names `tasks:read|write|admin` and webhook events keep `tasks.*`. The sub-skill's registry name
+> is `dailybot-tasks`.
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Plan command in `dailybot-cli >= 3.25.0` (173 commands plus the deprecated `task assign` alias, noted under `task set-owner`; the numbers below are when each capability arrived, all included at the floor: collaboration **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**, the scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and the saved-view fixes **3.24.0**, notifications, routes, reports, briefing, channel search and the timeline with milestones and projects **3.25.0**). They span
-`tasks`, `task`, `board`, `project` and `goal`.
+This file lists **every** Plan command, for `dailybot-cli >= 3.25.0`, generated from the CLI's command
+definitions (the deprecated `task assign` alias is noted under `task set-owner`). If a command here is
+missing from your CLI, run `dailybot upgrade`. The commands span `tasks`, `task`, `board`, `project` and
+`goal`.
 
-**Coverage.** With `dailybot-cli >= 3.23.0`, the CLI has a command for every live
-operation in the Tasks API contract (`/v1/plan/schema/`), so an agent can orchestrate the
+**Coverage.** The CLI has a command for every live
+operation in the Plan API contract (`/v1/plan/schema/`), so an agent can orchestrate the
 whole roadmap from the command line. The one exception is **task delegation** (handing a task
 to an agent, `/v1/plan/tasks/{t}/delegate/…`): it is published in the contract but answers
 501 until its runtime ships, so no command exists for it yet.
@@ -36,7 +33,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   the write, so a retry of the **same** call (`--idempotency-key <key>`) is safe for 24 hours.
   An entry without it sends no key, so a retry can repeat the write. A dry run never sends a
   key. `(person)` marks a structure change.
-- **Signed-in person.** Tasks tells three credentials apart: a login session
+- **Signed-in person.** Plan tells three credentials apart: a login session
   (`dailybot login`), a **personal API key** (bound to a person; the API treats it as that
   person, exactly like their login session), and an **agent or organization key** (nobody
   behind it). **person** means the door needs a person: a login session or a personal API
@@ -52,7 +49,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
   never refuses a credential before sending; the server decides.
 - **Global flag.** `--agent-name <name>` on the root command (`dailybot --agent-name
   "Claude Code" task comment …`), or `DAILYBOT_AGENT_NAME` in the environment, names the
-  agent acting for the person. Every Tasks write stays the credential's person's and records
+  agent acting for the person. Every Plan write stays the credential's person's and records
   the agent as the one who executed it. It is a label, not a credential: it never changes authorization or
   visibility. Set it only with a login session or a personal API key; an agent or
   organization key that sends it is refused with `invalid_agent_attribution` (exit 2).
@@ -134,7 +131,7 @@ Show the workspace activity feed — the catch-up read after an absence.
 
 ### `dailybot plan tasks attachments-resolve ATTACHMENT…`
 
-Resolve the current download URLs for `attachment:<uuid>` references in descriptions, comments and update bodies. Needs `dailybot-cli >= 3.22.0`.
+Resolve the current download URLs for `attachment:<uuid>` references in descriptions, comments and update bodies.
 
 - **API:** `GET /v1/plan/attachments/resolve/?ids=a,b`
 - **Signed-in person:** no
@@ -174,7 +171,7 @@ Read or move your activity read-mark — "what is new since I last looked".
 
 ### `dailybot plan tasks entitlements`
 
-Show what this organization's plan allows for Tasks.
+Show what this organization's plan allows for Plan.
 
 - **API:** `GET /v1/plan/entitlements/`
 - **Signed-in person:** no
@@ -190,7 +187,7 @@ List your pinned boards and saved views. Needs a person: `dailybot login` or a p
 
 ### `dailybot plan tasks inbox`
 
-Show your Tasks notifications.
+Show your Plan notifications.
 
 - **API:** `GET /v1/plan/inbox/ (?mentioned=true&type=)`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -212,7 +209,7 @@ Mark an inbox item — and everything older — as read. Needs a person: `dailyb
 
 ### `dailybot plan tasks inbox-read-all`
 
-Mark your whole Tasks inbox as read. Needs a person: `dailybot login` or a personal API key.
+Mark your whole Plan inbox as read. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `POST /v1/plan/inbox/read-all/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -220,7 +217,7 @@ Mark your whole Tasks inbox as read. Needs a person: `dailybot login` or a perso
 
 ### `dailybot plan tasks inbox-unread`
 
-How many Tasks notifications you have not read. Needs a person: `dailybot login` or a personal API key.
+How many Plan notifications you have not read. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `GET /v1/plan/inbox/unread-count/ (?mentioned=true&type=, same filters as the list)`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -245,7 +242,7 @@ List the tasks that are yours.
 
 ### `dailybot plan tasks recents`
 
-List the boards you opened most recently (`board visit` feeds it). Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+List the boards you opened most recently (`board visit` feeds it). Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `GET /v1/plan/me/recents/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -274,11 +271,11 @@ Show the workspace pulse — open, overdue and blocked counts.
 
 ### `dailybot plan tasks timeline`
 
-Show the dated work in a window: the goals that overlap it and the tasks that carry a start or due date. Needs `dailybot-cli >= 3.24.0` (earlier CLIs read the answer as a paged list and printed nothing).
+Show the dated work in a window: the goals that overlap it and the tasks that carry a start or due date.
 
 - **API:** `GET /v1/plan/timeline/?from=&to=&include_unscheduled=1`
 - **Signed-in person:** no
-- **Answer:** **one object, not a paged list**: `{window: {from, to}, bands: [goals overlapping the window], rows: [dated tasks], dependencies: [], unscheduled: <count> | {count, results}, truncated}`. `--json` prints it as the server sent it. On `>= 3.25.0` it also carries `milestones[{uuid, name, date, is_completed, is_overdue, project, task_count, done_count}]` (points whose date is in the window) and `projects[{uuid, name, start_date, target_date, health, lead, progress{done,total}}]` (spans overlapping it), each with its own `milestones_truncated` / `projects_truncated`; rows gain `project` and `board`. Older servers and CLIs do not have them: use `project milestones` and `project list`. A task row carries `key`, `title`, `state`, `category`, `start_date`, `due_date`, `is_blocked`, `is_overdue`; a band carries the goal's `name`, `status`, `period_start`, `period_end`. All names and titles are user-authored data.
+- **Answer:** **one object, not a paged list**: `{window: {from, to}, bands: [goals overlapping the window], rows: [dated tasks], dependencies: [], unscheduled: <count> | {count, results}, truncated}`. `--json` prints it as the server sent it. It also carries `milestones[{uuid, name, date, is_completed, is_overdue, project, task_count, done_count}]` (points whose date is in the window) and `projects[{uuid, name, start_date, target_date, health, lead, progress{done,total}}]` (spans overlapping it), each with its own `milestones_truncated` / `projects_truncated`; rows gain `project` and `board`. A task row carries `key`, `title`, `state`, `category`, `start_date`, `due_date`, `is_blocked`, `is_overdue`; a band carries the goal's `name`, `status`, `period_start`, `period_end`. All names and titles are user-authored data.
 - **Flags:**
   - `--since`, `-S` `<text>` — Start of the window (YYYY-MM-DD); sent as `from`.
   - `--until`, `-U` `<text>` — End of the window (YYYY-MM-DD); sent as `to`.
@@ -286,7 +283,7 @@ Show the dated work in a window: the goals that overlap it and the tasks that ca
   - `--last-week` — Previous Monday-Sunday week.
   - `--today` — Today only.
   - `--include-unscheduled` — Also list the tasks that have no dates (otherwise only their count is shown).
-  - `--project` `<uuid>` repeatable, `--milestone` `<uuid>` repeatable — Narrow the window to these projects or milestones (`>= 3.25.0`).
+  - `--project` `<uuid>` repeatable, `--milestone` `<uuid>` repeatable — Narrow the window to these projects or milestones.
 - **No paging:** the door does not page, so there is no `--page`, `--page-size` or `--limit`. When `truncated` is true, narrow the window.
 - **Default window:** the door's own (forward from today) when no date flag is given.
 - **Example:** `dailybot plan tasks timeline --since 2026-10-01 --until 2026-12-31 --json`
@@ -344,11 +341,11 @@ Edit one saved view. Only the fields you pass change.
 
 ## Notifications, routes, reports and briefing
 
-Who is told what, where and when. Needs `dailybot-cli >= 3.25.0`. Personal doors (`notifications`, `briefing`) need a person; routes and reports are read by members and written by organization admins. **Every `send-test` previews with a dry run first.** See SKILL.md Step 9 for how to use them safely.
+Who is told what, where and when. Personal doors (`notifications`, `briefing`) need a person; routes and reports are read by members and written by organization admins. **Every `send-test` previews with a dry run first.** See SKILL.md Step 9 for how to use them safely.
 
 ### `dailybot plan tasks notifications catalog`
 
-List every notification kind, personal and organization, with its group, scope, defaults and whether it fires immediately. Needs `dailybot-cli >= 3.25.0`.
+List every notification kind, personal and organization, with its group, scope, defaults and whether it fires immediately.
 
 - **API:** `GET /v1/plan/notifications/catalog/`
 - **Signed-in person:** no
@@ -769,7 +766,7 @@ Comment on a task. Pass `-` as the body to read it from stdin.
 
 - **API:** `POST /v1/plan/tasks/{t}/comments/ +key`
 - **Signed-in person:** no
-- **API (reply):** with `--reply-to`, the body carries `{"parent_comment": "<comment-uuid>"}` and the comment lands inside that comment's thread. Needs `dailybot-cli >= 3.22.0`.
+- **API (reply):** with `--reply-to`, the body carries `{"parent_comment": "<comment-uuid>"}` and the comment lands inside that comment's thread.
 - **Flags:**
   - `--reply-to` `<COMMENT>` — Reply in the thread of this comment (its uuid).
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
@@ -845,7 +842,7 @@ Replace a comment's text. `-` reads the new body from stdin.
 
 ### `dailybot plan task comment-react TASK COMMENT EMOJI`
 
-React to a comment with one emoji. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+React to a comment with one emoji. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `POST /v1/plan/tasks/{t}/comments/{c}/reactions/ {"emoji": "👍"}` — answers with the whole comment, its `reactions` aggregated
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
@@ -857,7 +854,7 @@ React to a comment with one emoji. Needs a person: `dailybot login` or a persona
 
 ### `dailybot plan task comment-reactions TASK COMMENT`
 
-Everyone who reacted to a comment, oldest first, with the agent that reacted for them. A comment itself carries only the first 10 reactors per emoji; this lists them all. Needs `dailybot-cli >= 3.23.0`.
+Everyone who reacted to a comment, oldest first, with the agent that reacted for them. A comment itself carries only the first 10 reactors per emoji; this lists them all.
 
 - **API:** `GET /v1/plan/tasks/{t}/comments/{c}/reactions/?emoji=&page=&page_size=` — `{count, next, previous, results: [{emoji, user, executed_by_agent, created_at}]}`
 - **Signed-in person:** no
@@ -868,7 +865,7 @@ Everyone who reacted to a comment, oldest first, with the agent that reacted for
 
 ### `dailybot plan task comment-unreact TASK COMMENT EMOJI`
 
-Remove your emoji reaction from a comment. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+Remove your emoji reaction from a comment. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `DELETE /v1/plan/tasks/{t}/comments/{c}/reactions/{emoji}/` — the emoji travels percent-encoded in the path; 204 even when you had not reacted
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
@@ -907,10 +904,10 @@ Create a task.
   - `--state` `<text>` — Initial workflow state.
   - `--owner` `<text>` — Owner: a user uuid, or `me`.
   - `--due` `<YYYY-MM-DD>` — Due date. Checked locally (a bad date exits 2 before any request).
-  - `--start-date` `<YYYY-MM-DD>` — Start date (`>= 3.24.0`). Checked locally. With `--due` it puts the task on the timeline.
-  - `--estimate` `<int>` — Estimate, a non-negative integer in the board's scale (`>= 3.24.0`).
-  - `--parent` `<text>` — Make it a sub-task of this task, key or uuid (`>= 3.24.0`).
-  - `--label` `<uuid>` repeatable, or comma-separated — Attach these labels right after the create (`>= 3.24.0`). Blank values are ignored.
+  - `--start-date` `<YYYY-MM-DD>` — Start date. Checked locally. With `--due` it puts the task on the timeline.
+  - `--estimate` `<int>` — Estimate, a non-negative integer in the board's scale.
+  - `--parent` `<text>` — Make it a sub-task of this task, key or uuid.
+  - `--label` `<uuid>` repeatable, or comma-separated — Attach these labels right after the create. Blank values are ignored.
   - `--priority` `<int>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe. Generated automatically when omitted. The server keeps it for 24h: reusing it inside that window replays the original result, reusing it after duplicates.
 - **A label step that fails leaves the task in place.** The command exits **1** (the partial-write code) and says once that the task exists: in text, and under `--json` in the error envelope's `message` and `created_task: {key, uuid}`. **Do not re-run the create** (it would duplicate); fix the label and run `task labels` on that task. A milestone cannot be set on create (the API refuses it on purpose): create, then `task update --milestone`.
@@ -939,7 +936,7 @@ Copy a task into the same column, with a new key.
   - `--include` `<title|description|labels|priority|estimate|owner|start_date|due_date>` repeatable — Fields to copy (repeatable). Default: title, description and labels.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe. Generated automatically when omitted.
 - **Example:** `dailybot plan task duplicate ENG-142 --include title --include owner`
-- **Refusals:** an archived task cannot be duplicated (403 `task_archived`; older servers answered `task_delete_forbidden`); restore it first. `--include owner` used to answer HTTP 500 on servers that had not fixed it: if you see that, drop `owner` from `--include` and run `task set-owner` on the copy.
+- **Refusals:** an archived task cannot be duplicated (403 `task_archived`); restore it first.
 
 ### `dailybot plan task events TASK`
 
@@ -991,7 +988,7 @@ List tasks.
   - `--state` `<text>` — Only tasks in this workflow state.
   - `--owner` `<text>` repeatable — Only tasks owned by this user (uuid, `me` or `unowned`). Repeat to OR several.
   - `--label` `<text>` — Only tasks carrying this label.
-  - `--milestone` `<uuid>` repeatable — Only tasks in these milestones (`>= 3.25.0`).
+  - `--milestone` `<uuid>` repeatable — Only tasks in these milestones.
   - `--sort` `<text>` — Order by rank, priority (urgent first), due, start, created, updated or completed (or the API names such as due_date); prefix with - for the reverse.
   - `--has-dates`, `--no-has-dates` — Only tasks that do (or do not) carry dates.
   - `--include` `<labels|participants|subtasks>` repeatable — Ask for a roll-up. Nothing is included by default — absence is a real answer.
@@ -1011,7 +1008,7 @@ Move a task to another column, or to another board.
   - `--board` `<text>` — Target board, for a move to another board.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe (same-board moves; a cross-board move takes none).
 - **Example:** `dailybot plan task move ENG-142 --state done`
-- **Cross-board move changes the key.** A task's key is its board plus a number: `--board` gives the task a **new key** on the target board and the old key stops resolving (404), while the task's uuid never changes. The answer carries the new key. Keep references by uuid, and re-read the key after a move (`>= 3.24.0` says this in `--help`).
+- **Cross-board move changes the key.** A task's key is its board plus a number: `--board` gives the task a **new key** on the target board and the old key stops resolving (404), while the task's uuid never changes. The answer carries the new key. Keep references by uuid, and re-read the key after a move (`--help` says this too).
 
 ### `dailybot plan task mute TASK`
 
@@ -1119,10 +1116,10 @@ Change fields on a task.
   - `--description`, `-d` `<text>` — New description.
   - `--state` `<text>` — New workflow state.
   - `--due` `<YYYY-MM-DD>` — New due date. Checked locally.
-  - `--start-date` `<YYYY-MM-DD>` — New start date (`>= 3.24.0`). Checked locally.
-  - `--estimate` `<int>` — New estimate, a non-negative integer (`>= 3.24.0`).
-  - `--milestone` `<uuid>` — Put the task in this milestone (`>= 3.24.0`). The milestone must belong to the project of the task's board, else 400 `milestone_not_on_project`. Checked locally as a uuid.
-  - `--clear-milestone` — Take the task out of its milestone (`>= 3.24.0`); sends `{"milestone": null}`. Not combinable with `--milestone`.
+  - `--start-date` `<YYYY-MM-DD>` — New start date. Checked locally.
+  - `--estimate` `<int>` — New estimate, a non-negative integer.
+  - `--milestone` `<uuid>` — Put the task in this milestone. The milestone must belong to the project of the task's board, else 400 `milestone_not_on_project`. Checked locally as a uuid.
+  - `--clear-milestone` — Take the task out of its milestone; sends `{"milestone": null}`. Not combinable with `--milestone`.
   - `--priority` `<int>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
   - `--owner` `<text>` — Owner: a user uuid, or `me`.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
@@ -1190,7 +1187,7 @@ Create an organization label from this board.
 
 ### `dailybot plan board label delete LABEL`
 
-Delete an organization label for good. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+Delete an organization label for good. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `DELETE /v1/plan/labels/{l}/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -1203,7 +1200,7 @@ Delete an organization label for good. Needs a person: `dailybot login` or a per
 
 ### `dailybot plan board label update LABEL`
 
-Edit or archive an organization label. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+Edit or archive an organization label. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `PATCH /v1/plan/labels/{l}/ {name, color, description, is_archived}`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -1322,7 +1319,7 @@ Who you can @mention on this board, with the token to write. Needs a person: `da
 - **Flags:**
   - `--query`, `-q` `<text>` — Only people whose name contains this text (case-insensitive).
 - **Example:** `dailybot plan board mentionables 00000000-0000-0000-0000-000000000001 -q jane`
-- **Table (`>= 3.24.0`):** columns are `Name`, `Kind` and `Mention as`; the token carries the whole uuid, so there is no separate UUID column and nothing is truncated at 80 columns. A row that cannot be mentioned shows `(not mentionable) <uuid>`. `--json` is unchanged.
+- **Table:** columns are `Name`, `Kind` and `Mention as`; the token carries the whole uuid, so there is no separate UUID column and nothing is truncated at 80 columns. A row that cannot be mentioned shows `(not mentionable) <uuid>`. `--json` is unchanged.
 
 ### `dailybot plan board restore BOARD`
 
@@ -1416,7 +1413,7 @@ List a board's states (its columns), left to right.
 - **Flags:**
   - `--include-archived` — Also list retired columns.
 - **Example:** `dailybot plan board states 00000000-0000-0000-0000-000000000001 --include-archived`
-- **Table (`>= 3.24.0`):** the `Archived` column only appears when a retired column is in the result (`--include-archived`); the freed width keeps names such as `In progress` whole at 80 columns.
+- **Table:** the `Archived` column only appears when a retired column is in the result (`--include-archived`); the freed width keeps names such as `In progress` whole at 80 columns.
 
 ### `dailybot plan board tasks BOARD`
 
@@ -1467,7 +1464,7 @@ Replace your saved views on a board with the array in a file.
   - `--fetch-etag` — Read the current ETag first instead of passing --if-match (narrower protection).
 - **Example:** `dailybot plan board view save 00000000-0000-0000-0000-000000000001 -f views.json --if-match "$ETAG"   # only after the developer saw what it replaces`
 - **The file** is a JSON **array** of view objects, not the envelope `views --json` prints (that one lists them under `results`: copy the objects out of it). Fields: `name` (text, up to 64 characters, required), `view_mode` (`list` | `board` | `kanban` | `timeline` | `calendar`), `group_by` (`state` | `owner` | `priority` | `category`), `sort` (a sort expression), `visibility` (`personal` | `shared` | `board_default`; the last two need a board manager) and `filters` (an object, may be `{}`). Read fields the server adds (`uuid`, `scope`, `owner`, timestamps) are not part of what you write.
-- **ETag:** `views --etag` prints what the server sent. It may be weak (`W/"3"`). Pass it as printed: since `3.24.0` the CLI sends the strong form the door compares against (before that, `--if-match` with a weak tag and `--fetch-etag` answered `precondition_failed` even on an untouched list).
+- **ETag:** `views --etag` prints what the server sent. It may be weak (`W/"3"`). Pass it as printed: the CLI sends the strong form the door compares against.
 
 ### `dailybot plan board views BOARD`
 
@@ -1481,7 +1478,7 @@ List your saved views on a board, with the ETag a save needs.
 
 ### `dailybot plan board visit BOARD`
 
-Record that you opened a board, so it shows in `tasks recents`. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.22.0`.
+Record that you opened a board, so it shows in `tasks recents`. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `POST /v1/plan/boards/{b}/visit/`
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
@@ -1568,7 +1565,7 @@ Create a project. Needs a signed-in person (any non-guest member).
   - `--target-date` `<date>` — YYYY-MM-DD.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot plan project create -n "Apollo" --target-date 2026-12-15`
-- **Refusals:** a name another project already uses, **archived ones included** (an archived project keeps its slug), answers 409 `project_name_conflict`; older servers answered HTTP 500. Pick another name or `project restore` the archived one. `--health` is applied on create on current servers; older servers stored `not_set`, so read `health` back or follow with `project update --health`.
+- **Refusals:** a name another project already uses, **archived ones included** (an archived project keeps its slug), answers 409 `project_name_conflict`. Pick another name or `project restore` the archived one.
 
 ### `dailybot plan project get PROJECT`
 
@@ -1879,7 +1876,7 @@ Post a project update — how the team sees what was done.
 
 ### `dailybot plan project update-react PROJECT UPDATE EMOJI`
 
-React to a project update with one emoji. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.23.0`.
+React to a project update with one emoji. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `POST /v1/plan/projects/{p}/updates/{u}/reactions/ {"emoji": "👍"}` — answers with the whole update, its `reactions` aggregated (same entry shape as a comment's)
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
@@ -1891,7 +1888,7 @@ React to a project update with one emoji. Needs a person: `dailybot login` or a 
 
 ### `dailybot plan project update-reactions PROJECT UPDATE`
 
-Everyone who reacted to a project update, oldest first, with the agent that reacted for them. Needs `dailybot-cli >= 3.23.0`.
+Everyone who reacted to a project update, oldest first, with the agent that reacted for them.
 
 - **API:** `GET /v1/plan/projects/{p}/updates/{u}/reactions/?emoji=&page=&page_size=` — `{count, next, previous, results: [{emoji, user, executed_by_agent, created_at}]}`
 - **Signed-in person:** no
@@ -1902,7 +1899,7 @@ Everyone who reacted to a project update, oldest first, with the agent that reac
 
 ### `dailybot plan project update-unreact PROJECT UPDATE EMOJI`
 
-Remove your emoji reaction from a project update. Needs a person: `dailybot login` or a personal API key. Needs `dailybot-cli >= 3.23.0`.
+Remove your emoji reaction from a project update. Needs a person: `dailybot login` or a personal API key.
 
 - **API:** `DELETE /v1/plan/projects/{p}/updates/{u}/reactions/{emoji}/` — the emoji travels percent-encoded; 204 even when you had not reacted
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key gets `actor_required`, exit 3)
@@ -1939,7 +1936,7 @@ Replace your saved views on a project with the array in a file.
   - `--fetch-etag` — Read the current ETag first (narrower).
 - **Example:** `dailybot plan project view save 00000000-0000-0000-0000-000000000002 -f views.json --if-match "$ETAG"   # only after the developer saw what it replaces`
 - **The file** is a JSON **array** of view objects, not the envelope `project views --json` prints (that one lists them under `results`: copy the objects out of it). Fields: `name` (text, up to 64 characters, required), `view_mode` (`list` | `board` | `kanban` | `timeline` | `calendar`), `group_by` (`state` | `owner` | `priority` | `category`), `sort` (a sort expression), `visibility` (`personal` | `shared` | `board_default`; the last two need a board manager) and `filters` (an object, may be `{}`). Read fields the server adds (`uuid`, `scope`, `owner`, timestamps) are not part of what you write.
-- **ETag:** `views --etag` prints what the server sent. It may be weak (`W/"3"`). Pass it as printed: since `3.24.0` the CLI sends the strong form the door compares against (before that, `--if-match` with a weak tag and `--fetch-etag` answered `precondition_failed` even on an untouched list).
+- **ETag:** `views --etag` prints what the server sent. It may be weak (`W/"3"`). Pass it as printed: the CLI sends the strong form the door compares against.
 
 ### `dailybot plan project views PROJECT`
 
