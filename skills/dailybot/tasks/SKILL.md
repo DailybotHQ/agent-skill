@@ -269,8 +269,7 @@ the goals that overlap the window, `rows` = the tasks that carry a start or due 
 projects (`project milestones`, `project list`). It takes a window only: no paging flags, and
 `--include-unscheduled` lists the undated ones. When `truncated` is true, narrow the window.
 
-`--owner` repeats and ORs: `--owner me --owner unowned`. `--sort` takes `rank`, `priority`,
-`due_date`, `updated_at`, `created_at` or `completed_at`; prefix `-` for descending.
+`--owner` repeats and ORs: `--owner me --owner unowned`. `--sort` takes `priority` (urgent first), `due`, `start`, `created`, `updated`, `completed` or `rank`, also as the API names (`due_date`, `updated_at`, ...); prefix `-` for the reverse. Dates sort null-last both ways. Anything else is passed through and the API answers `invalid_sort` with `extra.allowed`, which the CLI prints. The same flag works on `plan tasks mine`.
 
 **Roll-ups are opt-in.** A field you did not ask for with `--include` is **absent** from
 the payload — which is a different answer from `null` and from `0`:

@@ -237,10 +237,11 @@ List the tasks that are yours.
 - **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
 - **Flags:**
   - `--scope` `<text>` — owned (default): you are the owner · participating: you are on the card · involved: owned, participating or created by you.
+  - `--sort` `<text>` — Order by rank, priority (urgent first), due, start, created, updated or completed (or the API names such as due_date); prefix with - for the reverse.
   - `--page`, `-P` `<int>` — Page number to fetch.
   - `--page-size`, `-z` `<int>` — Items per page (max 100).
   - `--limit`, `-l` `<int>` — Stop after collecting N items.
-- **Example:** `dailybot plan tasks mine --scope owned --json`
+- **Example:** `dailybot plan tasks mine --scope owned --sort priority --json`
 
 ### `dailybot plan tasks recents`
 
@@ -989,7 +990,7 @@ List tasks.
   - `--owner` `<text>` repeatable — Only tasks owned by this user (uuid, `me` or `unowned`). Repeat to OR several.
   - `--label` `<text>` — Only tasks carrying this label.
   - `--milestone` `<uuid>` repeatable — Only tasks in these milestones (`>= 4.0.0`).
-  - `--sort` `<text>` — Order by rank, priority, due_date, updated_at, created_at or completed_at; prefix with - for descending.
+  - `--sort` `<text>` — Order by rank, priority (urgent first), due, start, created, updated or completed (or the API names such as due_date); prefix with - for the reverse.
   - `--has-dates`, `--no-has-dates` — Only tasks that do (or do not) carry dates.
   - `--include` `<labels|participants|subtasks>` repeatable — Ask for a roll-up. Nothing is included by default — absence is a real answer.
   - `--page`, `-P` `<int>` — Page number to fetch.
