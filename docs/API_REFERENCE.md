@@ -841,20 +841,28 @@ dailybot login --email me@example.com
 
 ---
 
-## Tasks
+## Plan (formerly Tasks)
 
-> **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
+> **Renamed.** The product formerly called Tasks is now **Dailybot Plan**, and the public API root is
+> `/v1/plan/` (it replaces `/v1/tasks/` with no fallback). `dailybot-cli >= 4.0.0` calls `/v1/plan/`;
+> earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
+> changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
+> (`tasks.*`), error codes and every command name (`dailybot tasks ...`, `task`, `board`, `project`, `goal`)
+> stay. `dailybot plan <group> ...` is an alias for the same groups. The sub-skill keeps the name
+> `dailybot-tasks` (registry name).
+
+> **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.25.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
+> **Recommended: `4.0.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
 > some person doors, so upgrade. **Milestone files, milestone restore and editable,
 > co-authored project updates need `>= 3.21.0`.** Comment reactions, reply threads
 > (`task comment --reply-to`), label edit and delete, recents, board visits and attachment
-> resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`. The scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and reliable saved views need `>= 3.24.0`. Notifications, routes, scheduled reports, your daily briefing, channel search and the timeline with milestones and projects need `>= 3.25.0`.
+> resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`. The scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and reliable saved views need `>= 3.24.0`. Notifications, routes, scheduled reports, your daily briefing, channel search and the timeline with milestones and projects need `>= 4.0.0`.
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
@@ -872,12 +880,12 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 141 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.25.0**; comment reactions,
+from the CLI's command definitions (aligned with **dailybot-cli 4.0.0**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
-**dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**; the scheduling and milestone flags, the real `tasks timeline` and the saved-view fixes need **>= 3.24.0**; notifications, routes, reports, the briefing, channel search and the richer timeline need **>= 3.25.0**).
+**dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**; the scheduling and milestone flags, the real `tasks timeline` and the saved-view fixes need **>= 3.24.0**; notifications, routes, reports, the briefing, channel search and the richer timeline need **>= 4.0.0**).
 Since 3.23.0 the CLI covers every live operation in
-the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
-(`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
+the Tasks API contract (`/v1/plan/schema/`); the one exception is task delegation
+(`/v1/plan/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 
 ### The rule that comes before any command
 
@@ -990,18 +998,18 @@ Other codes to recognise: `task_archived` (403, restore first), `project_name_co
 archived projects keep their name), `attachment_delete_forbidden` (403, only the uploader, the
 comment's author or an org admin), `milestone_not_on_project` (400).
 
-### Notifications, routes, reports and the briefing (`dailybot-cli >= 3.25.0`)
+### Notifications, routes, reports and the briefing (`dailybot-cli >= 4.0.0`)
 
 | Door | Command | Who |
 | --- | --- | --- |
-| `GET /v1/tasks/notifications/catalog/` | `tasks notifications catalog` | any key with Tasks scope |
-| `GET` / `PUT /v1/tasks/me/notifications/` | `tasks notifications get` / `set` | a person (login or personal key); agent/org keys: 400 `actor_required` |
-| `GET /v1/tasks/channels/?search=&type=` | `tasks channels search` | members (public channels); org admins also see private ones the bot is in |
-| `GET /v1/tasks/notification-routes/` (+ `{id}/`, `deliveries/`) | `tasks routes list` / `get` / `deliveries` | members read (`viewer.can_manage`) |
+| `GET /v1/plan/notifications/catalog/` | `tasks notifications catalog` | any key with Tasks scope |
+| `GET` / `PUT /v1/plan/me/notifications/` | `tasks notifications get` / `set` | a person (login or personal key); agent/org keys: 400 `actor_required` |
+| `GET /v1/plan/channels/?search=&type=` | `tasks channels search` | members (public channels); org admins also see private ones the bot is in |
+| `GET /v1/plan/notification-routes/` (+ `{id}/`, `deliveries/`) | `tasks routes list` / `get` / `deliveries` | members read (`viewer.can_manage`) |
 | `POST` `PATCH` `DELETE` on the routes, `…/send-test/?dry_run=true` | `tasks routes create` / `update` / `delete` / `send-test` | org admins (403 `insufficient_scope` otherwise) |
-| `GET /v1/tasks/reports/` (+ `{id}/`, `preview/`, `runs/`) | `tasks reports list` / `get` / `preview` / `runs` | members read |
+| `GET /v1/plan/reports/` (+ `{id}/`, `preview/`, `runs/`) | `tasks reports list` / `get` / `preview` / `runs` | members read |
 | `POST` `PATCH` `DELETE` on the reports, `…/send-test/?dry_run=true` | `tasks reports create` / `update` / `delete` / `send-test` | org admins |
-| `GET` / `PUT /v1/tasks/me/briefing/` (+ `preview/`, `send-test/`) | `tasks briefing get` / `set` / `preview` / `send-test` | a person |
+| `GET` / `PUT /v1/plan/me/briefing/` (+ `preview/`, `send-test/`) | `tasks briefing get` / `set` / `preview` / `send-test` | a person |
 
 Conventions: weekdays are ISO ints 1-7 on the wire and `mon,tue,...` on the command line; `time` is
 `HH:MM`; `timezone` is IANA and is sent only when `--timezone` is passed. A channel is

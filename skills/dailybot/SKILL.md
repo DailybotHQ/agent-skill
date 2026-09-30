@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads, sending as a user's identity, and interactive buttons with approval flows, workflow triggers, modals, and callbacks), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **browse/read/trigger the workspace** (`me` / `org` / `user get`, kudos browsing, workflows), **manage organization Labels** (`dailybot label` CRUD + assign/batch on forms, check-ins, workflows) and **private Featured stars**, **manage Tasks** (Beta — boards, backlog, sprint/kanban columns, owners, attachments, bulk with dry run, project updates, milestones, goals, open-org structure for non-guest members, agent-attributed work on a handed task with `task brief` — `dailybot tasks` for the workspace and `dailybot task` for one task), and **manage per-repo API keys** through `.dailybot/env.json` (pack baseline `dailybot-cli >= 3.9.0`; Tasks needs `>= 3.14.2`, recommended `>= 3.25.0`). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads, sending as a user's identity, and interactive buttons with approval flows, workflow triggers, modals, and callbacks), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **browse/read/trigger the workspace** (`me` / `org` / `user get`, kudos browsing, workflows), **manage organization Labels** (`dailybot label` CRUD + assign/batch on forms, check-ins, workflows) and **private Featured stars**, **manage Plan, formerly Tasks** (Beta — boards, backlog, sprint/kanban columns, owners, attachments, bulk with dry run, project updates, milestones, goals, open-org structure for non-guest members, agent-attributed work on a handed task with `task brief` — `dailybot tasks` for the workspace and `dailybot task` for one task), and **manage per-repo API keys** through `.dailybot/env.json` (pack baseline `dailybot-cli >= 3.9.0`; Tasks needs `>= 3.14.2`, recommended `>= 4.0.0`). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "3.22.0"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
@@ -32,7 +32,7 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    installer and installs **only after the developer confirms**. Confirm with
    `dailybot --version` (minimum `>= 3.9.0` — the skill-pack baseline for
    every sub-skill; **`dailybot-tasks` needs `>= 3.14.2`**, and the
-   recommended install is the latest CLI — currently **`3.25.0`**. Tasks
+   recommended install is the latest CLI — currently **`4.0.0`**. Tasks
    agent collaboration needs `>= 3.19.0`; administering Tasks with a personal
    API key needs `>= 3.20.0`; milestone files and co-authored project updates
    need `>= 3.21.0`; comment reactions, reply threads, label edit and delete, recents, board
@@ -92,7 +92,7 @@ Seventeen coordinated capabilities, with smart routing between them:
 | **Per-repo API keys** | `dailybot-env` | Configure `.dailybot/env.json` — an **opt-in, gitignored** file that carries API keys + URLs for one or more environments. Profiles may be `kind: live` or `kind: testing`; switch with `env use`, fall through to production login with `env off`. Pack baseline (`>= 3.9.0`) |
 | **Organization Labels** | `dailybot-labels` | Full org Labels lifecycle (`dailybot label entitlement/list/get/create/update/archive/delete/assign/batch`) — shared taxonomy for forms, check-ins, and workflows/automations; web chip-picker parity. Requires CLI `>= 3.9.0` |
 | **Featured stars** | `dailybot-featured` | Private per-user stars on Forms, Automations, Check-ins (`dailybot featured …`) |
-| **Tasks** (Beta) | `dailybot-tasks` | Boards, tasks, projects, goals and milestones. Read the workspace in one call (`tasks status`), poll what changed (`tasks changes`), create / move / set the owner / comment with @mentions / attach, bulk operations with a server-side dry run, schedule work with start and due dates and tie it to milestones, **choose who is told what and where** (personal notifications, channel routes, scheduled daily and weekly reports, a personal briefing; every send-test previews first), read the dated view (`tasks timeline`), archive with a previewed consequence, **create and manage structure as any non-guest member** (goals, projects, boards, columns, membership — no org-admin prerequisite), **post project updates** so the team sees what an agent did (co-authored: stamped with the agent, editable by their author, with inline files; milestones carry files too), and **work a task you were handed** (`task brief` reads the whole card; writes are the person's, attributed to the agent via `DAILYBOT_AGENT_NAME` with a login session or a personal API key). A login session or a personal API key can do everything that person can, structure included; an agent or organization key cannot act as a person — see the sub-skill's credential table. Current release `3.25.0`, which covers every live Tasks API operation; collaboration needs `>= 3.19.0`, personal-key administration `>= 3.20.0`, milestone files and co-authored updates `>= 3.21.0`, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve `>= 3.22.0`, reactions on project updates and who reacted `>= 3.23.0`, scheduling and milestone flags on `task create` / `task update` (`--start-date`, `--estimate`, `--parent`, `--label`, `--milestone`), the real `tasks timeline` and reliable saved views `>= 3.24.0`, notifications / routes / scheduled reports / briefing / channel search and the timeline with milestones and projects `>= 3.25.0` |
+| **Plan** (Beta; formerly Tasks) | `dailybot-tasks` | Boards, tasks, projects, goals and milestones. Read the workspace in one call (`tasks status`), poll what changed (`tasks changes`), create / move / set the owner / comment with @mentions / attach, bulk operations with a server-side dry run, schedule work with start and due dates and tie it to milestones, **choose who is told what and where** (personal notifications, channel routes, scheduled daily and weekly reports, a personal briefing; every send-test previews first), read the dated view (`tasks timeline`), archive with a previewed consequence, **create and manage structure as any non-guest member** (goals, projects, boards, columns, membership — no org-admin prerequisite), **post project updates** so the team sees what an agent did (co-authored: stamped with the agent, editable by their author, with inline files; milestones carry files too), and **work a task you were handed** (`task brief` reads the whole card; writes are the person's, attributed to the agent via `DAILYBOT_AGENT_NAME` with a login session or a personal API key). A login session or a personal API key can do everything that person can, structure included; an agent or organization key cannot act as a person — see the sub-skill's credential table. Current release `4.0.0`, which covers every live Tasks API operation; collaboration needs `>= 3.19.0`, personal-key administration `>= 3.20.0`, milestone files and co-authored updates `>= 3.21.0`, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve `>= 3.22.0`, reactions on project updates and who reacted `>= 3.23.0`, scheduling and milestone flags on `task create` / `task update` (`--start-date`, `--estimate`, `--parent`, `--label`, `--milestone`), the real `tasks timeline` and reliable saved views `>= 3.24.0`, notifications / routes / scheduled reports / briefing / channel search and the timeline with milestones and projects `>= 4.0.0` |
 
 ## Install
 
@@ -113,7 +113,7 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 > **Baseline: `dailybot-cli >= 3.9.0`** for every sub-skill except Tasks.
 > **`dailybot-tasks` needs `>= 3.14.2`** (Tasks Beta command surface — owner,
 > board administration, attachments, bulk dry run; `board create --project --key`).
-> **Recommended install / upgrade target: latest release (`3.25.0`)** —
+> **Recommended install / upgrade target: latest release (`4.0.0`)** —
 > `dailybot upgrade` (or `pip install --upgrade dailybot-cli`) always satisfies
 > both floors and picks up open-org structure access (every non-guest member,
 > through a login session or a personal API key) plus the guest/role refusal wording agents should
@@ -127,11 +127,11 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 > every live Tasks API operation; the scheduling and milestone flags on `task create` /
 > `task update`, the real `tasks timeline` and reliable saved views need `>= 3.24.0`;
 > notifications, routes, scheduled reports, the personal briefing, channel search and the timeline
-> with milestones and projects need `>= 3.25.0`.
+> with milestones and projects need `>= 4.0.0`.
 >
 > Requires **Python >= 3.10**. The wheel is `py3-none-any` (pure Python), MIT-licensed.
 >
-> **Current published version: `dailybot-cli 3.25.0`** on
+> **Current published version: `dailybot-cli 4.0.0`** on
 > [PyPI](https://pypi.org/project/dailybot-cli/) — what `pip install
 > --upgrade dailybot-cli` (or `dailybot upgrade`) installs today; run
 > `dailybot version --check` to confirm. Everything this pack documents —
@@ -174,7 +174,7 @@ working on older CLIs; only `dailybot-tasks` asks for the newer floor.
 If `dailybot --version` reports below 3.9.0, ask the developer to run
 `dailybot upgrade` (or `pip install --upgrade 'dailybot-cli>=3.9.0'`)
 before using any sub-skill. If it reports below 3.14.2, the same upgrade
-unlocks Tasks. Prefer **latest** (`3.25.0`) before structure or membership work so
+unlocks Tasks. Prefer **latest** (`4.0.0`) before structure or membership work so
 help text and refusal messages match this pack.
 
 ### Checking the installed version
@@ -182,7 +182,7 @@ help text and refusal messages match this pack.
 ```bash
 # Single-line, scriptable
 dailybot --version
-# → dailybot 3.25.0 (Python 3.12.4)
+# → dailybot 4.0.0 (Python 3.12.4)
 
 # Multi-line panel: version, Python runtime, install path, release notes link
 dailybot version

@@ -108,7 +108,7 @@ The API confirms it: a task payload carries 29 fields and **none** of them is `u
 So for boards, tasks, projects, goals and milestones:
 
 - hand the developer the **API self-link** the CLI prints
-  (`/v1/tasks/tasks/<uuid>/`, `/v1/tasks/boards/<uuid>/board/`);
+  (`/v1/plan/tasks/<uuid>/`, `/v1/plan/boards/<uuid>/board/`);
 - do **not** build a dashboard URL by analogy with the Forms or Check-ins routes above;
 - if a future API response starts carrying a `url` field, that still is not a licence to
   print it until the route shapes are published here.

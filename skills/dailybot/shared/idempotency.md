@@ -52,7 +52,7 @@ command reference (`tasks/commands.md`) marks every door that **does** send a ke
 `+key` (among them `project update-post` and `milestone complete` / `reopen`). For any other
 door, a retry can repeat the write, so check the state first.
 
-`POST /v1/tasks/tasks/bulk/` is the opposite: it **requires** the header.
+`POST /v1/plan/tasks/bulk/` is the opposite: it **requires** the header.
 
 ## A timeout is not a failure
 

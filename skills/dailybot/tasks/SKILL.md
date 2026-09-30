@@ -8,9 +8,17 @@ metadata: {"openclaw":{"emoji":"✅","homepage":"https://dailybot.com","requires
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-# Dailybot Tasks
+# Dailybot Plan (formerly Tasks)
 
-> **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
+> **Renamed.** The product formerly called Tasks is now **Dailybot Plan**, and the public API root is
+> `/v1/plan/` (it replaces `/v1/tasks/` with no fallback). `dailybot-cli >= 4.0.0` calls `/v1/plan/`;
+> earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
+> changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
+> (`tasks.*`), error codes and every command name (`dailybot tasks ...`, `task`, `board`, `project`, `goal`)
+> stay. `dailybot plan <group> ...` is an alias for the same groups. The sub-skill keeps the name
+> `dailybot-tasks` (registry name).
+
+> **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
 Drive the team's work tracker — boards, tasks, projects, goals, milestones — from the
 command line. Two groups: **`dailybot tasks`** answers questions about the workspace,
@@ -29,10 +37,10 @@ Every `<task>` argument takes a key like `ENG-142` or a uuid.
 how to use them safely; look up exact flags there before you guess one.
 
 **Nothing on the web is out of reach.** With `dailybot-cli >= 3.23.0`, the CLI has a
-command for every live operation in the Tasks API contract (`/v1/tasks/schema/`), so an agent
+command for every live operation in the Tasks API contract (`/v1/plan/schema/`), so an agent
 can orchestrate the whole roadmap from the command line — see
 [Orchestrate the whole roadmap](#orchestrate-the-whole-roadmap). The one exception is **task
-delegation** (handing a task to an agent, `/v1/tasks/tasks/{t}/delegate/…`): it is published
+delegation** (handing a task to an agent, `/v1/plan/tasks/{t}/delegate/…`): it is published
 but answers 501 until its runtime ships. It is coming; there is no command for it yet.
 
 ---
@@ -100,7 +108,7 @@ reactions on project updates and who reacted need `>= 3.23.0`,** the release tha
 every live Tasks API operation. **The scheduling and milestone flags (`task create` /
 `task update`), the real `tasks timeline` and reliable saved views need `>= 3.24.0`.**
 **Notifications, routes, reports, the briefing, channel search and the timeline with milestones and
-projects need `>= 3.25.0`** (Step 9). `3.25.0` is the current release;
+projects need `>= 4.0.0`** (Step 9). `4.0.0` is the current release;
 install it. On 3.19.x the CLI still refuses a key locally on
 structure and some person doors; upgrade. The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one
 that needs more. Tasks first shipped in 3.12.0; on an older CLI, `--owner`,
@@ -674,7 +682,7 @@ update/reopen/retire/restore, milestone files, goal restore/unlink, saved views)
 
 ## Step 9 — Notifications, routes, reports and the briefing
 
-Needs `dailybot-cli >= 3.25.0`. Who is told what, where and when — set from the CLI, never by
+Needs `dailybot-cli >= 4.0.0`. Who is told what, where and when — set from the CLI, never by
 guessing. Five groups hang under `dailybot tasks` (commands: [commands.md](commands.md)):
 
 | Group | What it sets | Who |
@@ -779,7 +787,7 @@ published but answers 501 until its runtime ships). Look up flags in
   `tasks routes ...`, `tasks reports ...`, `tasks briefing ...` (Step 9); every `send-test` previews first.
 - **Activity** — `tasks status`, `tasks activity`, `tasks changes`, `task activity` / `events`.
 - **Timeline** — `tasks timeline` (dated tasks and the goals that overlap a window; one
-  document; on `>= 3.25.0` with `milestones[]` and `projects[]` and `--project` / `--milestone`
+  document; on `>= 4.0.0` with `milestones[]` and `projects[]` and `--project` / `--milestone`
   filters); milestones are tied to tasks with `task update --milestone`.
 
 Not yet: **task delegation** (hand a task to an agent). The API publishes it but answers 501
