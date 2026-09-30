@@ -186,7 +186,7 @@ When `env.json::disabled` is `true`, or `active` is empty/null/unknown, the file
 Two precision notes (CLI >= 3.7.0):
 
 - **Layer 2 holds on the wire, not just in resolution.** When the key comes from `env.json`, the HTTP client sends `X-API-KEY` on the **first** attempt even if a Bearer login session exists — the per-repo key wins even against a server that would have accepted the Bearer, and the global session token is never transmitted to the env.json server. Keys from layers 5–6 keep the historical Bearer-first wire order.
-- **A login token only travels to the API host that issued it.** A testing profile whose `api_url` points at another host never receives the production session — not even as a fallback when its key is refused. On Tasks, a structure write refused for a testing key (an agent or organization key) therefore ends as `insufficient_scope` (exit 4), not as a silent retry under the production login. Sign in against that host, or use a personal API key that host issued (`dailybot-cli >= 3.20.0`).
+- **A login token only travels to the API host that issued it.** A testing profile whose `api_url` points at another host never receives the production session — not even as a fallback when its key is refused. On Plan, a structure write refused for a testing key (an agent or organization key) therefore ends as `insufficient_scope` (exit 4), not as a silent retry under the production login. Sign in against that host, or use a personal API key that host issued.
 - **Layer 1 vs layer 2 for `agent *` commands:** a keyed `agents.json` profile beats `env.json` only when selected with an explicit `--profile` flag. The same profile resolved implicitly (via `profile.json::profile` or as the `agents.json` default) yields to `env.json`. `dailybot agent profiles --resolve` always shows exactly what will be sent.
 
 ---
@@ -400,7 +400,7 @@ If step 2 does not fall back — i.e., the CLI keeps using the env.json profile 
 
 ### Example 4 — Dual session: keep production login, test locally, report to prod
 
-Developer: *"Stay logged into production for reports, but I need to hit my local Tasks org as several test users."*
+Developer: *"Stay logged into production for reports, but I need to hit my local Plan org as several test users."*
 
 ```bash
 # Production OTP is already in credentials.json (dailybot login, env off).
@@ -415,7 +415,7 @@ dailybot env add --name local-member --key sk_local_member \
 
 dailybot env use local-member
 dailybot me                     # local member
-dailybot plan task list --limit 5    # local Tasks
+dailybot plan task list --limit 5    # local Plan
 
 dailybot env off                # REQUIRED before reporting
 dailybot agent update "Shipped X" --metadata '{"model":"<model>"}'

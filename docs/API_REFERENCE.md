@@ -841,30 +841,17 @@ dailybot login --email me@example.com
 
 ---
 
-## Plan (formerly Tasks)
+## Plan
 
-> **Renamed.** The product formerly called Tasks is now **Dailybot Plan**, and the public API root is
-> `/v1/plan/` (it replaces `/v1/tasks/` with no fallback). `dailybot-cli >= 3.25.0` calls `/v1/plan/`;
-> earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
-> changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
-> (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
-> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
-> removed with no alias. Every command in this skill needs `dailybot-cli >= 3.25.0`; on an older CLI run `dailybot upgrade` first (the old form is not documented here). The sub-skill keeps the name
-> `dailybot-tasks` (registry name).
+> **Names.** Every command lives under `dailybot plan` (`dailybot plan tasks ...`, `plan task`,
+> `plan board`, `plan project`, `plan goal`) and calls the `/v1/plan/` public API. Scopes keep the
+> names `tasks:read|write|admin` and webhook events keep `tasks.*`. The sub-skill's registry name
+> is `dailybot-tasks`.
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-> **Requires `dailybot-cli >= 3.25.0`** — on PyPI: the release that moved every command under
-> `dailybot plan` and calls `/v1/plan/`. Tasks reached parity with the web in 3.14.0; 3.14.2 adds the
-> `--project` / `--key` that `board create` needs. Capability history, all included at the floor: agent attribution (`--agent-name` /
-> `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
-> and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
-> API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
-> some person doors, so upgrade. **Milestone files, milestone restore and editable,
-> co-authored project updates need `>= 3.21.0`.** Comment reactions, reply threads
-> (`task comment --reply-to`), label edit and delete, recents, board visits and attachment
-> resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`. The scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and reliable saved views need `>= 3.24.0`. Notifications, routes, scheduled reports, your daily briefing, channel search and the timeline with milestones and projects need `>= 3.25.0`.
-> The pack-wide baseline is `>= 3.9.0`.
+> **Requires `dailybot-cli >= 3.25.0`** (on PyPI). If `dailybot plan tasks status` says there is no
+> such command, run `dailybot upgrade`. The pack-wide baseline for the other sub-skills is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot plan tasks`** for the
 workspace, **`dailybot plan task`** for one task; `board`, `project` and `goal` manage the
@@ -878,14 +865,11 @@ This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 173 Plan commands, with every argument, flag, API door
+The complete command list (every Plan command, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.25.0**; comment reactions,
-reply threads, label edit and delete, recents, board visits and attachment resolve need
-**dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**; the scheduling and milestone flags, the real `tasks timeline` and the saved-view fixes need **>= 3.24.0**; notifications, routes, reports, the briefing, channel search and the richer timeline need **>= 3.25.0**).
-Since 3.23.0 the CLI covers every live operation in
-the Tasks API contract (`/v1/plan/schema/`); the one exception is task delegation
+from the CLI's command definitions. The CLI covers every live operation in
+the Plan API contract (`/v1/plan/schema/`); the one exception is task delegation
 (`/v1/plan/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
 
 ### The rule that comes before any command
@@ -918,7 +902,7 @@ expired key is 401 `credential_expired`. Privacy is invite/remove; 404 = not vis
 including in search and lists. A board inside a `members` project follows the project's
 membership (`effective_visibility`).
 
-**Agent attribution:** `--agent-name` / `DAILYBOT_AGENT_NAME` stamps every Tasks write with the
+**Agent attribution:** `--agent-name` / `DAILYBOT_AGENT_NAME` stamps every Plan write with the
 executing agent (JSON writes: body `agent_name`; multipart and body-less writes:
 `X-Dailybot-Agent-Name`, percent-encoded UTF-8). The person stays the author; the card's
 `executors` lists every agent that worked it. Plain names only (letters, numbers, spaces and
@@ -934,12 +918,12 @@ agent or organization key, is refused with `invalid_agent_attribution` (exit 2).
 | 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) |
 | 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door or a person door in general) and `guest_not_allowed` (a guest) |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
-| 6 | transient — rate limiting (`throttled`, with `retry_after` seconds), or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
+| 6 | transient — rate limiting (`throttled`, with `retry_after` seconds), or Plan writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
 | 7 | a human declined the confirmation — stop; never re-run with `--yes` |
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |
 
-(Exit 10 is form-response quota; Tasks never uses it.)
+(Exit 10 is form-response quota; Plan never uses it.)
 
 Exit **2** covers every HTTP 400: `too_many_items`, `invalid_filter_value`,
 `idempotency_key_required`. Exit **4** covers the 409s, where the call was well-formed but
@@ -950,7 +934,7 @@ Reads and writes agree on both.
 Under `--json`, stdout carries exactly one parseable document on every path — the result, the
 dry-run preview, or an error envelope. Prompts and consequence panels go to stderr.
 
-The error envelope is the same shape for every Tasks door, reads and writes alike:
+The error envelope is the same shape for every Plan door, reads and writes alike:
 
 ```json
 {"status": "error", "code": "not_found", "detail": "…", "message": "…"}
@@ -968,7 +952,7 @@ holds it, on a session and on their personal key. Only an agent or organization 
 member). See
 [`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
 
-### Scheduling, milestones and the timeline (`dailybot-cli >= 3.24.0`)
+### Scheduling, milestones and the timeline
 
 `task create` takes `--start-date`, `--estimate`, `--parent` and `--label` (labels attach in a
 second request right after the create: if it fails the task exists, the command exits 1 and
@@ -980,7 +964,7 @@ locally as `YYYY-MM-DD`.
 
 `tasks timeline` answers **one document** (`window`, `bands` = goals overlapping the window,
 `rows` = tasks with a start or due date, `dependencies`, `unscheduled`, `truncated`), not a paged
-list; milestones and projects are not in it before `dailybot-cli 3.25.0`, which adds `milestones[]` and `projects[]` plus repeatable `--project` / `--milestone` filters. It takes only a date window (`--since`, `--until`,
+list; it also carries `milestones[]` and `projects[]`, and takes repeatable `--project` / `--milestone` filters. It takes only a date window (`--since`, `--until`,
 `--date`, `--today`, `--last-week`) and `--include-unscheduled`.
 
 A task's key is its board plus a number: a cross-board move (`task move --board`) gives the task
@@ -992,8 +976,7 @@ Saved views (`board view save`, `project view save`) take a bare JSON array of
 
 Rate limits per actor per minute: writes 60, bulk 30, reads 120, delta reads 240. A 429 is
 `code: "throttled"` with an integer `retry_after` (seconds) in the body and the `Retry-After`
-header; wait that long and retry once. A server that predates the code answers `code: null`
-with the seconds in the sentence: key off exit 6.
+header; wait that long and retry once. Key off exit 6.
 
 Other codes to recognise: `task_archived` (403, restore first), `project_name_conflict` (409,
 archived projects keep their name), `attachment_delete_forbidden` (403, only the uploader, the
@@ -1049,7 +1032,7 @@ original result and writes nothing; reusing it **after** 24 hours is a new write
 duplicate. Two API keys in one organization share the namespace, which is why generated keys
 are uuid4.
 
-Every Tasks write body carries the client-added `_idempotency_replayed` (a boolean: did the
+Every Plan write body carries the client-added `_idempotency_replayed` (a boolean: did the
 server replay rather than write?). On a `+key` door it also carries `_idempotency_key`, the
 key that was actually sent. That key is the load-bearing half. The CLI mints a fresh uuid4 per
 invocation, so **re-running a `+key` command after a timeout duplicates unless you pass that

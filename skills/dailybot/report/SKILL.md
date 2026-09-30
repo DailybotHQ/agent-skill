@@ -276,7 +276,7 @@ Model identifier examples: `"claude-sonnet-4-6"`, `"o3"`, `"gemini-2.5-pro"`, `"
 | `--milestone` | `-m` | Mark as a milestone accomplishment | (always pass when relevant — not affected by repo profile) |
 | `--co-authors` | `-c` | Co-author email or UUID (repeatable, or comma-separated) | (always pass when relevant — not affected by repo profile) |
 
-**Same name on Tasks.** When you also work Tasks cards with a login session or a personal API key, set `DAILYBOT_AGENT_NAME` (or `dailybot --agent-name`) to the exact name you pass to `--name` here. With an agent or organization key, omit it: Tasks writes still work but carry no `executed_by_agent`, and sending a name is refused with `invalid_agent_attribution` (exit 2). Both resolve to the same agent in the organization's registry, so the card and your reports show the same agent and avatar. See [`../tasks/SKILL.md`](../tasks/SKILL.md), "Work a task you were handed".
+**Same name on Plan.** When you also work Plan cards with a login session or a personal API key, set `DAILYBOT_AGENT_NAME` (or `dailybot --agent-name`) to the exact name you pass to `--name` here. With an agent or organization key, omit it: Plan writes still work but carry no `executed_by_agent`, and sending a name is refused with `invalid_agent_attribution` (exit 2). Both resolve to the same agent in the organization's registry, so the card and your reports show the same agent and avatar. See [`../tasks/SKILL.md`](../tasks/SKILL.md), "Work a task you were handed".
 
 ### Plain report — no repo profile
 
