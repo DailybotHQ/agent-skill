@@ -32,7 +32,7 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    installer and installs **only after the developer confirms**. Confirm with
    `dailybot --version` (minimum `>= 3.9.0` — the skill-pack baseline for
    every sub-skill; **`dailybot-tasks` (Plan) needs `>= 3.25.0`**, and the
-   recommended install is the latest CLI — currently **`3.25.0`**).
+   recommended install is the latest CLI — currently **`3.25.1`**).
 2. **Authenticate.** `dailybot login` (email OTP) **or** set `DAILYBOT_API_KEY` —
    see [`shared/auth.md`](shared/auth.md). Credentials are stored owner-only
    (`0600`) and masked in all output.
@@ -109,13 +109,13 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 > **`dailybot-tasks` (Plan) needs `>= 3.25.0`**: every Plan command lives under
 > `dailybot plan`. If `dailybot plan tasks status` says there is no such command,
 > run `dailybot upgrade`.
-> **Recommended install / upgrade target: latest release (`3.25.0`)** —
+> **Recommended install / upgrade target: latest release (`3.25.1`)** —
 > `dailybot upgrade` (or `pip install --upgrade dailybot-cli`) always satisfies
 > both floors and picks up the guest/role refusal wording agents should surface.
 >
 > Requires **Python >= 3.10**. The wheel is `py3-none-any` (pure Python), MIT-licensed.
 >
-> **Current published version: `dailybot-cli 3.25.0`** on
+> **Current published version: `dailybot-cli 3.25.1`** on
 > [PyPI](https://pypi.org/project/dailybot-cli/) — what `pip install
 > --upgrade dailybot-cli` (or `dailybot upgrade`) installs today; run
 > `dailybot version --check` to confirm. Everything this pack documents —
@@ -147,7 +147,7 @@ unlocks Plan.
 ```bash
 # Single-line, scriptable
 dailybot --version
-# → dailybot 3.25.0 (Python 3.12.4)
+# → dailybot 3.25.1 (Python 3.12.4)
 
 # Multi-line panel: version, Python runtime, install path, release notes link
 dailybot version

@@ -376,6 +376,7 @@ Change your preferences (a partial update: only what you pass is sent).
   - `--kind` `<text>` repeatable, or comma-separated — Personal kind to change; checked locally against the catalog (unknown or organization kinds are refused with exit 2).
   - `--chat` / `--no-chat` — Chat delivery for the named kinds.
   - `--email` / `--no-email` — Email delivery for the named kinds.
+  - `--me` — Your own preferences (the only scope today).
   - `--dm` — Deliver chat notifications to your DM.
   - `--channel` `<name|external id>` — Deliver them in this **public** channel (resolved through `tasks channels search`; a private channel is `channel_not_found`).
   - `--json` — Emit the API document on stdout.
@@ -1267,7 +1268,9 @@ Take someone's sight of a board away.
 Attach a file to a board (up to 5 MiB, one request).
 
 - **API:** `POST /v1/plan/boards/{b}/attachments/ (multipart)`
-- **Signed-in person:** yes
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Flags:**
+  - `--caption` `<text>` — Short caption shown with the file.
 - **Example:** `dailybot plan board attach 00000000-0000-0000-0000-000000000004 ./spec.pdf`
 
 ### `dailybot plan board attachment delete BOARD ATTACHMENT`
@@ -1275,7 +1278,10 @@ Attach a file to a board (up to 5 MiB, one request).
 Remove an attachment from a board. This cannot be undone.
 
 - **API:** `DELETE /v1/plan/boards/{b}/attachments/{a}/`
-- **Signed-in person:** yes
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
+- **Flags:**
+  - `--dry-run` — Say what would happen and send nothing.
+  - `--yes`, `-y` — Skip the confirmation.
 - **Example:** `dailybot plan board attachment delete 00000000-0000-0000-0000-000000000004 00000000-0000-0000-0000-000000000009 --dry-run`
 
 ### `dailybot plan board attachment get BOARD ATTACHMENT`
@@ -1284,6 +1290,9 @@ Download a board's attachment to a file. Never overwrites without --force.
 
 - **API:** `GET /v1/plan/boards/{b}/attachments/{a}/content/`
 - **Signed-in person:** no
+- **Flags:**
+  - `--output`, `-o` `<path>` — Where to write the file (required).
+  - `--force` — Overwrite the output file if it exists.
 - **Example:** `dailybot plan board attachment get 00000000-0000-0000-0000-000000000004 00000000-0000-0000-0000-000000000009 -o ./spec.pdf`
 
 ### `dailybot plan board attachment rename BOARD ATTACHMENT FILENAME`
@@ -1291,7 +1300,7 @@ Download a board's attachment to a file. Never overwrites without --force.
 Rename a board's attachment (1 to 255 characters).
 
 - **API:** `PATCH /v1/plan/boards/{b}/attachments/{a}/ {filename}`
-- **Signed-in person:** yes
+- **Signed-in person:** **person** (login or a personal API key; an agent or organization key is refused by the server)
 - **Example:** `dailybot plan board attachment rename 00000000-0000-0000-0000-000000000004 00000000-0000-0000-0000-000000000009 spec-v2.pdf`
 
 ### `dailybot plan board attachments BOARD`
