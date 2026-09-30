@@ -848,8 +848,8 @@ dailybot login --email me@example.com
 > earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
 > changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
 > (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
-> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot plan tasks ...` form is
-> removed with no alias, so on `dailybot-cli < 4.0.0` use the old form. The sub-skill keeps the name
+> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
+> removed with no alias, so on `dailybot-cli < 4.0.0` use that older form (no `plan` segment). The sub-skill keeps the name
 > `dailybot-tasks` (registry name).
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
@@ -878,7 +878,7 @@ This section is the skill pack's view of the surface. The CLI repository's own
 `docs/API_REFERENCE.md` is the authoritative endpoint contract; what follows is what an
 **agent** needs to drive it safely.
 
-The complete command list (all 141 Tasks commands, with every argument, flag, API door
+The complete command list (all 173 Plan commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
 from the CLI's command definitions (aligned with **dailybot-cli 4.0.0**; comment reactions,
@@ -1003,14 +1003,14 @@ comment's author or an org admin), `milestone_not_on_project` (400).
 
 | Door | Command | Who |
 | --- | --- | --- |
-| `GET /v1/plan/notifications/catalog/` | `tasks notifications catalog` | any key with Tasks scope |
-| `GET` / `PUT /v1/plan/me/notifications/` | `tasks notifications get` / `set` | a person (login or personal key); agent/org keys: 400 `actor_required` |
-| `GET /v1/plan/channels/?search=&type=` | `tasks channels search` | members (public channels); org admins also see private ones the bot is in |
-| `GET /v1/plan/notification-routes/` (+ `{id}/`, `deliveries/`) | `tasks routes list` / `get` / `deliveries` | members read (`viewer.can_manage`) |
-| `POST` `PATCH` `DELETE` on the routes, `…/send-test/?dry_run=true` | `tasks routes create` / `update` / `delete` / `send-test` | org admins (403 `insufficient_scope` otherwise) |
-| `GET /v1/plan/reports/` (+ `{id}/`, `preview/`, `runs/`) | `tasks reports list` / `get` / `preview` / `runs` | members read |
-| `POST` `PATCH` `DELETE` on the reports, `…/send-test/?dry_run=true` | `tasks reports create` / `update` / `delete` / `send-test` | org admins |
-| `GET` / `PUT /v1/plan/me/briefing/` (+ `preview/`, `send-test/`) | `tasks briefing get` / `set` / `preview` / `send-test` | a person |
+| `GET /v1/plan/notifications/catalog/` | `plan tasks notifications catalog` | any key with Tasks scope |
+| `GET` / `PUT /v1/plan/me/notifications/` | `plan tasks notifications get` / `set` | a person (login or personal key); agent/org keys: 400 `actor_required` |
+| `GET /v1/plan/channels/?search=&type=` | `plan tasks channels search` | members (public channels); org admins also see private ones the bot is in |
+| `GET /v1/plan/notification-routes/` (+ `{id}/`, `deliveries/`) | `plan tasks routes list` / `get` / `deliveries` | members read (`viewer.can_manage`) |
+| `POST` `PATCH` `DELETE` on the routes, `…/send-test/?dry_run=true` | `plan tasks routes create` / `update` / `delete` / `send-test` | org admins (403 `insufficient_scope` otherwise) |
+| `GET /v1/plan/reports/` (+ `{id}/`, `preview/`, `runs/`) | `plan tasks reports list` / `get` / `preview` / `runs` | members read |
+| `POST` `PATCH` `DELETE` on the reports, `…/send-test/?dry_run=true` | `plan tasks reports create` / `update` / `delete` / `send-test` | org admins |
+| `GET` / `PUT /v1/plan/me/briefing/` (+ `preview/`, `send-test/`) | `plan tasks briefing get` / `set` / `preview` / `send-test` | a person |
 
 Conventions: weekdays are ISO ints 1-7 on the wire and `mon,tue,...` on the command line; `time` is
 `HH:MM`; `timezone` is IANA and is sent only when `--timezone` is passed. A channel is

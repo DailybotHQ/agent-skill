@@ -5,8 +5,8 @@
 > earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
 > changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
 > (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
-> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot plan tasks ...` form is
-> removed with no alias, so on `dailybot-cli < 4.0.0` use the old form. The sub-skill keeps the name
+> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
+> removed with no alias, so on `dailybot-cli < 4.0.0` use that older form (no `plan` segment). The sub-skill keeps the name
 > `dailybot-tasks` (registry name).
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.

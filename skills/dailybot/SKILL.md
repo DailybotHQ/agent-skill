@@ -314,7 +314,7 @@ the full step-by-step workflow.
 | "send this to a channel as me", "post as `<user>` in Slack", "send the message with someone's identity" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) § Send as a user's identity (`--send-as-user` / `--send-as-me`) |
 | "open a group DM with Jane and Bob", "start a Slack group with the release team and the bot", "open a group with `<user>` and send them this report", "get me a channel with these people" | **Conversations** → read [`conversation/SKILL.md`](conversation/SKILL.md) |
 | "list my forms", "which forms does the org have?", "only my own forms" (`--mine`) | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
-| "what's on my plate", "what's open / overdue / blocked", "catch me up on the board", "create a task", "move ENG-142", "make Jane the owner", "plan the sprint", "post a project update", "complete the milestone", "create a project / board / goal", "invite someone to the board", "take ENG-142", a pasted task link | **Tasks** → read [`tasks/SKILL.md`](tasks/SKILL.md) |
+| "what's on my plate", "what's open / overdue / blocked", "catch me up on the board", "create a task", "move ENG-142", "make Jane the owner", "plan the sprint", "post a project update", "complete the milestone", "create a project / board / goal", "invite someone to the board", "take ENG-142", a pasted task link, "turn on my daily Plan briefing", "route task completions to #eng", "schedule the week-end report", "who gets notified when a task is assigned" | **Tasks** → read [`tasks/SKILL.md`](tasks/SKILL.md) |
 | "local API key for this repo", "switch env profile", "test against localhost without losing prod login", "env.json" | **Env** → read [`env/SKILL.md`](env/SKILL.md) |
 
 ### Auto-activation (no explicit request)

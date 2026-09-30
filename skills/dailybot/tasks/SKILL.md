@@ -15,8 +15,8 @@ allowed-tools: Bash, Read, Grep, Glob
 > earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
 > changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
 > (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
-> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot plan tasks ...` form is
-> removed with no alias, so on `dailybot-cli < 4.0.0` use the old form. The sub-skill keeps the name
+> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
+> removed with no alias, so on `dailybot-cli < 4.0.0` use that older form (no `plan` segment). The sub-skill keeps the name
 > `dailybot-tasks` (registry name).
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
@@ -737,8 +737,9 @@ guessing. Five groups hang under `dailybot plan tasks` (commands: [commands.md](
 dailybot plan tasks notifications catalog --json                      # valid kinds
 dailybot plan tasks notifications set --kind tasks_assigned,tasks_commented --chat --no-email
 dailybot plan tasks channels search -q eng                            # the external id you will pass
+# Creating a route or a report arms real delivery: show the developer the intended line, wait for a yes, then run it.
 dailybot plan tasks routes create --name Completions --channel eng --kind task.completed,project.health_changed
-dailybot plan tasks routes send-test <route-uuid> --dry-run           # preview only; add --yes to post
+dailybot plan tasks routes send-test <route-uuid> --dry-run           # preview only; after they confirm, re-run with --yes to post
 dailybot plan tasks reports create --name "Week end" --kind week_end --weekdays fri --time 16:00 --channel eng
 dailybot plan tasks reports preview <report-uuid>                     # the exact document
 dailybot plan tasks briefing set --enabled --weekdays mon,tue,wed,thu,fri --time 08:30 --email
@@ -1183,6 +1184,9 @@ is connected to the organization: stop and say so. A member gets 403 `insufficie
 admin. Removing it is `routes delete --dry-run`, then `--yes`.
 
 ### 11. Set up the weekly report and my daily briefing
+
+Confirm the names, channel, weekdays, time and recipients with the developer first, show them each create
+line, and wait for a yes: a created report is scheduled real delivery even before any send-test.
 
 ```bash
 dailybot plan tasks reports create --name "Week ahead" --kind week_start --weekdays mon --time 09:00 \
