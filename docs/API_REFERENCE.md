@@ -854,9 +854,9 @@ dailybot login --email me@example.com
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-> **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
-> 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.25.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
+> **Requires `dailybot-cli >= 3.25.0`** — on PyPI: the release that moved every command under
+> `dailybot plan` and calls `/v1/plan/`. Tasks reached parity with the web in 3.14.0; 3.14.2 adds the
+> `--project` / `--key` that `board create` needs. Capability history, all included at the floor: agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
