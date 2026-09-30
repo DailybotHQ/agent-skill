@@ -1,6 +1,6 @@
 ---
 name: dailybot
-description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads, sending as a user's identity, and interactive buttons with approval flows, workflow triggers, modals, and callbacks), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **browse/read/trigger the workspace** (`me` / `org` / `user get`, kudos browsing, workflows), **manage organization Labels** (`dailybot label` CRUD + assign/batch on forms, check-ins, workflows) and **private Featured stars**, **manage Plan, formerly Tasks** (Beta — boards, backlog, sprint/kanban columns, owners, attachments, bulk with dry run, project updates, milestones, goals, open-org structure for non-guest members, agent-attributed work on a handed task with `task brief` — `dailybot plan tasks` for the workspace and `dailybot plan task` for one task), and **manage per-repo API keys** through `.dailybot/env.json` (pack baseline `dailybot-cli >= 3.9.0`; Tasks needs `>= 3.14.2`, recommended `>= 3.25.0`). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
+description: Official Dailybot agent skill pack — report progress, check messages, send emails, announce agent status, complete check-ins, give kudos (to users or teams), resolve teams, run the full forms lifecycle (list, submit, update, transition between workflow states), **author check-ins and forms from scratch** (create/configure questions, workflow states, permissions, reminders, scheduling, AI settings, sharing), send/edit chat messages on the team's Slack/Teams/Discord/Google Chat (including report-style threads, sending as a user's identity, and interactive buttons with approval flows, workflow triggers, modals, and callbacks), open (or reuse) a Slack group DM with the bot and post a report to it, ask the Dailybot AI a question headlessly, **browse/read/trigger the workspace** (`me` / `org` / `user get`, kudos browsing, workflows), **manage organization Labels** (`dailybot label` CRUD + assign/batch on forms, check-ins, workflows) and **private Featured stars**, **manage Plan, formerly Tasks** (Beta — boards, backlog, sprint/kanban columns, owners, attachments, bulk with dry run, project updates, milestones, goals, open-org structure for non-guest members, agent-attributed work on a handed task with `task brief` — `dailybot plan tasks` for the workspace and `dailybot plan task` for one task), and **manage per-repo API keys** through `.dailybot/env.json` (pack baseline `dailybot-cli >= 3.9.0`; Plan needs `>= 3.25.0`). Routes to the right sub-skill based on intent. Use when the developer mentions Dailybot or wants to interact with their team.
 version: "3.22.0"
 documentation_url: https://www.dailybot.com/skill.md
 user-invocable: true
@@ -31,7 +31,7 @@ no network fetch is required** to know what to do. Run first-run setup in order:
    [`shared/auth.md`](shared/auth.md) — it proposes the checksum-verified
    installer and installs **only after the developer confirms**. Confirm with
    `dailybot --version` (minimum `>= 3.9.0` — the skill-pack baseline for
-   every sub-skill; **`dailybot-tasks` needs `>= 3.14.2`**, and the
+   every sub-skill; **`dailybot-tasks` needs `>= 3.25.0`**, and the
    recommended install is the latest CLI — currently **`3.25.0`**. Tasks
    agent collaboration needs `>= 3.19.0`; administering Tasks with a personal
    API key needs `>= 3.20.0`; milestone files and co-authored project updates
@@ -111,7 +111,7 @@ reporting, ships **inside this skill** — follow **[Start here (first run)](#st
 ## Required Dailybot CLI version
 
 > **Baseline: `dailybot-cli >= 3.9.0`** for every sub-skill except Tasks.
-> **`dailybot-tasks` needs `>= 3.14.2`** (Tasks Beta command surface — owner,
+> **`dailybot-tasks` needs `>= 3.25.0`** (Tasks Beta command surface — owner,
 > board administration, attachments, bulk dry run; `board create --project --key`).
 > **Recommended install / upgrade target: latest release (`3.25.0`)** —
 > `dailybot upgrade` (or `pip install --upgrade dailybot-cli`) always satisfies
@@ -173,7 +173,7 @@ working on older CLIs; only `dailybot-tasks` asks for the newer floor.
 
 If `dailybot --version` reports below 3.9.0, ask the developer to run
 `dailybot upgrade` (or `pip install --upgrade 'dailybot-cli>=3.9.0'`)
-before using any sub-skill. If it reports below 3.14.2, the same upgrade
+before using any sub-skill. If it reports below 3.25.0, the same upgrade
 unlocks Tasks. Prefer **latest** (`3.25.0`) before structure or membership work so
 help text and refusal messages match this pack.
 
@@ -203,7 +203,7 @@ subprocess or prints the exact command for installs the CLI shouldn't drive.
 `dailybot upgrade --dry-run` previews without executing.
 
 If the developer is below the pack baseline (`dailybot-cli >= 3.9.0`), or
-below `3.14.2` before a Tasks command, ask them to run `dailybot upgrade`
+below `3.25.0` before a Tasks command, ask them to run `dailybot upgrade`
 once, then resume. For structure creates (goals, projects, boards, membership)
 prefer `>= 3.20.0` so open-org messaging and personal-key behavior match this pack. Do not retry CLI
 commands in a loop while the upgrade is pending.
@@ -314,7 +314,7 @@ the full step-by-step workflow.
 | "send this to a channel as me", "post as `<user>` in Slack", "send the message with someone's identity" | **Chat** → read [`chat/SKILL.md`](chat/SKILL.md) § Send as a user's identity (`--send-as-user` / `--send-as-me`) |
 | "open a group DM with Jane and Bob", "start a Slack group with the release team and the bot", "open a group with `<user>` and send them this report", "get me a channel with these people" | **Conversations** → read [`conversation/SKILL.md`](conversation/SKILL.md) |
 | "list my forms", "which forms does the org have?", "only my own forms" (`--mine`) | **Forms** → read [`forms/SKILL.md`](forms/SKILL.md) |
-| "what's on my plate", "what's open / overdue / blocked", "catch me up on the board", "create a task", "move ENG-142", "make Jane the owner", "plan the sprint", "post a project update", "complete the milestone", "create a project / board / goal", "invite someone to the board", "take ENG-142", a pasted task link, "turn on my daily Plan briefing", "route task completions to #eng", "schedule the week-end report", "who gets notified when a task is assigned" | **Tasks** → read [`tasks/SKILL.md`](tasks/SKILL.md) |
+| "what's on my plate", "what's open / overdue / blocked", "catch me up on the board", "create a task", "move ENG-142", "make Jane the owner", "plan the sprint", "post a project update", "complete the milestone", "create a project / board / goal", "invite someone to the board", "take ENG-142", a pasted task link, "turn on my daily Plan briefing", "route task completions to #eng", "schedule the week-end report", "who gets notified when a task is assigned" | **Plan** → read [`tasks/SKILL.md`](tasks/SKILL.md) |
 | "local API key for this repo", "switch env profile", "test against localhost without losing prod login", "env.json" | **Env** → read [`env/SKILL.md`](env/SKILL.md) |
 
 ### Auto-activation (no explicit request)

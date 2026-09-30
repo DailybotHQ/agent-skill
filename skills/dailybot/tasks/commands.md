@@ -6,7 +6,7 @@
 > changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
 > (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
 > `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
-> removed with no alias, so on `dailybot-cli < 3.25.0` use that older form (no `plan` segment). The sub-skill keeps the name
+> removed with no alias. Every command in this skill needs `dailybot-cli >= 3.25.0`; on an older CLI run `dailybot upgrade` first (the old form is not documented here). The sub-skill keeps the name
 > `dailybot-tasks` (registry name).
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
@@ -385,7 +385,7 @@ Change your preferences (a partial update: only what you pass is sent).
 - **Rules:** name kinds with `--kind` **and** say what to do (`--chat/--no-chat`, `--email/--no-email`); `--dm` and `--channel` are exclusive; nothing to change is a usage error. There is no `--pause-until` / `--resume`: the API accepts only `paused_until: null` today (a datetime is 501 `not_implemented`).
 - **No agent stamp:** this door rejects `agent_name` (400 `unknown_field`), so the CLI never sends it.
 - **Example:** `dailybot plan tasks notifications set --kind tasks_assigned,tasks_commented --chat --no-email`
-- **Example:** `dailybot plan tasks notifications set --channel eng`
+- **Example:** `dailybot plan tasks notifications set --channel eng`  (moving your notifications into a shared channel: have the developer name the channel first, and keep DM-only as the default you copy)
 
 ### `dailybot plan tasks channels search`
 

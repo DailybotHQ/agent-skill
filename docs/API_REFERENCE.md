@@ -849,7 +849,7 @@ dailybot login --email me@example.com
 > changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
 > (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
 > `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot tasks ...` / `dailybot task ...` / `dailybot board ...` form is
-> removed with no alias, so on `dailybot-cli < 3.25.0` use that older form (no `plan` segment). The sub-skill keeps the name
+> removed with no alias. Every command in this skill needs `dailybot-cli >= 3.25.0`; on an older CLI run `dailybot upgrade` first (the old form is not documented here). The sub-skill keeps the name
 > `dailybot-tasks` (registry name).
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
@@ -980,7 +980,7 @@ locally as `YYYY-MM-DD`.
 
 `tasks timeline` answers **one document** (`window`, `bands` = goals overlapping the window,
 `rows` = tasks with a start or due date, `dependencies`, `unscheduled`, `truncated`), not a paged
-list; milestones and projects are not in it. It takes only a date window (`--since`, `--until`,
+list; milestones and projects are not in it before `dailybot-cli 3.25.0`, which adds `milestones[]` and `projects[]` plus repeatable `--project` / `--milestone` filters. It takes only a date window (`--since`, `--until`,
 `--date`, `--today`, `--last-week`) and `--include-unscheduled`.
 
 A task's key is its board plus a number: a cross-board move (`task move --board`) gives the task
