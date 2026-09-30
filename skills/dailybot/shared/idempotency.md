@@ -31,7 +31,7 @@ Pass your own only when you genuinely want a retry to be recognised across separ
 invocations:
 
 ```bash
-dailybot task create --title "Deploy v2" --idempotency-key "deploy-2026-09-19-v2"
+dailybot plan task create --title "Deploy v2" --idempotency-key "deploy-2026-09-19-v2"
 ```
 
 ## The two refusals

@@ -847,8 +847,9 @@ dailybot login --email me@example.com
 > `/v1/plan/` (it replaces `/v1/tasks/` with no fallback). `dailybot-cli >= 4.0.0` calls `/v1/plan/`;
 > earlier versions call `/v1/tasks/`, which a current server answers with 404, so **upgrade**. Nothing else
 > changed: resource names, request and response shapes, scopes (`tasks:read|write|admin`), webhook events
-> (`tasks.*`), error codes and every command name (`dailybot tasks ...`, `task`, `board`, `project`, `goal`)
-> stay. `dailybot plan <group> ...` is an alias for the same groups. The sub-skill keeps the name
+> (`tasks.*`), error codes are unchanged. **Every command now lives under `dailybot plan`** (`dailybot plan tasks ...`,
+> `plan task`, `plan board`, `plan project`, `plan goal`); the old top-level `dailybot plan tasks ...` form is
+> removed with no alias, so on `dailybot-cli < 4.0.0` use the old form. The sub-skill keeps the name
 > `dailybot-tasks` (registry name).
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
@@ -865,8 +866,8 @@ dailybot login --email me@example.com
 > resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`. The scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and reliable saved views need `>= 3.24.0`. Notifications, routes, scheduled reports, your daily briefing, channel search and the timeline with milestones and projects need `>= 4.0.0`.
 > The pack-wide baseline is `>= 3.9.0`.
 
-Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
-workspace, **`dailybot task`** for one task; `board`, `project` and `goal` manage the
+Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot plan tasks`** for the
+workspace, **`dailybot plan task`** for one task; `board`, `project` and `goal` manage the
 containers. A task has an **owner** (never "assignee"; `--owner`, `task set-owner`) and a
 **state** (its column). Every task argument takes a key (`ENG-142`) or a uuid. Milestones
 carry files (`project milestone-attach`, shown inline as `attachment:<uuid>`), and project
@@ -1030,8 +1031,8 @@ reports per organization. The timeline answers `milestones[]` and `projects[]` (
 ### The polling loop
 
 ```bash
-dailybot board snapshot <board-uuid> --json          # → delta_cursor
-dailybot tasks changes <board-uuid> --cursor "<c>" --json   # → a new delta_cursor
+dailybot plan board snapshot <board-uuid> --json          # → delta_cursor
+dailybot plan tasks changes <board-uuid> --cursor "<c>" --json   # → a new delta_cursor
 ```
 
 Persist the new cursor each time. The window is **7 days**; an older cursor is refused
