@@ -1025,7 +1025,7 @@ reports per organization. The timeline answers `milestones[]` and `projects[]` (
 `milestones_truncated` / `projects_truncated`) and takes repeatable `project` / `milestone` filters;
 `tasks list` takes a repeatable `milestone`. Refusal codes: `invalid_schedule` (`extra.parameter`),
 `unknown_notification_kind`, `channel_not_found`, `platform_not_connected`,
-`route_scope_not_org_visible` (`extra.uuids`), `notification_routes_limit_reached` /
+`route_scope_not_org_visible` (`extra.uuids`), `user_inactive` (`extra.parameter`, `extra.uuids`; every embedded person carries `is_active`), `notification_routes_limit_reached` /
 `report_schedules_limit_reached` (`extra.limit`), `not_implemented`.
 
 ### The polling loop

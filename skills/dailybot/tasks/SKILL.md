@@ -554,6 +554,10 @@ Codes worth recognising:
   organization). List the valid ones with `tasks notifications catalog`. Exits **2**.
 - `channel_not_found` / `platform_not_connected` — the channel is unknown or private to you (a
   personal destination must be public), or no chat platform is connected. Exits **2**.
+- `user_inactive` — a write names a NEW inactive person (owner, lead, participant, member, report
+  recipient); `extra.parameter` says which flag and `extra.uuids` who. Pick an active person; existing
+  assignments are kept, and an @mention of an inactive person is not refused, just not notified.
+  Every embedded person carries `is_active`; the CLI prints `(inactive)`.
 - `route_scope_not_org_visible` — a route's scope names a private board or project
   (`extra.uuids`). `notification_routes_limit_reached` / `report_schedules_limit_reached` — 10 per
   organization (`extra.limit`): delete one first.
