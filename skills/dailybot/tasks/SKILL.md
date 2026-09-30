@@ -1165,7 +1165,8 @@ Things this run taught, each of which costs an afternoon if you learn it late:
 ### 10. Route organization events to a channel (org admin)
 
 Let a team see completions and project health in its channel. Confirm the channel and the events
-with the developer first; every step before the last is read-only or a preview.
+with the developer first, show them the `routes create` line, and wait for a yes: a created route
+arms real delivery on matching events even before any send-test.
 
 ```bash
 dailybot plan tasks channels search -q eng --json        # the channel and its external id
