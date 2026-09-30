@@ -415,7 +415,7 @@ dailybot env add --name local-member --key sk_local_member \
 
 dailybot env use local-member
 dailybot me                     # local member
-dailybot task list --limit 5    # local Tasks
+dailybot plan task list --limit 5    # local Tasks
 
 dailybot env off                # REQUIRED before reporting
 dailybot agent update "Shipped X" --metadata '{"model":"<model>"}'
