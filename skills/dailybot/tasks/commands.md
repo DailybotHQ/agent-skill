@@ -171,7 +171,7 @@ Read or move your activity read-mark — "what is new since I last looked".
 
 ### `dailybot plan tasks entitlements`
 
-Show what this organization's plan allows for Plan.
+Show what this organization can use in Dailybot Plan (feature flag, board caps, labels).
 
 - **API:** `GET /v1/plan/entitlements/`
 - **Signed-in person:** no

@@ -107,7 +107,7 @@ If one of these fails, or the `grep` prints nothing, the installed CLI is out of
 developer to run `dailybot upgrade`. Do not work around a
 missing command or flag.
 
-Check the plan allows Plan, and note the limits:
+Check whether Dailybot Plan is enabled for this organization, and note the limits:
 
 ```bash
 dailybot plan tasks entitlements --json
@@ -122,11 +122,11 @@ three things from it, and know them *before* you try anything:
 | `boards` | `3/3` | the board cap is reached; `board create` will fail with `task_boards_limit_reached` |
 | `labels.enabled` | `false` | the Plan labels family is unavailable |
 
-**`enabled: false` is not a plan problem you can talk your way around, and not a credential
-problem.** Plan is switched on **per organization**, independently of the plan — so
+**`enabled: false` is not something you can talk your way around, and not a credential
+problem.** Dailybot Plan is switched on **per organization**, independently of the billing plan — so
 `dailybot login`, a different API key, and an admin role all change nothing. The two real
-remedies are the ones the server names: a workspace admin enables Plan, or the plan is
-upgraded (the refusal carries an upgrade link). Tell the developer that and stop; do not
+remedies are the ones the server names: a workspace admin enables Dailybot Plan, or the organization upgrades its
+subscription (the refusal carries an upgrade link). Tell the developer that and stop; do not
 retry the doors hoping one of them is ungated.
 
 ---
@@ -544,7 +544,7 @@ Codes worth recognising:
   organization admin removes a comment's attachment. Like `update_not_author`, it is a
   role rule: do not retry with another credential.
 - `plan_upgrade_required` — **Plan is not enabled for this organization at all.** Exit 4.
-  Despite the name this is a per-organization switch, not a plan scope. Run
+  Despite the name this is a per-organization switch, not a billing-plan or scope problem. Run
   `dailybot plan tasks entitlements` to show the developer the state and the `reason`.
 - `feature_temporarily_read_only` — Plan writes are switched off for everyone while
   something is being fixed. Exit 6. Reads still answer. Wait; do not change credentials.

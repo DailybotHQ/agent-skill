@@ -47,7 +47,7 @@ Not every write honours it. Where the server ignores it, the CLI does not send o
 offers no `--idempotency-key` flag — advertising a guarantee that does not exist is worse
 than having none. Many Plan doors are like this, for example: editing, restoring or
 reordering columns; creating or updating milestones; updating, restoring, linking or
-unlinking goals; comment edits; board labels; saved views; task subscription. The Tasks
+unlinking goals; comment edits; board labels; saved views; task subscription. The Plan
 command reference (`tasks/commands.md`) marks every door that **does** send a key with
 `+key` (among them `project update-post` and `milestone complete` / `reopen`). For any other
 door, a retry can repeat the write, so check the state first.
