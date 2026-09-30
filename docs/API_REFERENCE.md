@@ -847,14 +847,14 @@ dailybot login --email me@example.com
 
 > **Requires `dailybot-cli >= 3.14.2`** — on PyPI. Tasks reached parity with the web in
 > 3.14.0; 3.14.2 adds the `--project` / `--key` that `board create` needs.
-> **Recommended: `3.23.1`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
+> **Recommended: `3.24.0`** (the current release, which covers every live Tasks API operation). Agent attribution (`--agent-name` /
 > `DAILYBOT_AGENT_NAME`), `task brief`, open-org structure writes (every non-guest member)
 > and guest/role refusal messaging need `>= 3.19.0`. **Administering Tasks with a personal
 > API key needs `>= 3.20.0`**; on 3.19.x the CLI still refuses a key locally on structure and
 > some person doors, so upgrade. **Milestone files, milestone restore and editable,
 > co-authored project updates need `>= 3.21.0`.** Comment reactions, reply threads
 > (`task comment --reply-to`), label edit and delete, recents, board visits and attachment
-> resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`.
+> resolve need `>= 3.22.0`. Reactions on project updates and who reacted need `>= 3.23.0`. The scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and reliable saved views need `>= 3.24.0`.
 > The pack-wide baseline is `>= 3.9.0`.
 
 Boards, tasks, projects, goals and milestones. Two CLI groups: **`dailybot tasks`** for the
@@ -872,9 +872,9 @@ This section is the skill pack's view of the surface. The CLI repository's own
 The complete command list (all 141 Tasks commands, with every argument, flag, API door
 and an example) ships in the pack at
 [`skills/dailybot/tasks/commands.md`](../skills/dailybot/tasks/commands.md), generated
-from the CLI's command definitions (aligned with **dailybot-cli 3.23.1**; comment reactions,
+from the CLI's command definitions (aligned with **dailybot-cli 3.24.0**; comment reactions,
 reply threads, label edit and delete, recents, board visits and attachment resolve need
-**dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**).
+**dailybot-cli >= 3.22.0**; reactions on project updates and who reacted need **>= 3.23.0**; the scheduling and milestone flags, the real `tasks timeline` and the saved-view fixes need **>= 3.24.0**).
 Since 3.23.0 the CLI covers every live operation in
 the Tasks API contract (`/v1/tasks/schema/`); the one exception is task delegation
 (`/v1/tasks/tasks/{t}/delegate/…`), published but answering 501 until its runtime ships.
@@ -925,7 +925,7 @@ agent or organization key, is refused with `invalid_agent_attribution` (exit 2).
 | 3 | needs a person (`actor_required`) — an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) |
 | 4 | the server refused — read `code` in `--json`; this includes `insufficient_scope` (an agent or organization key on an admin door or a person door in general) and `guest_not_allowed` (a guest) |
 | 5 | not found, **or invisible to you** — indistinguishable by design |
-| 6 | transient — rate limiting, or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
+| 6 | transient — rate limiting (`throttled`, with `retry_after` seconds), or Tasks writes switched off org-wide during an incident (not `attachment_storage_unavailable`, which will not change) |
 | 7 | a human declined the confirmation — stop; never re-run with `--yes` |
 | 8 | could not reach the API; a **write** that timed out may have been applied |
 | 9 | delta cursor expired — re-snapshot, do not retry |
@@ -958,6 +958,37 @@ holds it, on a session and on their personal key. Only an agent or organization 
 "nobody is behind this key" answer (`dailybot login` or a personal API key of a non-guest
 member). See
 [`../skills/dailybot/shared/destructive-previews.md`](../skills/dailybot/shared/destructive-previews.md).
+
+### Scheduling, milestones and the timeline (`dailybot-cli >= 3.24.0`)
+
+`task create` takes `--start-date`, `--estimate`, `--parent` and `--label` (labels attach in a
+second request right after the create: if it fails the task exists, the command exits 1 and
+names it in text and in the `--json` envelope as `created_task`, so never re-run the create).
+`task update` takes `--start-date`, `--estimate`, `--milestone <uuid>` and `--clear-milestone`;
+a milestone can not be set on create, and it must belong to the project of the task's board
+(`milestone_not_on_project`). Bulk items take `labels` and `milestone` too. Dates are checked
+locally as `YYYY-MM-DD`.
+
+`tasks timeline` answers **one document** (`window`, `bands` = goals overlapping the window,
+`rows` = tasks with a start or due date, `dependencies`, `unscheduled`, `truncated`), not a paged
+list; milestones and projects are not in it. It takes only a date window (`--since`, `--until`,
+`--date`, `--today`, `--last-week`) and `--include-unscheduled`.
+
+A task's key is its board plus a number: a cross-board move (`task move --board`) gives the task
+a **new key** and the old one answers 404, while its uuid never changes. Hold references by uuid.
+
+Saved views (`board view save`, `project view save`) take a bare JSON array of
+`{name, view_mode, group_by, sort, visibility, filters}`; `views --json` lists them under
+`results`. The ETag that `views --etag` prints may be weak; the CLI sends the strong form.
+
+Rate limits per actor per minute: writes 60, bulk 30, reads 120, delta reads 240. A 429 is
+`code: "throttled"` with an integer `retry_after` (seconds) in the body and the `Retry-After`
+header; wait that long and retry once. A server that predates the code answers `code: null`
+with the seconds in the sentence: key off exit 6.
+
+Other codes to recognise: `task_archived` (403, restore first), `project_name_conflict` (409,
+archived projects keep their name), `attachment_delete_forbidden` (403, only the uploader, the
+comment's author or an org admin), `milestone_not_on_project` (400).
 
 ### The polling loop
 

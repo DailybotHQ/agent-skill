@@ -97,7 +97,9 @@ project update need `dailybot-cli >= 3.21.0`** (see "Project updates and milesto
 co-authored"). **Comment reactions, reply threads (`task comment --reply-to`), label edit
 and delete, recents, board visits and attachment resolve need `dailybot-cli >= 3.22.0`;
 reactions on project updates and who reacted need `>= 3.23.0`,** the release that covers
-every live Tasks API operation. `3.23.1` is the current release;
+every live Tasks API operation. **The scheduling and milestone flags (`task create` /
+`task update`), the real `tasks timeline` and reliable saved views need `>= 3.24.0`.**
+`3.24.0` is the current release;
 install it. On 3.19.x the CLI still refuses a key locally on
 structure and some person doors; upgrade. The pack-wide baseline is `>= 3.9.0`; this sub-skill is the one
 that needs more. Tasks first shipped in 3.12.0; on an older CLI, `--owner`,
@@ -248,7 +250,14 @@ dailybot task list --owner unowned --json                  # nobody owns these y
 dailybot task get ENG-142 --json
 dailybot board snapshot <board-uuid> --json                # the whole board in one call
 dailybot board states <board-uuid> --json                  # its columns, left to right
+dailybot tasks timeline --since 2026-10-01 --until 2026-12-31 --json   # dated work (>= 3.24.0)
 ```
+
+`tasks timeline` is the dated view: **one document**, not a paged list (`window`, `bands` =
+the goals that overlap the window, `rows` = the tasks that carry a start or due date,
+`unscheduled` = how many have no dates, `truncated`). It does **not** hold milestones or
+projects (`project milestones`, `project list`). It takes a window only: no paging flags, and
+`--include-unscheduled` lists the undated ones. When `truncated` is true, narrow the window.
 
 `--owner` repeats and ORs: `--owner me --owner unowned`. `--sort` takes `rank`, `priority`,
 `due_date`, `updated_at`, `created_at` or `completed_at`; prefix `-` for descending.
@@ -326,6 +335,8 @@ Full treatment: [`../shared/tasks-delta.md`](../shared/tasks-delta.md).
 ```bash
 dailybot task create --title "Fix the retry path" --board <board-uuid> --owner me --priority 2 --json
 dailybot task update ENG-142 --due 2026-10-01 --priority 1
+dailybot task create -t "Load test" --board <board-uuid> --start-date 2026-11-09 --due 2026-11-20 --estimate 5 --label <label-uuid>   # >= 3.24.0
+dailybot task update ENG-142 --milestone <milestone-uuid>       # >= 3.24.0; --clear-milestone to take it out
 dailybot task set-owner ENG-142 <user-uuid>        # or: me
 dailybot task move ENG-142 --state done            # a column name, a category, or a state uuid
 dailybot task move ENG-142 --board <board-uuid>    # to another board
@@ -334,6 +345,23 @@ dailybot task link ENG-142 ENG-99 --type blocks    # blocks | relates_to | dupli
 dailybot task attach ENG-142 ./crash.log
 dailybot task comment-attach ENG-142 <comment-uuid> ./trace.txt   # only the comment's author
 ```
+
+**Schedule and group work the way the web does** (`>= 3.24.0`): `--start-date` plus `--due` put a
+task on the timeline, `--estimate` sizes it in the board's scale, `--parent` makes it a
+sub-task, `--label` (repeatable) attaches labels, and `--milestone` ties it to a milestone.
+Dates are checked locally (`YYYY-MM-DD`, exit 2 otherwise). Two rules to remember:
+
+- **A milestone cannot be set on create** (the API refuses it on purpose): create the task,
+  then `task update --milestone <uuid>`. The milestone must belong to the project of the task's
+  board (`milestone_not_on_project`). Bulk items take `milestone` (uuid or `null`) too.
+- **`task create --label` is two requests.** The labels attach right after the create. If that
+  second step fails, the task **exists**: the command exits 1 and says so, in text and under
+  `--json` (`message` plus `created_task: {key, uuid}`). **Never re-run the create**; fix the
+  label and run `task labels` on that task.
+
+**A cross-board move changes the key.** A key is board plus number, so `task move --board`
+gives the task a **new key** and the old key answers 404 afterwards; the uuid never changes.
+Read the new key from the move's answer and keep references by uuid.
 
 **Files attach to a task, a comment, a project or a goal.** A task takes up to 25 MiB
 through the default upload (5 MiB with `--caption`, which is a single request). A comment,
@@ -443,6 +471,10 @@ first (`board views --json` / `project views --json`), show the developer what t
 drops or changes, wait, then save with `--if-match` the ETag you read. `--fetch-etag` is
 not a substitute for that review.
 
+The ETag `views --etag` prints may be weak (`W/"3"`). Pass it as printed: `>= 3.24.0` sends the
+strong form the door compares against. Older CLIs failed with `precondition_failed` on an
+untouched list; there, remove the `W/` yourself.
+
 Facts worth carrying:
 
 - **archiving a board cascade-archives its live tasks**, and restoring the board does
@@ -486,7 +518,7 @@ exit 8.
 | **3** | needs a person (`actor_required`): an agent or organization key on an `owner=me`-style person filter (`tasks mine`, `tasks counts`, inbox, cursor) or a reaction (comments or project updates) | `dailybot login` or a personal API key — not a permissions bug |
 | **4** | the server refused this action: `insufficient_scope` (an agent or organization key on an admin door or a person door in general), `guest_not_allowed` (a guest), or another refusal | read `code`; see below |
 | **5** | not found / not visible | the key/uuid is wrong, private without a membership grant, **or another organization** — never "not allowed" |
-| **6** | transient — back off | rate limiting, or Tasks writes switched off org-wide during an incident (`feature_temporarily_read_only`). Wait and retry; change nothing |
+| **6** | transient — back off | rate limiting (`throttled`, with `retry_after` seconds), or Tasks writes switched off org-wide during an incident (`feature_temporarily_read_only`). Wait and retry; change nothing |
 | **7** | a human declined the confirmation | **stop.** Nothing was changed. Do **not** retry, and never re-run the same call with `--yes` — that skips the prompt they just refused |
 | **8** | could not reach the API | check the connection and `dailybot env show`; a **write** that timed out may have been applied |
 | **9** | delta cursor expired | re-snapshot; do **not** retry |
@@ -498,8 +530,25 @@ Codes worth recognising:
 - `idempotency_key_payload_mismatch` — same key, different body. Use a **new** key; retrying
   cannot succeed.
 - `idempotency_in_progress` — an identical call is still running. Wait and check; do not loop.
+- `throttled` — 429: too many requests from one actor. The body carries `retry_after` (whole
+  seconds; the CLI prints it and puts it in the `--json` envelope) and the standard
+  `Retry-After` header. **Wait that long, then retry once**; do not loop. Limits per actor per
+  minute: writes 60, bulk 30, reads 120, delta reads 240 — so a 100-item bulk is one bulk call,
+  not 100 writes, and a seeding run of many single writes has to pace itself. A server that
+  predates the code answers the same 429 with `code: null` and the seconds in the sentence:
+  key off exit **6**, not the text.
 - `too_many_items` — split the batch; the cap is 100. Exits **2**.
 - `task_boards_limit_reached` — the plan's board limit, not a permission problem.
+- `task_archived` — 403: the task is archived, so it cannot be changed or duplicated. Restore
+  it first (`task restore`). Older servers said `task_delete_forbidden` for a duplicate.
+- `project_name_conflict` — 409: another project already uses the name, **archived ones
+  included** (they keep their slug). Pick another name or `project restore` the archived one.
+  Older servers answered HTTP 500 with no code.
+- `milestone_not_on_project` — 400: `task update --milestone` named a milestone of another
+  project than the task's board. List the right ones with `project milestones <project>`.
+- `attachment_delete_forbidden` — 403: only the uploader, the comment's author or an
+  organization admin removes a comment's attachment. Like `update_not_author`, it is a
+  role rule: do not retry with another credential.
 - `plan_upgrade_required` — **Tasks is not enabled for this organization at all.** Exit 4.
   Despite the name this is a per-organization switch, not a plan scope. Run
   `dailybot tasks entitlements` to show the developer the state and the `reason`.
@@ -647,13 +696,16 @@ published but answers 501 until its runtime ships). Look up flags in
   references into current URLs (use them, never store them, and never paste a raw URL
   into comments, updates, chat or logs: a URL can be a permanent link; keep the uuid).
 - **Views** — `board views` / `view save`, `project views` / `view save`, `tasks view get` /
-  `update` / `delete`.
+  `update` / `delete`. A saved view is `{name, view_mode, group_by, sort, visibility, filters}`;
+  `views --json` lists them under `results`, but `view save -f` takes the bare array.
 - **Pins** — `board star` / `unstar`, `tasks view star` / `unstar`, `tasks favorites`.
 - **Inbox** — `tasks inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`.
 - **Recents** — `board visit` records an opened board; `tasks recents` lists them.
 - **Search** — `tasks search`, `board mentionables`.
-- **Activity** — `tasks status`, `tasks activity`, `tasks timeline`, `tasks changes`,
-  `task activity` / `events`.
+- **Activity** — `tasks status`, `tasks activity`, `tasks changes`, `task activity` / `events`.
+- **Timeline** — `tasks timeline` (dated tasks and the goals that overlap a window; one
+  document); milestones live in `project milestones`, tied to tasks with
+  `task update --milestone`.
 
 Not yet: **task delegation** (hand a task to an agent). The API publishes it but answers 501
 until its runtime ships.
@@ -969,6 +1021,58 @@ dailybot task comment ENG-142 "Shipped <what changed>. PRs: <url> <url>"
   file paths, commit hashes or secrets into the card.
 - The reference to hand onward is the task key (`ENG-142`) or its uuid. Do not build a web
   URL for it; the web app's paths are not published.
+
+### 9. Build a team roadmap from scratch (login or personal API key)
+
+Goals, projects, boards, milestones and dated tasks, as a team would set them up in the web app.
+Confirm names, dates and owners with the developer first; every command below is
+`dailybot-cli >= 3.24.0` unless said otherwise. **Any non-guest member** can run all of it, each
+with their own credential, so a lead can create their own goal, project and board.
+
+```bash
+# 1. Goals (a dated commitment, an owner), then projects linked to them
+dailybot goal create -n "Ship v2 to GA" --period-start 2026-10-01 --period-end 2026-12-31 --owner <user-uuid> --json
+dailybot project create -n "Core API" --lead <user-uuid> --start-date 2026-10-01 --target-date 2026-11-30 --json
+dailybot goal link <goal-uuid> <project-uuid>
+dailybot project update <project-uuid> --health on_track     # read health back: older servers ignored it on create
+
+# 2. Boards and columns (a key prefix, an "In review" column, a scale for estimates)
+dailybot board create -n "Core API" --project <project-uuid> --key API --json
+dailybot board update <board-uuid> --estimate-scale fibonacci
+dailybot board state create <board-uuid> -n "In review" --category in_progress --position 4
+
+# 3. Labels (organization-wide: created from any board) and milestones (dated)
+dailybot board label create <board-uuid> -n backend --color "#2563eb"
+dailybot project milestone-create <project-uuid> -n "API design freeze" --date 2026-10-16
+
+# 4. Tasks in one batch: dates, owners, priorities, estimates (dry run first, then --yes)
+dailybot task bulk --operation create --board <board-uuid> -f tasks.json --dry-run
+dailybot task bulk --operation create --board <board-uuid> -f tasks.json --yes --json
+# 5. Tie each task to its milestone (single PATCH per task; the milestone must be on the board's project)
+dailybot task update API-3 --milestone <milestone-uuid>
+```
+
+Things this run taught, each of which costs an afternoon if you learn it late:
+
+- **Read the dry run, not the exit code.** An item field the server does not take shows up as
+  a missing `changes` entry. `labels` on a create item was dropped by older servers; `set_labels`
+  after the create always works.
+- **Pace single writes.** 60 writes per minute per actor, 30 bulk calls; a 90-task seeding is
+  a handful of bulk calls plus one `task update` per milestone link, so spread the per-task
+  calls or let exit 6 (`throttled`, `retry_after`) set the pace. Bulk is the cheap path.
+- **Keep uuids, not keys, once tasks move between boards** (the key changes on a cross-board move).
+- **Sub-tasks, links, comments:** `--parent <task>` (or `parent_task` in a bulk item),
+  `task link <task> <other> --type blocks`, `task comment` with `<@DB@uuid>` mentions from
+  `board mentionables --json`. Post a `project update-post` per lead when a phase starts.
+- **A private project shows as 404 to everyone outside its members**, in lists and search
+  too: check with a second credential before telling the team it is private.
+- **Verify the picture**: `goal list --include progress --include projects`,
+  `project list --include progress`, `board snapshot <board-uuid>` and
+  `tasks timeline --since <first-day> --until <last-day>`. A goal that shows 0% with tasks
+  present usually means the projects are not linked to it.
+- **Archive scratch objects you made while testing** (`project archive`, `task archive`):
+  an archived project keeps its name (`project_name_conflict` on reuse) and a board key
+  stays reserved, so test with disposable names.
 
 ---
 

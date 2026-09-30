@@ -108,3 +108,11 @@ server has never seen — which is precisely how a timeout becomes a duplicate.
 
 On a door without `+key`, the error carries no `idempotency_key`, and nothing makes a retry
 safe. Re-read the object's current state, and repeat the write only if it did not land.
+
+## `task create --label` is two writes
+
+With `--label` (`dailybot-cli >= 3.24.0`) the CLI creates the task (with a key) and then attaches
+the labels through the label door (its own key). If the second write fails, the task **already
+exists**: the command exits 1, says so, and under `--json` names it in `created_task`. The
+create's key would replay that same task, but the safe move is not to re-run the create at all:
+fix the label and run `task labels <task> --mode add --label <uuid>` on the task it named.
