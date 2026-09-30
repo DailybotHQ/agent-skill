@@ -11,7 +11,7 @@
 
 > **Beta** — Dailybot Plan (formerly Tasks) is in beta. Everything under `/plan` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/plan/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **4.0.0**, 164 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**, the scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and the saved-view fixes **3.24.0**, notifications, routes, reports, briefing, channel search and the timeline with milestones and projects **4.0.0**). They span
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **4.0.0**, 173 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**, the scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and the saved-view fixes **3.24.0**, notifications, routes, reports, briefing, channel search and the timeline with milestones and projects **4.0.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
 **Coverage.** With `dailybot-cli >= 3.23.0`, the CLI has a command for every live
@@ -100,10 +100,10 @@ Examples use placeholder uuids (`00000000-0000-0000-0000-00000000000N`) and the 
 | Group | Commands |
 | --- | --- |
 | `tasks` | `briefing get`, `briefing preview`, `briefing send-test`, `briefing set`, `channels search`, `notifications catalog`, `notifications get`, `notifications set`, `reports create`, `reports delete`, `reports get`, `reports list`, `reports preview`, `reports runs`, `reports send-test`, `reports update`, `routes create`, `routes delete`, `routes deliveries`, `routes get`, `routes list`, `routes send-test`, `routes update`, `activity`, `attachments-resolve`, `changes`, `counts`, `cursor`, `entitlements`, `favorites`, `inbox`, `inbox-read`, `inbox-read-all`, `inbox-unread`, `mine`, `recents`, `search`, `status`, `timeline`, `view delete`, `view get`, `view star`, `view unstar`, `view update` |
-| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachments`, `comment-delete`, `comment-edit`, `comment-react`, `comment-reactions`, `comment-unreact`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
-| `board` | `archive`, `create`, `get`, `label create`, `label delete`, `label update`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views`, `visit` |
-| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-attach`, `milestone-attachment delete`, `milestone-attachment get`, `milestone-attachment rename`, `milestone-attachments`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-restore`, `milestone-update`, `milestones`, `restore`, `update`, `update-attach`, `update-attachment delete`, `update-attachment get`, `update-attachment rename`, `update-attachments`, `update-delete`, `update-edit`, `update-get`, `update-post`, `update-react`, `update-reactions`, `update-unreact`, `updates`, `view save`, `views` |
-| `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
+| `task` | `activity`, `archive`, `attach`, `attachment delete`, `attachment get`, `attachment rename`, `attachments`, `brief`, `bulk`, `children`, `comment`, `comment-attach`, `comment-attachment delete`, `comment-attachment get`, `comment-attachment rename`, `comment-attachments`, `comment-delete`, `comment-edit`, `comment-react`, `comment-reactions`, `comment-unreact`, `comments`, `create`, `delete`, `duplicate`, `events`, `get`, `labels`, `link`, `list`, `move`, `mute`, `participants add`, `participants list`, `participants remove`, `relations`, `restore`, `set-owner`, `unlink`, `unmute`, `unwatch`, `update`, `watch` |
+| `board` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachment rename`, `attachments`, `create`, `get`, `label create`, `label delete`, `label update`, `labels`, `list`, `member add`, `member remove`, `members`, `mentionables`, `restore`, `snapshot`, `star`, `state archive`, `state create`, `state reorder`, `state restore`, `state update`, `states`, `tasks`, `unstar`, `update`, `view save`, `views`, `visit` |
+| `project` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachment rename`, `attachments`, `create`, `get`, `list`, `member add`, `member remove`, `members`, `milestone-attach`, `milestone-attachment delete`, `milestone-attachment get`, `milestone-attachment rename`, `milestone-attachments`, `milestone-complete`, `milestone-create`, `milestone-delete`, `milestone-reopen`, `milestone-restore`, `milestone-update`, `milestones`, `restore`, `update`, `update-attach`, `update-attachment delete`, `update-attachment get`, `update-attachment rename`, `update-attachments`, `update-delete`, `update-edit`, `update-get`, `update-post`, `update-react`, `update-reactions`, `update-unreact`, `updates`, `view save`, `views` |
+| `goal` | `archive`, `attach`, `attachment delete`, `attachment get`, `attachment rename`, `attachments`, `create`, `get`, `link`, `list`, `restore`, `unlink`, `update` |
 
 
 ## Workspace — `dailybot plan tasks`
@@ -706,6 +706,14 @@ Download an attachment to a file. Never overwrites without --force.
   - `--force` — Overwrite the output file if it exists.
 - **Example:** `dailybot plan task attachment get ENG-142 00000000-0000-0000-0000-000000000009 -o ./crash.log`
 
+### `dailybot plan task attachment rename TASK ATTACHMENT FILENAME`
+
+Rename a task's attachment (1 to 255 characters).
+
+- **API:** `PATCH /v1/plan/tasks/{t}/attachments/{a}/ {filename}`
+- **Signed-in person:** no
+- **Example:** `dailybot plan task attachment rename ENG-142 00000000-0000-0000-0000-000000000009 crash-v2.log`
+
 ### `dailybot plan task attachments TASK`
 
 List a task's attachments.
@@ -796,6 +804,14 @@ Download a comment's attachment to a file. Never overwrites without --force.
   - `--output`, `-o` `<file>` **required** — Where to write the file.
   - `--force` — Overwrite the output file if it exists.
 - **Example:** `dailybot plan task comment-attachment get ENG-142 00000000-0000-0000-0000-000000000007 00000000-0000-0000-0000-000000000009 -o ./trace.txt`
+
+### `dailybot plan task comment-attachment rename TASK COMMENT ATTACHMENT FILENAME`
+
+Rename a comment's attachment (1 to 255 characters).
+
+- **API:** `PATCH /v1/plan/tasks/{t}/comments/{c}/attachments/{a}/ {filename}`
+- **Signed-in person:** no
+- **Example:** `dailybot plan task comment-attachment rename ENG-142 00000000-0000-0000-0000-000000000007 00000000-0000-0000-0000-000000000009 trace-v2.txt`
 
 ### `dailybot plan task comment-attachments TASK COMMENT`
 
@@ -1246,6 +1262,46 @@ Take someone's sight of a board away.
   - `--yes`, `-y` — Skip the confirmation.
 - **Example:** `dailybot plan board member remove 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000004 --dry-run`
 
+### `dailybot plan board attach BOARD FILE`
+
+Attach a file to a board (up to 5 MiB, one request).
+
+- **API:** `POST /v1/plan/boards/{b}/attachments/ (multipart)`
+- **Signed-in person:** yes
+- **Example:** `dailybot plan board attach 00000000-0000-0000-0000-000000000004 ./spec.pdf`
+
+### `dailybot plan board attachment delete BOARD ATTACHMENT`
+
+Remove an attachment from a board. This cannot be undone.
+
+- **API:** `DELETE /v1/plan/boards/{b}/attachments/{a}/`
+- **Signed-in person:** yes
+- **Example:** `dailybot plan board attachment delete 00000000-0000-0000-0000-000000000004 00000000-0000-0000-0000-000000000009 --dry-run`
+
+### `dailybot plan board attachment get BOARD ATTACHMENT`
+
+Download a board's attachment to a file. Never overwrites without --force.
+
+- **API:** `GET /v1/plan/boards/{b}/attachments/{a}/content/`
+- **Signed-in person:** no
+- **Example:** `dailybot plan board attachment get 00000000-0000-0000-0000-000000000004 00000000-0000-0000-0000-000000000009 -o ./spec.pdf`
+
+### `dailybot plan board attachment rename BOARD ATTACHMENT FILENAME`
+
+Rename a board's attachment (1 to 255 characters).
+
+- **API:** `PATCH /v1/plan/boards/{b}/attachments/{a}/ {filename}`
+- **Signed-in person:** yes
+- **Example:** `dailybot plan board attachment rename 00000000-0000-0000-0000-000000000004 00000000-0000-0000-0000-000000000009 spec-v2.pdf`
+
+### `dailybot plan board attachments BOARD`
+
+List a board's attachments.
+
+- **API:** `GET /v1/plan/boards/{b}/attachments/`
+- **Signed-in person:** no
+- **Example:** `dailybot plan board attachments 00000000-0000-0000-0000-000000000004 --json`
+
 ### `dailybot plan board members BOARD`
 
 List who can see a board, and their role on it.
@@ -1473,6 +1529,14 @@ Download a project's attachment to a file. Never overwrites without --force.
   - `--output`, `-o` `<file>` **required** — Where to write the file.
   - `--force` — Overwrite the output file if it exists.
 - **Example:** `dailybot plan project attachment get 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000009 -o ./plan.pdf`
+
+### `dailybot plan project attachment rename PROJECT ATTACHMENT FILENAME`
+
+Rename a project's attachment (1 to 255 characters).
+
+- **API:** `PATCH /v1/plan/projects/{p}/attachments/{a}/ {filename}`
+- **Signed-in person:** yes
+- **Example:** `dailybot plan project attachment rename 00000000-0000-0000-0000-000000000002 00000000-0000-0000-0000-000000000009 plan-v2.pdf`
 
 ### `dailybot plan project attachments PROJECT`
 
@@ -1929,6 +1993,14 @@ Download a goal's attachment to a file. Never overwrites without --force.
   - `--output`, `-o` `<file>` **required** — Where to write the file.
   - `--force` — Overwrite the output file if it exists.
 - **Example:** `dailybot plan goal attachment get 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000009 -o ./okr.pdf`
+
+### `dailybot plan goal attachment rename GOAL ATTACHMENT FILENAME`
+
+Rename a goal's attachment (1 to 255 characters).
+
+- **API:** `PATCH /v1/plan/goals/{g}/attachments/{a}/ {filename}`
+- **Signed-in person:** yes
+- **Example:** `dailybot plan goal attachment rename 00000000-0000-0000-0000-000000000003 00000000-0000-0000-0000-000000000009 plan-v2.pdf`
 
 ### `dailybot plan goal attachments GOAL`
 
