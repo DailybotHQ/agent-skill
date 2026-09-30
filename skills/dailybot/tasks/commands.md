@@ -759,6 +759,8 @@ List a task's direct sub-tasks.
 
 - **API:** `GET /v1/plan/tasks/{t}/children/`
 - **Signed-in person:** no
+- **Flags:**
+  - `--sort` `<text>` — Order by rank, priority (urgent first), due, start, created, updated or completed (or the API names such as due_date); prefix with - for the reverse.
 - **Example:** `dailybot plan task children ENG-142`
 
 ### `dailybot plan task comment TASK BODY`
@@ -1338,6 +1340,8 @@ Show the whole board in one request — the cold-context read.
 
 - **API:** `GET /v1/plan/boards/{b}/board/`
 - **Signed-in person:** no
+- **Flags:**
+  - `--sort` `<text>` — Order by rank, priority (urgent first), due, start, created, updated or completed (or the API names such as due_date); prefix with - for the reverse.
 - **Example:** `dailybot plan board snapshot 00000000-0000-0000-0000-000000000001 --json`
 
 ### `dailybot plan board star BOARD`
@@ -1424,6 +1428,7 @@ List the tasks on one board.
   - `--page`, `-P` `<int>` — Page number to fetch.
   - `--page-size`, `-z` `<int>` — Items per page (max 100).
   - `--limit`, `-l` `<int>` — Stop after collecting N items.
+  - `--sort` `<text>` — Order by rank, priority (urgent first), due, start, created, updated or completed (or the API names such as due_date); prefix with - for the reverse.
 - **Example:** `dailybot plan board tasks 00000000-0000-0000-0000-000000000001 --page 2`
 
 ### `dailybot plan board unstar BOARD`
