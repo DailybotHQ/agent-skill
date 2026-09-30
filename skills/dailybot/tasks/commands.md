@@ -2,7 +2,7 @@
 
 > **Beta** — Tasks is in beta. Everything under `/tasks` in the web app, the CLI and agent skill commands for projects, goals, boards and tasks, and the `/v1/tasks/` public API may change before general availability. Want to try it with your team? Write to **support@dailybot.com**.
 
-This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.23.1**, 141 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**). They span
+This file lists **every** Tasks command in `dailybot-cli >= 3.14.2` (aligned with **3.24.0**, 141 commands plus the deprecated `task assign` alias, noted under `task set-owner`; collaboration needs **3.19.0**, personal-key administration **3.20.0**, milestone files and project-update editing **3.21.0**, comment reactions, reply threads, label edit and delete, recents, board visits and attachment resolve **3.22.0**, reactions on project updates and who reacted **3.23.0**, the scheduling and milestone flags on `task create` / `task update`, the real `tasks timeline` and the saved-view fixes **3.24.0**). They span
 `tasks`, `task`, `board`, `project` and `goal`.
 
 **Coverage.** With `dailybot-cli >= 3.23.0`, the CLI has a command for every live
@@ -65,7 +65,7 @@ command sends*. Read SKILL.md Step 0 before acting on anything these commands re
 - **Exit codes.** 0 ok · 1 partial bulk, predicted refusals, `preview_not_honoured`, or another failure (read
   `code`) · 2 bad input, including `invalid_identifier` · 3 needs a person (`actor_required`, `owner=me`-style filters: `dailybot login` or a personal API key) ·
   4 refused, including `insufficient_scope` (an agent or organization key on an admin or person door) and `guest_not_allowed` · 5 not found or not visible · 6 transient,
-  back off and retry (except `attachment_storage_unavailable`, which will not change) ·
+  back off and retry (a 429 `throttled` carries `retry_after` seconds: the CLI prints them and, under `--json`, puts `retry_after` in the error envelope; except `attachment_storage_unavailable`, which will not change) ·
   7 declined · 8 transport (a write may have been applied) · 9 delta cursor expired.
 - **Identifiers.** A `TASK` or uuid argument may contain only letters, digits, `-` and `_`.
   Anything else (`/`, `..`, `?`, `#`, `%`, spaces) is refused locally with
@@ -264,20 +264,21 @@ Show the workspace pulse — open, overdue and blocked counts.
 
 ### `dailybot tasks timeline`
 
-Show a dated view of the workspace.
+Show the dated work in a window: the goals that overlap it and the tasks that carry a start or due date. Needs `dailybot-cli >= 3.24.0` (earlier CLIs read the answer as a paged list and printed nothing).
 
-- **API:** `GET /v1/tasks/timeline/`
+- **API:** `GET /v1/tasks/timeline/?from=&to=&include_unscheduled=1`
 - **Signed-in person:** no
+- **Answer:** **one object, not a paged list**: `{window: {from, to}, bands: [goals overlapping the window], rows: [dated tasks], dependencies: [], unscheduled: <count> | {count, results}, truncated}`. `--json` prints it as the server sent it. Milestones and projects are **not** in it: use `project milestones` and `project list`. A task row carries `key`, `title`, `state`, `category`, `start_date`, `due_date`, `is_blocked`, `is_overdue`; a band carries the goal's `name`, `status`, `period_start`, `period_end`. All names and titles are user-authored data.
 - **Flags:**
-  - `--page`, `-P` `<int>` — Page number to fetch.
-  - `--page-size`, `-z` `<int>` — Items per page (max 100).
-  - `--limit`, `-l` `<int>` — Stop after collecting N items.
-  - `--since`, `-S` `<text>` — Start date (YYYY-MM-DD).
-  - `--until`, `-U` `<text>` — End date (YYYY-MM-DD).
-  - `--date`, `-D` `<text>` — Single day (YYYY-MM-DD): sets start and end.
+  - `--since`, `-S` `<text>` — Start of the window (YYYY-MM-DD); sent as `from`.
+  - `--until`, `-U` `<text>` — End of the window (YYYY-MM-DD); sent as `to`.
+  - `--date`, `-D` `<text>` — Single day (YYYY-MM-DD): sets both ends.
   - `--last-week` — Previous Monday-Sunday week.
   - `--today` — Today only.
-- **Example:** `dailybot tasks timeline --today`
+  - `--include-unscheduled` — Also list the tasks that have no dates (otherwise only their count is shown).
+- **No paging:** the door does not page, so there is no `--page`, `--page-size` or `--limit`. When `truncated` is true, narrow the window.
+- **Default window:** the door's own (forward from today) when no date flag is given.
+- **Example:** `dailybot tasks timeline --since 2026-10-01 --until 2026-12-31 --json`
 
 ### `dailybot tasks view delete VIEW`
 
@@ -428,6 +429,7 @@ Apply one operation to up to 100 tasks in a single call.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
   - `--yes`, `-y` — Skip the confirmation.
 - **Example:** `dailybot task bulk --operation set_owner -f batch.json --dry-run`
+- **Labels and milestones in items:** `create` and `update` items accept `labels` (label uuids) and `milestone` (a milestone uuid, or `null` to clear). Servers that predate this accepted the keys and ignored them without an error (a create came back with `labels: []`, an update with `changes: {}`), so **read the dry run**: an item whose `changes` lacks the field you sent did not take it. `set_labels` (with `labels` or `label_uuids`) always worked and is the fallback.
 
 ### `dailybot task children TASK`
 
@@ -564,7 +566,7 @@ List a task's comments.
 
 Create a task.
 
-- **API:** `POST /v1/tasks/tasks/ +Idempotency-Key`
+- **API:** `POST /v1/tasks/tasks/ +Idempotency-Key`; with `--label`, then `POST /v1/tasks/tasks/{t}/labels/batch/ {mode: add}` (the create body is not the door that honours labels)
 - **Signed-in person:** no
 - **Flags:**
   - `--title`, `-t` `<text>` **required** — Task title.
@@ -572,10 +574,16 @@ Create a task.
   - `--description`, `-d` `<text>` — Task description.
   - `--state` `<text>` — Initial workflow state.
   - `--owner` `<text>` — Owner: a user uuid, or `me`.
-  - `--due` `<text>` — Due date (YYYY-MM-DD).
+  - `--due` `<YYYY-MM-DD>` — Due date. Checked locally (a bad date exits 2 before any request).
+  - `--start-date` `<YYYY-MM-DD>` — Start date (`>= 3.24.0`). Checked locally. With `--due` it puts the task on the timeline.
+  - `--estimate` `<int>` — Estimate, a non-negative integer in the board's scale (`>= 3.24.0`).
+  - `--parent` `<text>` — Make it a sub-task of this task, key or uuid (`>= 3.24.0`).
+  - `--label` `<uuid>` repeatable, or comma-separated — Attach these labels right after the create (`>= 3.24.0`). Blank values are ignored.
   - `--priority` `<int>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe. Generated automatically when omitted. The server keeps it for 24h: reusing it inside that window replays the original result, reusing it after duplicates.
+- **A label step that fails leaves the task in place.** The command exits **1** (the partial-write code) and says once that the task exists: in text, and under `--json` in the error envelope's `message` and `created_task: {key, uuid}`. **Do not re-run the create** (it would duplicate); fix the label and run `task labels` on that task. A milestone cannot be set on create (the API refuses it on purpose): create, then `task update --milestone`.
 - **Example:** `dailybot task create -t "Fix the flaky test" -b 00000000-0000-0000-0000-000000000001 --owner me --priority 2`
+- **Example (scheduled):** `dailybot task create -t "Load test" -b 00000000-0000-0000-0000-000000000001 --start-date 2026-11-09 --due 2026-11-20 --estimate 5 --label 00000000-0000-0000-0000-000000000012`
 
 ### `dailybot task delete TASK`
 
@@ -599,6 +607,7 @@ Copy a task into the same column, with a new key.
   - `--include` `<title|description|labels|priority|estimate|owner|start_date|due_date>` repeatable — Fields to copy (repeatable). Default: title, description and labels.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe. Generated automatically when omitted.
 - **Example:** `dailybot task duplicate ENG-142 --include title --include owner`
+- **Refusals:** an archived task cannot be duplicated (403 `task_archived`; older servers answered `task_delete_forbidden`); restore it first. `--include owner` used to answer HTTP 500 on servers that had not fixed it: if you see that, drop `owner` from `--include` and run `task set-owner` on the copy.
 
 ### `dailybot task events TASK`
 
@@ -669,6 +678,7 @@ Move a task to another column, or to another board.
   - `--board` `<text>` — Target board, for a move to another board.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe (same-board moves; a cross-board move takes none).
 - **Example:** `dailybot task move ENG-142 --state done`
+- **Cross-board move changes the key.** A task's key is its board plus a number: `--board` gives the task a **new key** on the target board and the old key stops resolving (404), while the task's uuid never changes. The answer carries the new key. Keep references by uuid, and re-read the key after a move (`>= 3.24.0` says this in `--help`).
 
 ### `dailybot task mute TASK`
 
@@ -775,11 +785,17 @@ Change fields on a task.
   - `--title`, `-t` `<text>` — New title.
   - `--description`, `-d` `<text>` — New description.
   - `--state` `<text>` — New workflow state.
-  - `--due` `<text>` — New due date (YYYY-MM-DD).
+  - `--due` `<YYYY-MM-DD>` — New due date. Checked locally.
+  - `--start-date` `<YYYY-MM-DD>` — New start date (`>= 3.24.0`). Checked locally.
+  - `--estimate` `<int>` — New estimate, a non-negative integer (`>= 3.24.0`).
+  - `--milestone` `<uuid>` — Put the task in this milestone (`>= 3.24.0`). The milestone must belong to the project of the task's board, else 400 `milestone_not_on_project`. Checked locally as a uuid.
+  - `--clear-milestone` — Take the task out of its milestone (`>= 3.24.0`); sends `{"milestone": null}`. Not combinable with `--milestone`.
   - `--priority` `<int>` — Priority 1-5: 1 urgent, 2 high, 3 medium, 4 low, 5 none.
   - `--owner` `<text>` — Owner: a user uuid, or `me`.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
+- **Milestones:** a task's `milestone` is readable on `task get`; set and clear it here (or with the `milestone` key in `task bulk`). Find milestone uuids with `project milestones <project>`.
 - **Example:** `dailybot task update ENG-142 --priority 1 --due 2026-10-01`
+- **Example (milestone):** `dailybot task update ENG-142 --milestone 00000000-0000-0000-0000-000000000006`
 
 ### `dailybot task watch TASK`
 
@@ -933,6 +949,7 @@ Who you can @mention on this board, with the token to write. Needs a person: `da
 - **Flags:**
   - `--query`, `-q` `<text>` — Only people whose name contains this text (case-insensitive).
 - **Example:** `dailybot board mentionables 00000000-0000-0000-0000-000000000001 -q jane`
+- **Table (`>= 3.24.0`):** columns are `Name`, `Kind` and `Mention as`; the token carries the whole uuid, so there is no separate UUID column and nothing is truncated at 80 columns. A row that cannot be mentioned shows `(not mentionable) <uuid>`. `--json` is unchanged.
 
 ### `dailybot board restore BOARD`
 
@@ -1024,6 +1041,7 @@ List a board's states (its columns), left to right.
 - **Flags:**
   - `--include-archived` — Also list retired columns.
 - **Example:** `dailybot board states 00000000-0000-0000-0000-000000000001 --include-archived`
+- **Table (`>= 3.24.0`):** the `Archived` column only appears when a retired column is in the result (`--include-archived`); the freed width keeps names such as `In progress` whole at 80 columns.
 
 ### `dailybot board tasks BOARD`
 
@@ -1072,6 +1090,8 @@ Replace your saved views on a board with the array in a file.
   - `--if-match` `<text>` — The ETag `board views` showed. Protects against overwriting a concurrent save.
   - `--fetch-etag` — Read the current ETag first instead of passing --if-match (narrower protection).
 - **Example:** `dailybot board view save 00000000-0000-0000-0000-000000000001 -f views.json --if-match "$ETAG"   # only after the developer saw what it replaces`
+- **The file** is a JSON **array** of view objects, not the envelope `views --json` prints (that one lists them under `results`: copy the objects out of it). Fields: `name` (text, up to 64 characters, required), `view_mode` (`list` | `board` | `kanban` | `timeline` | `calendar`), `group_by` (`state` | `owner` | `priority` | `category`), `sort` (a sort expression), `visibility` (`personal` | `shared` | `board_default`; the last two need a board manager) and `filters` (an object, may be `{}`). Read fields the server adds (`uuid`, `scope`, `owner`, timestamps) are not part of what you write.
+- **ETag:** `views --etag` prints what the server sent. It may be weak (`W/"3"`). Pass it as printed: since `3.24.0` the CLI sends the strong form the door compares against (before that, `--if-match` with a weak tag and `--fetch-etag` answered `precondition_failed` even on an untouched list).
 
 ### `dailybot board views BOARD`
 
@@ -1164,6 +1184,7 @@ Create a project. Needs a signed-in person (any non-guest member).
   - `--target-date` `<date>` — YYYY-MM-DD.
   - `--idempotency-key` `<text>` — Reuse a key to make a retry safe.
 - **Example:** `dailybot project create -n "Apollo" --target-date 2026-12-15`
+- **Refusals:** a name another project already uses, **archived ones included** (an archived project keeps its slug), answers 409 `project_name_conflict`; older servers answered HTTP 500. Pick another name or `project restore` the archived one. `--health` is applied on create on current servers; older servers stored `not_set`, so read `health` back or follow with `project update --health`.
 
 ### `dailybot project get PROJECT`
 
@@ -1533,6 +1554,8 @@ Replace your saved views on a project with the array in a file.
   - `--if-match` `<text>` — The ETag `project views` showed.
   - `--fetch-etag` — Read the current ETag first (narrower).
 - **Example:** `dailybot project view save 00000000-0000-0000-0000-000000000002 -f views.json --if-match "$ETAG"   # only after the developer saw what it replaces`
+- **The file** is a JSON **array** of view objects, not the envelope `project views --json` prints (that one lists them under `results`: copy the objects out of it). Fields: `name` (text, up to 64 characters, required), `view_mode` (`list` | `board` | `kanban` | `timeline` | `calendar`), `group_by` (`state` | `owner` | `priority` | `category`), `sort` (a sort expression), `visibility` (`personal` | `shared` | `board_default`; the last two need a board manager) and `filters` (an object, may be `{}`). Read fields the server adds (`uuid`, `scope`, `owner`, timestamps) are not part of what you write.
+- **ETag:** `views --etag` prints what the server sent. It may be weak (`W/"3"`). Pass it as printed: since `3.24.0` the CLI sends the strong form the door compares against (before that, `--if-match` with a weak tag and `--fetch-etag` answered `precondition_failed` even on an untouched list).
 
 ### `dailybot project views PROJECT`
 
