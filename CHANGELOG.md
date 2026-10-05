@@ -4,6 +4,12 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changes
+
+- docs(tasks): agent-first T5 leaves (reorder, move-preview, view create, workspace views, tasks board, member update, plan labels) aligned with CLI plan__next / OpenAPI x-cli-command
+
 ## [3.23.2] — 2026-09-30
 
 ### Changes

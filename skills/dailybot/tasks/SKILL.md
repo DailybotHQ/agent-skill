@@ -1191,3 +1191,19 @@ weekday. The first real send of anything is a `send-test` the developer confirme
   board — they already can. Tell a **guest** the real fix: change role. Tell an agent or
   organization key the real fix: `dailybot login` or a personal API key of a non-guest
   member.
+
+<!-- t5-agent-first-leaves -->
+### Agent-first T5 leaves (CLI ≥ plan__next / post-3.26)
+
+Contract `x-cli-command` strings (OpenAPI). Prefer these exact invocations:
+
+- `dailybot plan project reorder` / `board reorder` / `board move-preview`
+- `dailybot plan board view create` / `project view create` (single view + Idempotency-Key; no If-Match)
+- `dailybot plan views workspace` / `views workspace save` (If-Match on save)
+- `dailybot plan tasks board` (grouped workspace snapshot; prefer `board snapshot` for one board)
+- `dailybot plan board member update` / `project member update` (inspect grant; role read-only)
+- `dailybot plan label list|create|update|delete` (Plan org labels under `/v1/plan/labels/`)
+- `dailybot plan task brief` (unchanged)
+
+Still out of scope by API design: task **delegation** (501 Phase2), `author_kind=agent` from org agent keys, server `goals/review` door (compose `goal list` + progress client-side).
+
