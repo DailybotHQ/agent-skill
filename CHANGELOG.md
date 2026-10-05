@@ -4,6 +4,13 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.23.3] — 2026-10-05
+
+### Changes
+
+- docs(tasks): agent-first T5 leaves (CLI_HANDOFF parity) (#66)
+
+
 ## [Unreleased]
 
 ### Changes
