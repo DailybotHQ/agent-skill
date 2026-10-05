@@ -9,6 +9,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ### Changes
 
 - docs(tasks): agent-first T5 leaves (reorder, move-preview, view create, workspace views, tasks board, member update, plan labels) aligned with CLI plan__next / OpenAPI x-cli-command
+- docs(tasks): loop-review polish — CLI floor for T5 leaves, drop duplicate brief entry, expand command flags
 
 ## [3.23.2] — 2026-09-30
 

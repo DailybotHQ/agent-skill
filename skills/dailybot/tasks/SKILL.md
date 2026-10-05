@@ -1193,17 +1193,18 @@ weekday. The first real send of anything is a `send-test` the developer confirme
   member.
 
 <!-- t5-agent-first-leaves -->
-### Agent-first T5 leaves (CLI ≥ plan__next / post-3.26)
+### Agent-first T5 leaves (OpenAPI `x-cli-command`)
 
-Contract `x-cli-command` strings (OpenAPI). Prefer these exact invocations:
+**CLI requirement.** These leaves need a CLI build that ships them (DailybotHQ/cli#129 on `plan__next`, or a release **after** `3.26.2` that includes that PR). The pack floor for the rest of Plan remains `dailybot-cli >= 3.25.0`. If a leaf is missing, run `dailybot upgrade` (or install from that branch) before inventing alternate command names.
+
+Contract strings — prefer these exact invocations (full flags in [commands.md](commands.md) § Agent-first T5 leaves):
 
 - `dailybot plan project reorder` / `board reorder` / `board move-preview`
 - `dailybot plan board view create` / `project view create` (single view + Idempotency-Key; no If-Match)
 - `dailybot plan views workspace` / `views workspace save` (If-Match on save)
-- `dailybot plan tasks board` (grouped workspace snapshot; prefer `board snapshot` for one board)
-- `dailybot plan board member update` / `project member update` (inspect grant; role read-only)
+- `dailybot plan tasks board` (grouped workspace snapshot; prefer `board snapshot` when you already have one board uuid)
+- `dailybot plan board member update` / `project member update` (inspect grant; role is read-only)
 - `dailybot plan label list|create|update|delete` (Plan org labels under `/v1/plan/labels/`)
-- `dailybot plan task brief` (unchanged)
+- `dailybot plan task brief` — already documented above; still the primary card read for handed work
 
-Still out of scope by API design: task **delegation** (501 Phase2), `author_kind=agent` from org agent keys, server `goals/review` door (compose `goal list` + progress client-side).
-
+**Phase2 — do not invent commands or fake success:** task **delegation** / handback / revoke answer **501**; `author_kind=agent` never from an org agent key (person credential + `--agent-name` / `DAILYBOT_AGENT_NAME` only); no `/goals/review/` door — compose `goal list` with progress includes client-side.
