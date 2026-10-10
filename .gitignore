@@ -99,4 +99,5 @@ tmp/*
 !.vscode_example/
 
 # Deep Work Plan runtime state (plans, drafts, progress)
-.dwp/
+.dwp/*
+!.dwp/config.json
