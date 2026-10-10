@@ -15,8 +15,9 @@ in [`AGENTS.md`](../AGENTS.md). The behavior is in
 
 ## 1. Router meta-skill + sub-skills (not one big SKILL.md)
 
-We ship **one discoverable skill** (`dailybot`) that routes to four
-internal sub-skills (`report`, `messages`, `email`, `health`). An
+We ship **one discoverable skill** (`dailybot`) that routes to
+internal sub-skills (started as `report`, `messages`, `email` and `health`;
+17 today, see `skills/dailybot/`). An
 alternative would have been a single 800-line `SKILL.md` covering
 everything.
 
