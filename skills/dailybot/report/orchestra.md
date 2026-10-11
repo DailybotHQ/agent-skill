@@ -132,5 +132,5 @@ missing authentication, `.dailybot/disabled`, or an unreachable service must
 not block development or its validation gates. A skipped report is not
 evidence that a lane's work failed.
 
-For general cadence and writing guidance, return to [the report
-skill](SKILL.md#step-5--trigger-check).
+For general cadence and writing guidance, read the [report significance
+guide](significance.md) and [writing guide](writing-guide.md).

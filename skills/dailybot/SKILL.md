@@ -325,7 +325,7 @@ common use case.
 
 ### Mandatory pre-flight: respect the repo profile
 
-> **This applies to every sub-skill, every turn, no exceptions.** Before
+> **Run this pre-flight for every sub-skill, every turn.** Before
 > constructing any `dailybot <verb>` command line, the agent **MUST**
 > walk up from `$PWD` looking for a `.dailybot/` directory. If
 > `.dailybot/profile.json` exists in the closest ancestor, **omit from
@@ -333,7 +333,7 @@ common use case.
 >
 > | Profile sets | You must omit |
 > |---|---|
-> | `name` | `--name` / `-n` |
+> | `name` | `--name` / `-n`, except the authorized report-only orchestra override below |
 > | `profile` (slug) | `--profile` / `-p` |
 > | `default_metadata.<key>` | each `<key>` from your inline `--metadata` / `-d` JSON |
 >

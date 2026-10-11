@@ -43,10 +43,10 @@ The following are tracked separately and not handled here:
 
 ## What This Skill Does To Your Environment
 
-For full transparency, every behavior with security relevance is enumerated in
-[`README.md`](README.md) under the section **"What this skill does to your
-environment"**. Review that section before installation if you are auditing
-the skill for an enterprise rollout.
+Start with [Security and trust in the README](README.md#security-and-trust),
+then review the shipped [trust contract](skills/dailybot/TRUST.md) and the
+[CLI/HTTP reference](docs/API_REFERENCE.md) for the full behavior and API
+surface before an enterprise rollout.
 
 ## Hardening Defaults
 

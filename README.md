@@ -98,7 +98,7 @@ The router dispatches ordinary requests to these shipped skills:
 | Workflow | Sub-skills and scope |
 | --- | --- |
 | Progress and coordination | [Report](skills/dailybot/report/SKILL.md), [messages](skills/dailybot/messages/SKILL.md), [health](skills/dailybot/health/SKILL.md), and [ask](skills/dailybot/ask/SKILL.md) |
-| Check-ins and forms | [Check-ins](skills/dailybot/checkin/SKILL.md) and [forms](skills/dailybot/forms/SKILL.md): create/configure, inspect, respond, and manage workflows |
+| Check-ins and forms | [Check-ins](skills/dailybot/checkin/SKILL.md) and [forms](skills/dailybot/forms/SKILL.md): author and complete check-ins; author, inspect, submit, and transition forms |
 | Team communication | [Chat](skills/dailybot/chat/SKILL.md), [email](skills/dailybot/email/SKILL.md), [kudos](skills/dailybot/kudos/SKILL.md), [teams](skills/dailybot/teams/SKILL.md), [channels](skills/dailybot/channels/SKILL.md), and [conversation](skills/dailybot/conversation/SKILL.md) |
 | Automation and organization | [Workflows](skills/dailybot/workflow/SKILL.md), [labels](skills/dailybot/labels/SKILL.md), and [featured](skills/dailybot/featured/SKILL.md) |
 | Dailybot Plan | [Tasks](skills/dailybot/tasks/SKILL.md): boards, tasks, projects, goals, milestones, and agent attribution; CLI 3.25.0+ |

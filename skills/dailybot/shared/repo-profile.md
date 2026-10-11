@@ -16,7 +16,7 @@ What "already provides" means concretely:
 
 | Profile key | Effect | Omit from your command line |
 |---|---|---|
-| `name` | Pins the agent display name | `--name` (and its short alias `-n`) |
+| `name` | Pins the agent display name | `--name` (and its short alias `-n`), except the authorized report-only orchestra override below |
 | `profile` | Pins a named profile slug from `~/.config/dailybot/agents.json` | `--profile` (and its short alias `-p`) |
 | `default_metadata.<key>` | Each `<key>` is shallow-merged into every outgoing report's metadata, with your inline value winning if both are set | `<key>` from your `--metadata` / `-d` JSON object — pass only keys the profile does **not** set |
 
