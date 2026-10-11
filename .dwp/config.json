@@ -1,4 +1,33 @@
 {
+  "addons": {
+    "agentkit": {
+      "enabled": true,
+      "note": "Existing interface-1 host kit used by authorized orchestra lanes; no machine changes",
+      "version": "v0.5.0"
+    },
+    "ai-diff-reviewer": {
+      "enabled": true,
+      "note": "Dogfood upgrade: verified pinned skill",
+      "version": "v3.3.9"
+    },
+    "dailybot": {
+      "enabled": true,
+      "note": "Dogfood upgrade: verified pinned skill",
+      "version": "v3.23.12"
+    },
+    "design-system": {
+      "enabled": true,
+      "note": "Planner back-filled existing docs/DESIGN.md; this is architecture rationale, not a design profile. Preserve the handwritten document and flag the detection ambiguity for the lead."
+    },
+    "devcontainer": {
+      "enabled": false,
+      "note": "Pure tooling repository with no development container/editor layer; host tools left untouched"
+    },
+    "vim": {
+      "enabled": false,
+      "note": "Pure tooling repository with no development container/editor layer; host tools left untouched"
+    }
+  },
   "benchmark": {
     "enabled": true,
     "learnings": true

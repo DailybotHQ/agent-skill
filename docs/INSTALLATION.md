@@ -413,3 +413,32 @@ rm -rf ~/.dailybot
 - [`docs/API_REFERENCE.md`](API_REFERENCE.md) — public CLI / HTTP API for sandboxed-environment fallback
 - [`docs/OPENCLAW.md`](OPENCLAW.md) — OpenClaw-specific notes
 - [`SECURITY.md`](../SECURITY.md) — security disclosure + what the skill does on your machine
+
+## Distribution Workflow
+
+End-to-end: how a change in this repo reaches users.
+
+1. **Land the change** on `main` via PR
+2. **Bump version** in `skills/dailybot/SKILL.md` frontmatter and add an
+   entry to `CHANGELOG.md`
+3. **Tag the release** (`git tag v1.0.x && git push --tags`) — GitHub
+   release notes are auto-generated from the changelog entry
+4. **skills.sh re-indexes** automatically (within hours of the push to
+   `main`) — no manual action needed
+5. **Existing users**: `npx skills update DailybotHQ/agent-skill` or
+   `cd <skill-path> && git pull`
+6. **OpenClaw users**: `openclaw skills update dailybot`
+
+For changes that affect the install script (`cli.dailybot.com/install.sh`),
+the actual script lives in
+[github.com/DailybotHQ/cli](https://github.com/DailybotHQ/cli) — coordinate
+across both repos. After the install.sh changes:
+
+```bash
+cd /path/to/DailybotHQ/cli
+shasum -a 256 install.sh > install.sh.sha256
+# Upload both files to the CDN serving cli.dailybot.com
+```
+
+`scripts/verify-cdn.sh` in this repo can probe the CDN and tell you whether
+the `.sha256` is currently published and whether it matches the script.

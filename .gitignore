@@ -38,6 +38,10 @@ ENV/
 !skills/dailybot/env/
 !skills/dailybot/env/**
 
+# The contributor snapshot includes the same non-credential env sub-skill.
+!.agents/skills/dailybot/env/
+!.agents/skills/dailybot/env/**
+
 # Node (some contributors may run `npx skills` locally for testing)
 node_modules/
 npm-debug.log*

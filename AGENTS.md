@@ -67,60 +67,9 @@ small helper scripts (`setup.sh`, `shared/context.sh`, plus the
 its installer to `cli.dailybot.com`. This skill repo references that CLI
 but does not contain it.
 
-## Project Structure
+## Project structure
 
-```
-agent-skill/
-├── AGENTS.md, CLAUDE.md (symlink)         ← this file (NOT installed)
-├── CONTRIBUTING.md                        ← contributor guide (NOT installed)
-├── README.md                              ← public README on GitHub (NOT installed)
-├── LICENSE, SECURITY.md, CHANGELOG.md     ← repo metadata (NOT installed)
-├── setup.sh                               ← symlink installer for non-skills.sh users
-├── .agents/                               ← contributor kit (NOT installed): DWP + AI Diff Reviewer
-├── .claude → .agents, .cursor → .agents   ← agent-directory symlinks (NOT installed)
-├── .review/extension.md                   ← AI Diff Reviewer overrides (NOT installed)
-├── .github/
-│   ├── workflows/ci.yml                   ← shellcheck + bats + frontmatter validation
-│   ├── workflows/pr-review.yml            ← AI Diff Reviewer CI (Ready label)
-│   ├── ISSUE_TEMPLATE/                    ← bug + feature templates
-│   └── PULL_REQUEST_TEMPLATE.md
-├── tests/                                 ← bats-core tests (NOT installed)
-│   └── context-sh.bats
-├── scripts/                               ← repo-dev scripts (NOT installed)
-│   ├── verify-cdn.sh                      ← checks install.sh + .sha256 are published
-│   └── validate-frontmatter.py            ← schema check on every SKILL.md
-├── docs/                                  ← internal docs (NOT installed)
-│   ├── API_REFERENCE.md, INSTALLATION.md, DESIGN.md, …
-└── skills/dailybot/                       ← THE INSTALLED ARTIFACT — only this ships
-    ├── SKILL.md                           ← router (+ "Start here (first run)" self-contained setup)
-    ├── TRUST.md                           ← install-time trust & guarantees + self-audit (ships)
-    ├── shared/                            ← auth.md, context.sh, http-fallback.md, list-query-and-errors.md, …
-    ├── report/                            ← progress reporting + auto-activation
-    ├── messages/SKILL.md
-    ├── email/SKILL.md
-    ├── health/SKILL.md
-    ├── checkin/SKILL.md
-    ├── kudos/SKILL.md
-    ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
-    ├── forms/SKILL.md
-    ├── ask/SKILL.md                        ← headless Dailybot AI questions (`dailybot ask`)
-    ├── conversation/SKILL.md               ← open/reuse a Slack group DM with the bot (Slack, org-admin)
-    ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
-    ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones
-    │                                          (Plan needs CLI >= 3.25.0);
-    │                                          untrusted content is Step 0
-    ├── tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
-    │                                          regenerated from dailybot-cli --help
-    ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
-    ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)
-    ├── env/SKILL.md                        ← .dailybot/env.json per-repo API keys
-    ├── channels/SKILL.md                   ← report-channel discovery (UUIDs for --report-channel on forms/check-ins)
-    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.9.0; latest on PyPI)
-```
-
-The hard rule: **anything you put outside `skills/dailybot/` is invisible
-to the runtime agent**. Use that to keep this repo discoverable and
-auditable on GitHub without polluting the skill itself.
+The shipped artifact is `skills/dailybot/`; contributor infrastructure stays outside it. See [Design decisions and project layout](docs/DESIGN.md) for the full tree.
 
 ## Quick Commands
 
@@ -148,6 +97,8 @@ mkdir -p .dailybot && touch .dailybot/disabled && \
 # Check that cli.dailybot.com publishes install.sh + .sha256:
 bash scripts/verify-cdn.sh
 ```
+
+Scoped checks: `bats tests/setup-sh.bats` for the installer and `bats tests/context-sh.bats` for context detection. Full mapping and fallback: [Testing guide](docs/TESTING_GUIDE.md); other contributor commands: [Development commands](docs/DEVELOPMENT_COMMANDS.md).
 
 ## CRITICAL: Mandatory Rules
 
@@ -324,63 +275,13 @@ You don't have to run all of these locally — CI covers macOS + Linux. But
 if you're touching `setup.sh`, `shared/context.sh`, or the install
 documentation, mention in the PR which environments you tested manually.
 
-## Distribution Workflow
+## Distribution workflow
 
-End-to-end: how a change in this repo reaches users.
+Auto-release owns source versions and changelog. The [distribution reference](docs/INSTALLATION.md#distribution-workflow) covers the release and CDN sequence; the CLI installer lives in its own repository.
 
-1. **Land the change** on `main` via PR
-2. **Bump version** in `skills/dailybot/SKILL.md` frontmatter and add an
-   entry to `CHANGELOG.md`
-3. **Tag the release** (`git tag v1.0.x && git push --tags`) — GitHub
-   release notes are auto-generated from the changelog entry
-4. **skills.sh re-indexes** automatically (within hours of the push to
-   `main`) — no manual action needed
-5. **Existing users**: `npx skills update DailybotHQ/agent-skill` or
-   `cd <skill-path> && git pull`
-6. **OpenClaw users**: `openclaw skills update dailybot`
+## Commit message format
 
-For changes that affect the install script (`cli.dailybot.com/install.sh`),
-the actual script lives in
-[github.com/DailybotHQ/cli](https://github.com/DailybotHQ/cli) — coordinate
-across both repos. After the install.sh changes:
-
-```bash
-cd /path/to/DailybotHQ/cli
-shasum -a 256 install.sh > install.sh.sha256
-# Upload both files to the CDN serving cli.dailybot.com
-```
-
-`scripts/verify-cdn.sh` in this repo can probe the CDN and tell you whether
-the `.sha256` is currently published and whether it matches the script.
-
-## Commit Message Format (MANDATORY)
-
-```
-<type>(<scope>): <short description>
-
-<body — Summary, motivation, what changed, risks>
-
-Co-Authored-By: <agent name + version> <noreply@anthropic.com>
-```
-
-**Types:** `feat` (new behavior), `fix` (bug fix), `docs` (docs only),
-`chore` (repo maintenance), `test` (adding tests), `ci` (CI config),
-`refactor` (no user-visible change).
-
-**Scopes:** `skill` (general pack), `report` / `messages` / `email` /
-`health` / `checkin` / `kudos` / `teams` / `forms` / `chat` (specific
-sub-skill), `shared` (auth.md, context.sh, http-fallback.md), `setup`
-(setup.sh), `ci` (.github/), `docs` (docs/), `release` (versioning,
-CHANGELOG).
-
-Examples (from this repo's history):
-
-```
-chore(skill): restructure to skills/dailybot/ layout and add open-source boilerplate
-feat(skill): require explicit consent for CLI install, auto-activation, and email sends
-feat(skill): bash hardening and per-repo telemetry opt-out
-fix(skill): restore curl|bash as universal install path and add DAILYBOT_AUTO_YES escape hatch
-```
+Use conventional English commits with the active agent’s co-author trailer. Types and examples are in [Contributing](CONTRIBUTING.md#commit-message-format-mandatory).
 
 ## Agent Progress Reporting (Eat Our Own Dog Food)
 
@@ -465,7 +366,7 @@ that's both validation and documentation.
 For non-trivial contributor work (multi-sub-skill changes, install-surface
 edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
 through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
-at **v2.17.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+at **v7.6.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
 
 | Step | Command | What it does |
 |------|---------|--------------|
@@ -476,6 +377,23 @@ at **v2.17.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/com
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
 Symlinks: `.claude → .agents`, `.cursor → .agents`.
 
+DWP standard: 7.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11; skill 7.6.0, vendored 2026-10-11). Existing plans retain their recorded generation.
+
+**Flow routing.** Explicit planning requests use create; execute/resume requests
+use those flows. Status and verify stay read-only. Ordinary edits do not silently
+become plans; trust mode changes authorization, not the selected flow. Discover
+procedures locally through `.agents/skills/deepworkplan/SKILL.md`.
+
+**Host limits and authority.** All eight host capabilities (`stop_agent`,
+`meter_spend`, `meter_tokens`, `meter_wall_clock`, `cancel_children`,
+`model_routing`, `subagents`, `telemetry`) default to false until verified for
+the active runtime; telemetry also needs consent. Unenforceable limits are
+advisory. Repository addon registration grants no per-plan delegation authority.
+Respect the developer’s active write scope and existing consent; publication,
+merge, secret access and external messages require their own authorization.
+Use the [testing map](docs/TESTING_GUIDE.md) to verify outcomes, and preserve
+existing plans and evidence on an upgrade.
+
 ### Dailybot addon (contributor reporting)
 
 Optional DWP lifecycle reporting uses the companion CLI / the in-repo
@@ -484,7 +402,7 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### AI Diff Reviewer (Flow B — dual-surface)
 
-[`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.1.1` for both the vendored skill and the Action.
+[`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.3.9` for both the vendored skill and the Action.
 
 | Surface | What | How |
 |---------|------|-----|
@@ -521,52 +439,9 @@ this `AGENTS.md`:
 If you're updating shared standards in this file, you don't need to mirror
 to per-agent files — `AGENTS.md` is the canonical source.
 
-## Temporary Files (tmp/) and `.dwp/`
+## Temporary files and plans
 
-The `tmp/` folder at the repo root is **git-ignored entirely** — the
-directory is preserved with a `.gitkeep` placeholder, but every file or
-subdirectory you create inside it is invisible to git. It exists so
-agents and contributors can do scratch work without polluting the
-working tree or risking accidental commits of debug output. The folder
-is yours — write freely, clean up when done.
-
-The gitignored `.dwp/` tree is the **structured** Deep Work Plan output
-area (`plans/`, `drafts/`, progress state) — distinct from unstructured
-`tmp/` scratch. Do not commit plans unless explicitly asked.
-
-Use `tmp/` for:
-
-- **Inter-agent prompts** — drafting a prompt for another agent before
-  invoking it (`tmp/prompts/codex-review-pr.md`)
-- **Probes against external services** — output from `curl`-ing
-  `cli.dailybot.com`, `api.dailybot.com`, the GitHub API, etc.
-  (`tmp/probes/cdn-check-2026-05-01.txt`)
-- **Scratch experiments** — throwaway shell scripts or one-off tooling
-  (`tmp/scratch/test-frontmatter-edge-case.sh`)
-- **Data exports** — query results, downloaded artifacts you want to
-  inspect without committing (`tmp/exports/skills-sh-listings.json`)
-- **Personal scratch space** — `tmp/<your-handle>/` to avoid stepping
-  on parallel work
-
-Common subdirectory pattern (suggested but not enforced):
-`tmp/scratch/`, `tmp/prompts/`, `tmp/probes/`, `tmp/exports/`.
-
-**The hard rule:** nothing under `tmp/` is ever committed. If a file
-you drafted in `tmp/` deserves to live in the repo, **move** it to its
-proper home (`skills/dailybot/`, `tests/`, `scripts/`, `docs/`,
-or the repo root) and `git add` it from there — never `git add tmp/...`
-because the `.gitignore` will reject the file anyway and the path
-itself is wrong.
-
-CI does not look at `tmp/`. The frontmatter validator and bats tests
-only see `skills/`, `tests/`, and a handful of named files. So there's
-no risk of half-finished drafts breaking checks while you iterate.
-
-If you create `tmp/` yourself by accident on a fresh clone (it's
-already there in committed form via the README), it survives `git
-clean -fd` because it's tracked.
-
----
+Keep freeform scratch in gitignored `tmp/`. Keep plan state and evidence in `.dwp/`; neither belongs in a commit. See [Workspace conventions](docs/DEVELOPMENT_COMMANDS.md#temporary-files-tmp-and-dwp) for the full rules.
 
 ## When in Doubt
 
