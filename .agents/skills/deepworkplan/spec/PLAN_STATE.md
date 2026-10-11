@@ -1,5 +1,9 @@
 # PLAN_STATE.md — Machine-Readable Plan State
 
+> **Version scope:** This is a retained v5.0.0 base document. The current
+> v6 standard also requires the applicable `V6_*.md` extensions indexed in
+> [README.md](README.md). Existing v5 plans keep this document’s recorded rules.
+
 ## Abstract
 
 This document specifies the **machine-readable plan state layer** of the
@@ -19,6 +23,10 @@ prose.
 
 JSON Schemas for both artifacts ship with this specification in
 [`schema/`](schema/) and are published at `https://deepworkplan.com/schema/`.
+The v5 schema URLs (`plan-manifest/v5.json`, `plan-state/v5.json`) are
+**generation snapshots** of the v2 shape for the 5.0.0 standard — no property
+differs — and new plans from 5.0.0 declare them; plans referencing v1/v2 URLs
+remain valid forever and are never rewritten.
 
 ---
 
@@ -26,9 +34,9 @@ JSON Schemas for both artifacts ship with this specification in
 
 | Field | Value |
 |-------|-------|
-| **Version** | 2.2.0 |
+| **Version** | 5.0.0 |
 | **Status** | Stable |
-| **Supersedes** | (net-new in 2.2.0; no prior equivalent) |
+| **Supersedes** | `PLAN_STATE.md` 4.0.0, 2.4.0 (and 2.2.0; net-new in 2.2.0) |
 | **Companions** | `DWP_SPECIFICATION.md`, `AGENT_PROTOCOL.md`, `ARCHETYPES.md`, `DOCUMENTATION_STANDARD.md`, `ADDONS.md` |
 | **License** | MIT |
 
@@ -63,23 +71,39 @@ The RFC 2119 keywords (**MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**,
 A plan using the state layer has this layout (extending `DWP_SPECIFICATION.md` §4):
 
 ```text
-.dwp/plans/PLAN_{name}/
+.dwp/plans/<plan>/
 ├── README.md            ← human source of truth (unchanged)
 ├── PROGRESS.md          ← narrative log (unchanged)
 ├── PROMPTS.md           ← unchanged
-├── manifest.json        ← static identity (NEW — written at materialization)
+├── manifest.json        ← static identity (written FIRST at materialization: the intended shape)
 ├── state.json           ← live state (NEW — rewritten at protocol points)
 ├── analysis_results/
+│   └── SKILLS_CANDIDATES.md ← task-local skills ledger (DWP_SPECIFICATION §6.2; markdown, not JSON)
 └── {N}.task_{...}.md
 ```
 
-- `manifest.json` **MUST** be written exactly once, when the `create` flow
-  materializes the plan, and **MUST NOT** change afterward except for a spec-version
-  migration recorded in the plan's `PROGRESS.md`.
+Newly created folders use `PLAN_<id>_<slug>` (for example,
+`PLAN_001_payment_webhooks`); the ID is allocated by `shared/plan_paths.py`.
+The v5 manifest and state schemas are frozen, so new v5 slugs use 2–4 words
+after the numeric ID. Existing unnumbered folders keep their recorded names
+and stay in place. This naming policy does not rewrite any existing state.
+
+- `manifest.json` **MUST** be written exactly once, as the **first file** of the
+  plan folder when the `create` flow materializes the plan — before any task
+  file, so an interrupted materialization leaves the plan's identity and
+  intended `task_count` on disk (`DWP_SPECIFICATION.md` §3) — and **MUST NOT**
+  change afterward. Its `spec_version`,
+  `created_at`, and `created_by` are **creation provenance**: an authorized
+  migration of a plan to a newer standard (§6.1) is declared in the plan README
+  and recorded in `PROGRESS.md`; the manifest is **never** rewritten to disguise
+  when and under which standard the plan was created.
 - `state.json` **MUST** be rewritten by the agent at each of these protocol points:
   plan materialization (all tasks `pending`), task start (`in_progress`), each
-  validation-gate run (gate record appended/updated), and task completion
-  (`completed`, as part of `DWP_SPECIFICATION.md` §5.2 step 6).
+  validation-gate run (gate record appended/updated), task completion
+  (`completed`, as part of `DWP_SPECIFICATION.md` §5.2 step 6), a checkpoint
+  before any planned interruption, and a `blocked` stop (`AGENT_PROTOCOL.md`
+  §7.3). Rewrites happen at these task and step boundaries — **not** after every
+  tool call.
 - Both files **MUST** be written atomically: write to a temporary file in the same
   directory, then rename over the target. A crashed write **MUST NOT** leave a
   truncated JSON file in place.
@@ -107,7 +131,7 @@ Conforms to [`schema/plan-manifest.schema.json`](schema/plan-manifest.schema.jso
 ```json
 {
   "schema": "https://deepworkplan.com/schema/plan-manifest/v1.json",
-  "spec_version": "2.2.0",
+  "spec_version": "2.3.0",
   "name": "PLAN_payment_webhooks",
   "title": "Add payment webhook handling",
   "archetype": "individual",
@@ -128,6 +152,11 @@ Conforms to [`schema/plan-manifest.schema.json`](schema/plan-manifest.schema.jso
   (`DWP_SPECIFICATION.md` §11, Proportional Rigor).
 - `parent_plan` links a child DWP to its orchestrator plan (`{repo}:{plan_name}`,
   or `null`).
+- `task_count` is the number of task files the materialization **intends to
+  write**, Final Review included (creation provenance; a completed
+  materialization has exactly that many task files on disk). A `refine`
+  that adds, splits, or removes tasks changes the live count in
+  `state.json.task_count` only; the manifest is never rewritten (§2).
 - `created_by` **SHOULD** identify the creating agent and model; it **MUST NOT**
   contain secrets, tokens, or user identifiers beyond a display name.
 
@@ -205,8 +234,21 @@ Conforms to [`schema/plan-state.schema.json`](schema/plan-state.schema.json)
 
 - Each run of a validation command (`DWP_SPECIFICATION.md` §5.1) **SHOULD** be
   recorded as a gate record: `command`, `passes` (boolean), `exit_code`,
-  `last_run`, and a short human-readable `evidence` string (a summary line or a
-  path under `analysis_results/`, **never** full command output).
+  `last_run`, and a short human-readable `evidence` string (≤ 500 characters:
+  a summary line or a path under the plan's own `analysis_results/` — inside
+  the plan folder, never the repository root — **never** full command
+  output). `passes` is a boolean: a check that could not run is recorded with
+  `passes: false` and an `evidence` string that says why (missing tool,
+  unavailable environment) — never as a pass and never as `null`.
+- The additional evidence `DWP_SPECIFICATION.md` §5.1.3 asks for — working
+  directory, scope and reason, revision or fingerprint, selected/executed test
+  counts, evidence path — is carried **inside the `evidence` string** in a
+  compact `key=value; …` form (for example
+  `scope=tests/unit/i18n (touched surface); fp=6037c9f+clean; ran=12/12; log=analysis_results/gates/t7.log`).
+  The v1 gate object is closed (`additionalProperties: false`), and 2.3.0
+  deliberately adds **no** field so that state files remain valid in both
+  directions (§6). The full record also lives in the task's Completion & Log,
+  which is the authoritative copy.
 - A task **MUST NOT** be marked `completed` in `state.json` while any of its gate
   records has `passes: false` and no later passing run.
 - Gate records are the machine equivalent of §5.1's "never mark complete without
@@ -219,8 +261,13 @@ Conforms to [`schema/plan-state.schema.json`](schema/plan-state.schema.json)
   `failed`, what `worked`, and free-form `notes`. Keep each entry to one line.
 - Outcome records make a finished plan retrievable **episodic memory**: an agent
   (or a memory-indexing platform) can later recall *how* a problem was solved,
-  not just that it was. They feed the mandatory Skills & Agents Discovery task
-  (`DWP_SPECIFICATION.md` §6.1), which **SHOULD** read them when mining patterns.
+  not just that it was. They are the evidence a task's **task-local skills
+  decision** (`DWP_SPECIFICATION.md` §6.2) cites, and the Final Review
+  (`DWP_SPECIFICATION.md` §6.1 c) **MAY** read them when reconciling the
+  candidates ledger — it does not re-mine the whole plan. The disposition itself
+  is recorded in the task's Completion & Log and, when a candidate exists, in
+  `analysis_results/SKILLS_CANDIDATES.md` by stable ID; `outcome.notes` **MAY**
+  carry a one-line pointer (`skills: none` / `skills: T7-001`).
 
 ### 4.4. Checkpoint and blocked state
 
@@ -228,6 +275,13 @@ Conforms to [`schema/plan-state.schema.json`](schema/plan-state.schema.json)
   the task `id`, a free-form `step` locator, a timestamp, and a one-line note. An
   agent **SHOULD** update it whenever it pauses inside a task; it **MUST** update
   it before any planned interruption in unattended mode.
+- **The terminal checkpoint is the one fixed value.** `step` is free-form
+  everywhere except at completion: a plan whose `status` is `completed`
+  **MUST** carry `checkpoint.task` = the last task's id and
+  `checkpoint.step` = the literal `"done"`. Every earlier checkpoint in a
+  plan's life is free-form, so this is the one place the convention is not
+  inferable from the plan's own history — state it here rather than leaving an
+  agent to discover it from a refusal.
 - `blocked` is `null` or `{ "task": N, "reason": "...", "since": "...", "needs": "..." }`.
   An unattended agent that hits a stop condition (`AGENT_PROTOCOL.md` §7.3)
   **MUST** populate `blocked` before halting — this is how a daemon's next
@@ -249,27 +303,345 @@ Conforms to [`schema/plan-state.schema.json`](schema/plan-state.schema.json)
 - Tools other than the executing agent **MUST** treat both JSON files as
   read-only.
 
+### 5.1. Update order and interruption recovery
+
+- **Update order.** At a task or step boundary the agent **MUST** persist in this
+  order: the task file's Completion & Log → the plan README checkboxes and status
+  → `PROGRESS.md` → `state.json` (atomic replace). The markdown is therefore
+  never behind the projection; a crash between steps leaves a state file that is
+  at worst *stale*, never *ahead* of the truth. For the `state.json` step a
+  targeted mutation **SHOULD** use the shipped updater
+  (`shared/update-state.py`, stdlib-only, atomic, idempotent modulo
+  timestamps) rather than re-emitting the whole file; whole-file regeneration
+  remains the path for creation, `refine` recounts, and markdown-wins
+  reconciliation.
+- **Interruption before or after the commit.** On resume the agent **MUST**
+  inspect actual evidence before replaying anything: `git status` and `git log`
+  (where git exists), the task log, the README checkbox, and `state.json`. Work
+  found in the tree but not committed is **not** redone; a commit that already
+  exists is **not** repeated; a gate whose recorded inputs are unchanged is
+  **not** rerun; a report or external write already sent is **not** resent. The
+  resumed action is **idempotent**: it completes whichever of validate → task log
+  → README/status → `PROGRESS.md` → commit → `state.json` is missing, in that
+  order.
+- **Stale results.** A change to a task's requirements (a `refine` edit), a fix
+  landed after a gate ran, or a resumed edit to the same surface **invalidates**
+  the affected gate records even when the checkbox is already set; the agent
+  **MUST** rerun those gates and update the records before marking or
+  re-marking the task complete.
+- **Evidence reuse requires an unchanged world.** Before reusing a recorded
+  pass after an interruption, the agent **MUST** compare the recorded
+  fingerprint (`fp=` in the gate evidence: revision plus dirty state) with the
+  current `git rev-parse HEAD` and `git status --porcelain`; a changed
+  revision, changed dirty/generated files, or a changed environment
+  invalidate reuse — the gate is rerun instead. A `log=` pointer inside gate
+  evidence that does not resolve within the plan folder is a conformance
+  finding (the writer refuses closure on it; the checker reports it), never
+  silently reusable evidence.
+- **External-action receipts.** An outward-facing action (report, push, PR,
+  message) is evidenced by its own receipt — id, URL, or remote branch —
+  recorded in the task log at action time. Deterministic tests simulate
+  receipts as local files; a genuinely missing receipt on resume is
+  investigated against the service's actual state, never guessed at and never
+  re-sent on assumption.
+- **Pointers, not history.** `checkpoint.step` and `checkpoint.note` **SHOULD**
+  point at the exact instruction and the last durable artifact, so a fresh agent
+  resumes from the pointer rather than from a transcript. Unknown or stale
+  pointers require retrieval and verification, never guessing.
+
 ---
 
 ## 6. Versioning
 
-- Both schemas are versioned by URL (`/v1.json`). Additive fields are allowed
-  within a version; renaming or re-typing a field requires `/v2.json` and a
+- Both schemas are versioned by URL (`/v1.json`). Every object in the v1 schemas
+  is **closed** (`additionalProperties: false`), so a new field — even an optional
+  one — is **not** accepted by an existing v1 validator. Adding, renaming, or
+  re-typing a field therefore requires a new URL generation (`/v2.json` was that
+  move, published alongside v1 with the `schema` field selecting it) and a
   migration note in the spec changelog.
+  **2.3.0 adds no field to either schema**: every new piece of evidence maps onto
+  existing strings (§4.2, §4.3), so a 2.3.0 state file validates against the v1
+  schema as shipped in 2.2.0, and a 2.2.0 state file validates unchanged under
+  2.3.0. Package SemVer (the skill), the spec document version, and the schema
+  URL version are three separate things and are never conflated. The standard's
+  own series are 2.x and 4.x (historical — those plans stay valid, §6.5) and 5.x
+  (current, aligned with the product line); there is no 3.x standard. The
+  `/v2.json` schema URLs stay v2 across all three series, and `/v5.json` is a
+  **generation snapshot** of the v2 shape (no property added, renamed, or
+  re-typed): the URL generation marks the plan's methodology line, not a
+  schema-shape change.
 - `spec_version` in the manifest pins the DWP spec version the plan was created
-  under; an agent encountering a newer plan than its installed spec **SHOULD**
-  say so rather than guess.
+  under and is never rewritten (§2); an agent encountering a newer plan than its
+  installed spec **MUST** say so rather than guess (`DWP_SPECIFICATION.md` §6.5).
+
+### 6.1. Discovering the standard in force
+
+An agent **MUST** be able to state, from files alone, which standard it is
+executing:
+
+| Question | Source of truth |
+|---|---|
+| Which skill is installed? | The router `SKILL.md` frontmatter `version:` (package SemVer). |
+| Which spec does it implement? | The `Version` field in each `spec/*.md` status table (`spec/README.md` indexes them). |
+| Which standard was this plan created under? | `manifest.json` → `spec_version`. When no manifest exists (a pre-2.2.0 plan), the plan is **legacy** by definition; its shape is read conservatively from its files (three closing task files ⇒ the pre-2.3.0 lifecycle; a single `{N}.task_final_review.md` ⇒ 2.3.0 or later). |
+| Which standard is this plan executing **now**? | The creation `spec_version`, unless the plan README carries an explicit **declared migration** line (below). |
+
+A **declared migration** is the only way a plan changes standard after
+materialization. It is written by an authorized `refine` session (or, for a plan
+that has not started, by its author) as a line in the plan README —
+`**Standard:** DWP spec X.Y.Z (migrated from A.B.C on YYYY-MM-DD — reason)` —
+and recorded in `PROGRESS.md`; the manifest keeps its creation provenance.
+Completed tasks and their gate evidence **MUST** be preserved by a migration;
+only unstarted tasks may take the new shape. A conformance checker **MUST**
+honor a declared migration by reading that declaration — it **MUST NOT**
+recognize migrated plans by name, and it **MUST** still reject a plan that
+declares a standard it objectively violates (`DWP_SPECIFICATION.md` §6.5).
+
+> **Divergence from 2.2.0.** Adds the `SKILLS_CANDIDATES.md` ledger to the
+> layout, maps the 2.3.0 gate-evidence fields onto the closed v1 gate object
+> without a schema change, states the update-order and interruption-recovery
+> rules (§5.1), corrects the versioning rule (closed schemas: any new field needs
+> `/v2.json`), and defines standard discovery and declared migration (§6.1).
+> Existing 2.2.0 state and manifest files remain valid.
 
 ---
 
 ## 7. References
 
+### v2 evidence compatibility
+
+New Lite and Full plans use the v5 schemas (generation snapshots of the v2
+shape; plans created under 4.0.0 keep their v2 URLs and stay valid). A task's
+typed `locator` replaces
+v1's `file`; the execution evidence contract is unchanged: `started_at`,
+`completed_at`, `commit`, `gates` and `outcome` remain supported with the same
+types and limits. After validating a task, commit its owned changes and record
+the commit hash in state. A plan without source changes need not invent a commit.
+Gate, checkpoint and blocker objects remain structured and closed. Promotion
+records carry `from: lite`, `to: full` and phase `intent`, `tasks_written` or
+`switched`; all phases block execution until recovery clears the marker.
+
+The v1 schemas and existing v1 plans are unchanged. Schema validity describes
+shape; the conformance checker and agent additionally verify completion evidence,
+task correspondence and the meaning of validation results.
+
 - [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119)
 - [`schema/plan-manifest.schema.json`](schema/plan-manifest.schema.json),
-  [`schema/plan-state.schema.json`](schema/plan-state.schema.json)
+  [`schema/plan-state.schema.json`](schema/plan-state.schema.json),
+  [`schema/plan-manifest-v2.schema.json`](schema/plan-manifest-v2.schema.json),
+  [`schema/plan-state-v2.schema.json`](schema/plan-state-v2.schema.json),
+  [`schema/plan-manifest-v5.schema.json`](schema/plan-manifest-v5.schema.json),
+  [`schema/plan-state-v5.schema.json`](schema/plan-state-v5.schema.json)
+- [`LITE_PLANS.md`](LITE_PLANS.md) defines v2 Lite/Full representation, typed
+  task locators and promotion recovery. v1 state remains immutable for plans
+  created with it; new Lite and Full plans declare the v5 schema URLs
+  (generation snapshots of v2 — plans created under 4.0.0 keep their v2 URLs).
 - `DWP_SPECIFICATION.md` (§4, §5, §11), `AGENT_PROTOCOL.md` (§7), `ARCHETYPES.md` (§4)
 - [JSON Schema 2020-12](https://json-schema.org/specification)
 
 ---
 
-*Part of the DeepWorkPlan methodology v2.2.0, MIT License, by [Dailybot](https://dailybot.com) / dailybotops.*
+*Part of the DeepWorkPlan methodology v5.0.0, MIT License, by [Dailybot](https://dailybot.com) / dailybotops.*
+
+## 8. The v6 record layer: journal, ledger snapshot, generated views
+
+> **Status: v6 line.** This section binds **v6 new plans only**. v1/v2/v5
+> plans keep sections 1–7 as their complete standard; the v6 contract and
+> journal record formats are specified in
+> [`V6_CONTRACT.md`](V6_CONTRACT.md) and validated by the published
+> schemas plus `shared/contract_v6.py`. What this section adds is the
+> **write discipline and projections** around those records.
+
+A v6 plan carries, beside the markdown:
+
+| Artifact | Role | Writer |
+|---|---|---|
+| `manifest.json` (v6) | Identity manifest with the **contract pointer** — written FIRST by materialization so a plan's v6-ness is discoverable even if interrupted before the contract lands; the pointer is provenance and is never edited (`schema/plan-manifest/v6.json`) | `shared/ledger.py materialize` (once) |
+| `contract.json` (or `contracts/` chain) | Outcome + authority contract; content-addressed identity | materialization / revisions (never in-place edits) |
+| `journal.ndjson` | Append-only event log — the plan's **memory** | `shared/ledger.py` only |
+| `state.json` (v6 shape) | Deterministic **snapshot projection** — the recovery root | `shared/ledger.py project` |
+| `evidence.jsonl` | Fingerprint→result cache for equivalent-input reuse | `shared/ledger.py gate` |
+| `gates/<task>/*.log` | Recoverable gate output logs | `shared/ledger.py gate` |
+| `views/*.md` | Generated views (tasks / evidence / audit / completion) | `shared/views.py render` |
+
+**The snapshot's own schema URL.** The v6 snapshot publishes under its own
+new-generation URL — `https://deepworkplan.com/schema/plan-snapshot/v6.json`
+(`spec/schema/plan-snapshot-v6.schema.json`) — never inside the
+`plan-state` label: that label is the frozen v1/v2/v5 **shape** series (v5
+is a generation snapshot of the v2 shape), and the v6 snapshot is a
+different artifact projected from the journal, not a mutation of those
+shapes. The same rule gave v6 the `plan-contract/v6` and
+`journal-event/v6` labels.
+
+**Materialization order.** `shared/ledger.py materialize` writes the v6
+records in exactly this order — manifest, contract, approval event — each
+step idempotent and resumable; the full normative sequence and its
+refusals are specified in [`V6_LIFECYCLE.md`](V6_LIFECYCLE.md) §3.
+
+**Write discipline.** One writer per plan. A cooperative `.ledger.lock`
+directory serializes writers; a session that finds the journal grown
+behind its own observed byte position refuses to append (the collision is
+reported, never interleaved). A final line from a crash mid-append is
+handled by what it IS, not by where it sits: a line that **does not
+parse** is a torn tail — truncated at its line start on the next open,
+with a `journal_repair` event recording the byte offset and cause — while
+a line that **parses but lost only its trailing newline** is a complete,
+durable event: the writer restores the framing byte and records the
+repair, and the event itself is never deleted. The append-only rule binds
+complete events. The
+snapshot is rewritten only by the projector, atomically (temp + rename +
+fsync). No protection is claimed against editors that bypass the writer;
+read-time checks report what the records can show.
+
+**Trust — the closed mint rule (B1/A1).** `observed` is minted by
+execution, never by declaration. `gate_run` records exist only through
+`ledger.py gate` — the helper itself executes the command with declared
+cwd, timeout and captured logs, bound at execution time to one criterion
+the task's `gate_intent` declares and to a started task; a mediated
+`append` of a `gate_run` is refused outright. Outside the gate executor
+exactly two `observed` paths exist: `resource_sample` metering written by
+a `host_adapter` actor citing an evidence artifact that resolves, and the
+control-pair executor — `ledger.py start` captures the task's starting
+fingerprint (revision plus dirty state) on the `task_start` record while
+the working tree still is the starting state, and `run_control` (reached
+through `outcomes.py control`) then executes both legs itself, materializing
+the old leg as a detached worktree at that recorded revision carrying
+exactly the declared check artifacts (D2-6/D3-4); a dirty starting
+fingerprint or a non-git host records `control_unavailable`, never a
+synthesized old outcome (D3-3). Every
+`observed`/`imported` record must cite a pointer that resolves inside the
+plan or the repository. Everything else an agent writes down — including
+invariant evaluations, discoveries and model-reported results — is
+`asserted`, with the mediation named. Criteria count evidence only when
+recorded inside the CURRENT attempt — at or after the task's **latest**
+`task_start` journal position (D2-9b) with an accepted trust label; a
+restart reopens the window and earlier evidence is carried as stale,
+never satisfying. Boundary invariants are evaluated at or after
+task-start (D3-6).
+
+**Determinism.** Every timestamp in the snapshot and the views is derived
+from event `ts` values, never the wall clock: replaying the same journal
+bytes yields byte-identical `state.json` and view files. Positions the
+journal cannot support after a markdown-wins reconciliation are recorded
+`regenerated`, never fabricated (D2-8), and are ignored for roll bounding.
+
+**The human-edit rule (views).** A generated view whose bytes differ from
+what render would produce AND from the digest its last render recorded
+(`view_render.digests`) is a human edit — whether or not its identity
+header survived — and is never silently overwritten. A view that still
+matches its recorded digest is merely stale (the records moved on): render
+refreshes it in place without a reconciliation. Render reports the
+divergence and the operator reconciles: `human-wins` (the human edit
+stays; the generated output sits beside it as `<name>.generated.md`) or
+`generated-wins` (the human edit is preserved as `<name>.human.md`). Both
+record a
+`reconciliation` event with the trigger, the editor whose change won, and
+the operator-supplied authority. `README.md` and `PROGRESS.md` remain
+markdown-wins human documents.
+
+**Completion.** A task may only close when every `gate_intent` criterion
+has in-window accepted evidence; `ledger.py complete` refuses otherwise
+(zero-test control) and the refusal is itself a recorded event. The
+completion profile view shows which mechanism closed every criterion
+(evidence + trust + pointer, or reconciled authority) — never a bare
+claim. In 6.0, reconciled-authority closures render as an explicit
+amendment line in the view footer: rendering them as first-class
+completion rows waits for the lifecycle wiring that mints them.
+
+**Durability and rolls (Q2, bounded by measurement).** `.dwp/` is
+conventionally gitignored, so the default durability posture is
+**export**: `ledger.py export --dest DIR` copies the whole evidence
+chain — journal + snapshot + contract chain, plus roll archives, the
+`evidence.jsonl` reuse cache, every `gates/` log, and every
+`evidence_path` cited by any record or snapshot criterion — with
+verified digests; a cited pointer that does not resolve is listed in the
+manifest as `missing_evidence`, never silently dropped. Rolls are OFF by
+default. When used, `ledger.py roll` retires **live bytes only**: the
+journal archive beside the plan keeps every event first-class (approvals,
+evidence windows and projections read archived + live history — a rolled
+plan continues; nothing is deleted, snapshot-cited positions become
+archive-addressable, and a corrupt archive segment is an error, never a
+silent skip). Automatic roll-sizing waits for measurement data from the
+confirmation campaign, which is why no automatic policy ships in 6.0.
+
+**View layout (Q4).** Four views ship: `tasks` (task table),
+`evidence` (evidence index with trust labels), `audit` (every refusal and
+intervention, by class, with reasons — a faithful ledger of recorded
+proposals, never an index or rating), and `completion` (rendered at
+completion). All are pure projections under the generated-view discipline
+above.
+
+---
+
+## Guarded state updates
+
+The installed updater rejects malformed state and completed tasks without passing
+nonempty gate evidence. Use `--gate-json` for commands containing pipes; it accepts
+the existing closed gate object. Different commands retain their records; retries
+supersede only the same command. `--block-reason` records a blocker, and
+`--resolve-blocker` explicitly resolves only the current task's blocker. Skipped
+work cannot make a plan completed. `--reopen-reason` records caller intent to
+refine; preserve the amendment and invalidated evidence in the task log first.
+`--expected-sha256` rejects a stale state snapshot. A cooperative `.lock` directory
+serializes writes; inspect a crashed writer before removing its lock. No protection
+is claimed against editors that ignore the lock. Records assert results; they do
+not prove command execution or semantic acceptance.
+
+### Verified plan publication
+
+Before announcing completion, author the finished task logs (including
+`Skills disposition:` and `Documentation decision:`), README index and PROGRESS
+from earned source/acceptance results. Then close the final task through
+`shared/update-state.py`: its terminal transition validates the completed
+candidate against all plan artifacts before writing state, verifies the actual
+files afterward, and records `analysis_results/FINALIZATION.json`. Do not add
+an invented passing gate for this invocation to the candidate it is validating.
+The receipt is external evidence, not its own prerequisite. Run
+`bash ../verify/conformance.sh --plan PLAN_name` on the actual artifacts next.
+
+An interrupted publication leaves `.finalizing.json`; normal verification fails
+until evidence is inspected and `python3 ../shared/finalize_plan.py PLAN_DIR
+--candidate CANDIDATE.json --recover` succeeds. A stale cooperative lock requires
+checking that no writer is active before removal. No helper commits, pushes,
+executes stored gate commands or silently repairs Markdown. Missing Python means
+UNVERIFIED, never completed. These checks enforce records and structure; manually
+judge acceptance, consumer coverage and the truth of the underlying evidence.
+
+### Evidence truth and amendments
+
+Every scope, criterion or deferral change carries one durable amendment record
+(`refine/SKILL.md` 3.7): original criterion verbatim, what was observed, the
+disposition, the reason, the authority (user / developer / evidence), affected
+tasks, and which evidence was invalidated or preserved. Amendments are
+appended, never backdated; `manifest.json` keeps creation provenance and is
+never rewritten to match a changed live scope.
+
+The five evidence states, and what each may close:
+
+- **Completed investigation** — real recorded work; never the execution of the
+  original criterion. Closes the task only against a revised criterion that
+  names it.
+- **Unexecuted scenario** — recorded as not performed; contributes no passing
+  gate evidence in any era.
+- **Deferred requirement** — the criterion moves to a named destination task
+  with recorded authority; the source closes only with that amendment.
+- **Failed gate** — remains failing until the same acceptance intent is re-run
+  and passes; a retry supersedes only its own command.
+- **Achieved product outcome** — the criterion as written, verified by its
+  gate; the only state that completes a task unchanged.
+
+Enforcement is mechanical where the records allow it and manual where they do
+not. Gate evidence prefixed `invalidated by refine` is retained history, never
+passing evidence — the guarded writer refuses closure without a fresh later
+record for each invalidated command, and read-only verification reports a
+completed task that relies on it. A passing record whose own evidence admits
+the check never ran (`never entered`, `did not run`, `structurally impossible`,
+`unexecuted`, `cannot be measured`) is a contradiction, reported the same way;
+an honest non-execution belongs in an amendment, not behind a passing boolean.
+A completed state task whose record still reads `Status: pending` is likewise a
+reported mismatch. Narrative contradictions beyond these — a report whose
+conclusions disagree with a checklist's claims — require a human reviewer; the
+checker reports what records say, not what prose means. The user may explicitly
+accept a bounded exception with recorded authority; unattended pre-approval is
+never blanket permission to abandon a core objective, and an unmeetable
+mandatory criterion is a blocker, never completed work.
