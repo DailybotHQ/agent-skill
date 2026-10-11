@@ -56,8 +56,8 @@ skill's own `shared/auth.md` flow.
 
 | Want | Offer |
 |------|-------|
-| **Dailybot skill** (recommended — brings consent/auth + `report`) | `npx skills add DailybotHQ/agent-skill` · OpenClaw `openclaw skills install dailybot` · `git clone https://github.com/DailybotHQ/agent-skill.git` + `./setup.sh` |
-| **Dailybot CLI only** (developer explicitly wants the binary) | `pip install 'dailybot-cli>=3.7.0'` (Py 3.10+) · `brew install dailybothq/tap/dailybot` (macOS) · vendor's verified installer flow (macOS / Linux / Windows) via [`shared/auth.md`](https://github.com/DailybotHQ/agent-skill/blob/main/skills/dailybot/shared/auth.md) — `download → verify SHA-256 → execute`, never a one-line remote-installer pipe |
+| **Dailybot skill** (recommended — brings consent/auth + `report`) | `npx --yes skills add https://github.com/DailybotHQ/agent-skill/tree/v3.23.3 --skill dailybot -y` (**pinned to a published tag**; content hash recorded in `skills-lock.json`) · OpenClaw `openclaw skills install dailybot` (registry-managed pin) |
+| **Dailybot CLI only** (developer explicitly wants the binary) | `pip install 'dailybot-cli>=3.9.0'` (Py 3.10+) · `brew install dailybothq/tap/dailybot` (macOS) · vendor's verified installer flow (macOS / Linux / Windows) via [`shared/auth.md`](https://github.com/DailybotHQ/agent-skill/blob/main/skills/dailybot/shared/auth.md) — `download → verify SHA-256 → execute`, never a one-line remote-installer pipe |
 
 > Prefer installing the **skill** — it owns the SHA-256-verified CLI install and
 > the OTP/API-key auth flow. Only surface the raw CLI commands when the developer
@@ -148,17 +148,17 @@ Decision notes:
 
 ---
 
-## 4b. Offer deterministic hook enforcement (CLI >= 3.7.0)
+## 4b. Offer deterministic hook enforcement (CLI >= 3.9.0)
 
 The §4 wiring is prompt-layer — it relies on the model remembering. When
-`dailybot-cli` is **>= 3.7.0** (the unified floor for the current skill pack,
-currently **3.10.3**), also offer (opt-in, show the exact config first) to commit
+`dailybot-cli` is **>= 3.9.0** (the unified floor for the current skill pack,
+currently **3.23.3**), also offer (opt-in, show the exact config first) to commit
 the repo-level harness hook config so the harness itself reminds the agent about
 unreported work at end of turn:
 
 ```bash
 # Version gate — only offer when the CLI meets the floor
-dailybot --version          # >= 3.7.0 (hooks, chat, authoring, browse/read)
+dailybot --version          # >= 3.9.0 (hooks, chat, authoring, browse/read)
 dailybot version --check      # confirms whether an upgrade is available
 ```
 
@@ -182,7 +182,7 @@ other harnesses per its table. Decision notes:
   `"report": {"min_interval_minutes": 30, "nudge": false}` turns reminders off
   for the repo while keeping manual reporting; `"mode": "continuous"` nudges
   non-commit work (research, docs, plans) sooner in research-heavy repos.
-- **Older CLI:** below 3.7.0 → skip the offer, suggest `dailybot upgrade` once,
+- **Older CLI:** below 3.9.0 → skip the offer, suggest `dailybot upgrade` once,
   and let the §4 wiring stand alone.
 
 ---
@@ -200,5 +200,5 @@ other harnesses per its table. Decision notes:
 - **Never block:** the wired report step is best-effort; absence, auth failure,
   network errors, or `.dailybot/disabled` mean skip-and-continue — warn once, no
   retries, no diagnostic loop. `execute` always succeeds regardless.
-- **Vendor-neutral:** never imply DWP requires Dailybot. A repo with zero addons
+- **Vendor-neutral:** never imply DWP requires Dailybot. A repo with zero optional addons
   is fully conformant.

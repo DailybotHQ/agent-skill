@@ -11,7 +11,9 @@ This file contains **copy-paste ready prompts** for working with this specific p
 **When generating PROMPTS.md for a new plan:**
 
 1. **Use this template** as the base structure
-2. **Replace all instances of `{PLAN_NAME}`** with the actual plan name (e.g., `PLAN_EXAMPLE_document_domain_app`)
+2. **Replace all instances of `{PLAN_NAME}`** with the actual allocated plan
+   basename (e.g., `PLAN_001_document_domain_app`). For an existing unnumbered
+   plan, use its unchanged basename.
 3. **Reference the canonical examples** in the skill's `examples/` folder and the
    command sub-skills:
    - See `examples/CREATE_PLAN.md` for create prompt patterns
@@ -130,7 +132,7 @@ When creating or customizing these prompts, reference:
 - **Execute** sub-skill (`../execute/SKILL.md`) - Execution behavior
 - **Resume** sub-skill (`../resume/SKILL.md`) - Resume behavior
 - **Status** sub-skill (`../status/SKILL.md`) - Status reporting
-- **[../guide/GUIDE.md](../guide/GUIDE.md)** - Complete methodology specification
+- **[../guide/GUIDE.md](../guide/GUIDE.md)** - Methodology guide routing index (read the file your flow needs)
 
 ---
 

@@ -1,34 +1,38 @@
 # Task {N}: Create Child DWP — {Repository Name}
 
-> **Template for orchestrator plans.** Replace all `{placeholders}` when generating a real task file.
+> **Template for orchestrator plans.** Replace known placeholders when generating
+> a real task file. `{CHILD_PLAN_NAME}` is a runtime variable bound only after
+> the target repository allocates its next plan ID. Substitute that basename
+> when running commands and writing child records; do not edit approved parent
+> task markdown merely to fill in the ID.
 
 ## 1. Context
 
 **Plan Type:** Orchestrator — Child DWP Creation
 **Target Repository:** `repositories/{repo_name}/`
-**Child Plan Name:** `PLAN_{feature}_{repo_short}`
+**Child Plan Slug:** `{feature}_{repo_short}` (the full `{CHILD_PLAN_NAME}` is allocated during this task)
 
 This task creates a complete DWP plan inside `repositories/{repo_name}/` that implements the {repo_name}-specific portion of the overall feature. The child DWP will follow {repo_name}'s own AGENTS.md, validation commands, and conventions.
 
 ### Orchestrator Context
 
-- **Parent Plan:** PLAN_{parent_plan_name} (this plan, in Core Hub)
+- **Parent Plan:** {PARENT_PLAN_NAME} (this plan, in Core Hub)
 - **Feature:** {overall feature description}
 - **This repo's role:** {what this repo contributes — e.g., "CRUD API endpoints for user preferences"}
 - **Depends on:** {list child plans that must complete first, or "None — this is the first child DWP"}
 - **Depended on by:** {list child plans that depend on this one's outputs, or "None"}
-- **Manifest:** `.dwp/plans/PLAN_{parent_plan_name}/ORCHESTRATOR_MANIFEST.md` {or "Not used"}
+- **Manifest:** `.dwp/plans/{PARENT_PLAN_NAME}/ORCHESTRATOR_MANIFEST.md` {or "Not used"}
 
 ### Input Dependencies (from predecessors)
 
 {If this child has predecessors, list what outputs it expects from them:}
-- From PLAN_{feature}_{predecessor_short}: {what outputs are expected — e.g., "Executive Report with API endpoint definitions, data model schemas"}
+- From {PREDECESSOR_PLAN_NAME}: {the concrete artifacts that plan declared — e.g., "analysis_results/API_CONTRACT.md with endpoint definitions and data model schemas"}
 - {Or "None — this is the first child DWP in the dependency chain"}
 
 ### Output Declarations (for successors)
 
 {What this child DWP is expected to produce for downstream consumers:}
-- Executive Report: {summary of what it will contain — e.g., "API endpoint paths, request/response schemas, data model definitions"}
+- Declared output artifacts: {the exact files this child will write for downstream use — e.g., "analysis_results/API_CONTRACT.md: endpoint paths, request/response schemas, data model definitions"}
 - Key outputs: {specific outputs — e.g., "API endpoint URLs, error response formats, pagination patterns"}
 - {Or "None — no downstream child DWPs depend on this one's outputs"}
 
@@ -41,7 +45,7 @@ The child DWP should cover approximately {N} tasks, including:
 - {high-level task 4 — e.g., "Security hardening pass over the new endpoints"}
 - {high-level task 5 — e.g., "Write comprehensive tests"}
 - {high-level task 6 — e.g., "Update documentation"}
-- Plus mandatory final tasks (Security Review + Skills & Agents Discovery + Executive Report)
+- Plus the single mandatory Final Review (security pass + final-state validation + skills reconciliation + documentation reconciliation)
 
 ## 2. Read Before Starting
 
@@ -84,8 +88,19 @@ Create a complete, executable DWP plan inside `repositories/{repo_name}/` that:
 
 **Navigate to target repository:**
 ```bash
+# Save the Core Hub root before entering the child — resolving the git root
+# while inside the child would return the child, not the hub.
+HUB_ROOT="$(git rev-parse --show-toplevel)"
+
+# Enter the child by its REGISTERED root (from ORCHESTRATOR_MANIFEST.md).
+# repositories/{repo_name}/ is the convention, not a hardcoded requirement.
 cd repositories/{repo_name}
 ```
+
+> [!NOTE]
+> Do not carry a hub `DWP_DIR` into the child: resolve the child's `.dwp/` in a
+> subshell with `unset DWP_DIR`, or set an explicitly recorded child-specific
+> override.
 
 Read the following files completely:
 - **`AGENTS.md`** — Extract and note:
@@ -146,10 +161,11 @@ Based on this repo's role in the feature, break down the work into atomic tasks:
 
 ### Step 3: Create the child DWP plan
 
-Create the plan at:
+From the target repository, allocate the child folder once with `shared/plan_paths.py --plans-dir <dwp_dir>/plans allocate <slug>` (use `--max-words 4` for a v5 child). Bind `{CHILD_PLAN_NAME}` to the returned basename and create the plan at:
 ```
-repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/
+repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/
 ```
+The target repository owns the child ID. Never derive it from the parent ID, and never rename an existing child plan.
 
 Create all required files:
 
@@ -157,7 +173,7 @@ Create all required files:
 ```markdown
 # Plan: {Feature Title} — {Repo Name}
 
-> This is a child DWP created by orchestrator plan `PLAN_{parent_plan_name}` in the Core Hub.
+> This is a child DWP created by orchestrator plan `{PARENT_PLAN_NAME}` in the Core Hub.
 
 ## 1. Goal
 {Repo-specific goal}
@@ -172,24 +188,20 @@ Create all required files:
 - [ ] Task 1: {title}
       See: [1.task_{name}.md](./1.task_{name}.md)
 ...
-- [ ] Task N-2: Security Review
-      See: [{N-2}.task_security_review.md](./{N-2}.task_security_review.md)
-- [ ] Task N-1: Skills & Agents Discovery
-      See: [{N-1}.task_skills_agents_discovery.md](./{N-1}.task_skills_agents_discovery.md)
-- [ ] Task N: Executive Report
-      See: [{N}.task_executive_report.md](./{N}.task_executive_report.md)
+- [ ] Task N: Final Review
+      See: [{N}.task_final_review.md](./{N}.task_final_review.md)
 
 ## 5. Execution Rules for the Agent
 {Standard execution rules}
 
 ## 6. Orchestrator Context
 
-> This child DWP is part of orchestrator plan `PLAN_{parent_plan_name}` in the Core Hub.
+> This child DWP is part of orchestrator plan `{PARENT_PLAN_NAME}` in the Core Hub.
 
 ### Parent Plan Reference
-- **Parent Plan:** PLAN_{parent_plan_name}
-- **Parent Location:** /workspace/.dwp/plans/PLAN_{parent_plan_name}/
-- **Manifest:** /workspace/.dwp/plans/PLAN_{parent_plan_name}/ORCHESTRATOR_MANIFEST.md
+- **Parent Plan:** {PARENT_PLAN_NAME}
+- **Parent Location:** `.dwp/plans/{PARENT_PLAN_NAME}/` (in the Core Hub)
+- **Manifest:** `.dwp/plans/{PARENT_PLAN_NAME}/ORCHESTRATOR_MANIFEST.md` (in the Core Hub)
 - **This repo's role:** {what this repo contributes}
 - **Dependencies:** {which child plans must complete first}
 
@@ -213,14 +225,14 @@ Create all required files:
 
 > ⚠️ **EXECUTION BLOCKED** until all inputs are available.
 
-| Predecessor | Status | Executive Report Path |
+| Predecessor | Status | Declared Output Path |
 |-------------|--------|----------------------|
-| PLAN_{feature}_{predecessor_short} | [ ] Ready | `repositories/{predecessor_repo}/.agent_commands/.../PLAN_{feature}_{predecessor_short}/analysis_results/EXECUTIVE_REPORT.md` |
+| {PREDECESSOR_PLAN_NAME} | [ ] Ready | `repositories/{predecessor_repo}/.dwp/plans/{PREDECESSOR_PLAN_NAME}/analysis_results/{declared_artifact}` |
 
 **Before starting execution:**
-1. Verify each predecessor's Executive Report exists at the path above
-2. Read the Executive Report(s) — extract API endpoints, data models, key decisions
-3. If any predecessor report is missing, STOP and report: "Cannot start — waiting for {predecessor} to complete"
+1. Verify the predecessor plan is complete (`state.json` → `status: completed`) and each declared artifact above exists
+2. Read those artifacts — extract API endpoints, data models, key decisions
+3. If a declared artifact is missing, STOP and report: "Cannot start — waiting for {predecessor} to complete"
 4. Use predecessor context throughout execution, especially for integration-related tasks
 
 {Or if no predecessors: "None — this child DWP has no predecessors and can execute immediately."}
@@ -228,8 +240,9 @@ Create all required files:
 ### Expected Outputs
 
 {What this child DWP must produce for downstream consumers:}
-- **Executive Report:** `analysis_results/EXECUTIVE_REPORT.md` — {what it should contain for downstream use}
+- **Declared artifacts:** `analysis_results/{file}` — {what each contains for downstream use}
 - **Key outputs for successors:** {e.g., "API endpoint definitions, data model schemas, error handling patterns"}
+- **Executive Report:** only if this orchestrator explicitly requested one when creating this child; it is optional under DWP 2.3.0 and is never assumed to exist.
 - {Or "No downstream consumers — this is the last child DWP in the chain."}
 
 ## 7. Plan Status / Notes
@@ -250,12 +263,12 @@ See [PROMPTS.md](./PROMPTS.md) for ready-to-use prompts.
 **PROMPTS.md** — Using the target repo's template if available, or Core Hub's
 **PROGRESS.md** — Initial template
 **analysis_results/** — Empty folder (with .gitkeep)
-**Mandatory final tasks** — Skills & Agents Discovery + Executive Report
+**Mandatory final task** — the single Final Review, last (`{N}.task_final_review.md`)
 
 ### Step 4: Return to Core Hub and update orchestrator tracking
 
 ```bash
-cd /workspace  # Return to Core Hub root
+cd "$HUB_ROOT"  # Return to the SAVED Core Hub root (never a hardcoded path)
 ```
 
 Update the orchestrator plan's README.md:
@@ -265,14 +278,14 @@ Update the orchestrator plan's README.md:
 ## 5. Acceptance Criteria
 
 - [ ] Target repo's AGENTS.md was read and its rules extracted
-- [ ] Child DWP plan folder created at `repositories/{repo_name}/.agent_commands/.../PLAN_{feature}_{repo_short}/`
+- [ ] Child DWP plan folder created at `repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/`
 - [ ] README.md references parent orchestrator plan
 - [ ] README.md uses target repo's conventions (validation, test patterns, etc.)
 - [ ] All task files use target repo's validation commands
 - [ ] Task files reference target repo's test naming convention
 - [ ] Task files use target repo's commit format and scope
 - [ ] PROMPTS.md, PROGRESS.md, analysis_results/ all created
-- [ ] Mandatory final tasks included (Skills & Agents Discovery + Executive Report)
+- [ ] The single Final Review is included as the last task
 - [ ] Orchestrator plan's Child DWP Plans table updated (`[x] Created`)
 - [ ] Child DWP README includes "Orchestrator Context" section with shared context snapshot
 - [ ] Child DWP README includes "Input Dependencies" section (with blocking notice if applicable)
@@ -281,26 +294,26 @@ Update the orchestrator plan's README.md:
 
 ## 6. Outputs
 
-- **Created:** `repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/`
+- **Created:** `repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/`
 - **Updated:** Parent plan README (Child DWP Plans table)
 
 ## 7. Validation
 
 ```bash
 # Verify child plan structure
-test -f repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/README.md && echo "PASS: README exists" || echo "FAIL"
-test -f repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/PROMPTS.md && echo "PASS: PROMPTS exists" || echo "FAIL"
-test -f repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/PROGRESS.md && echo "PASS: PROGRESS exists" || echo "FAIL"
-test -d repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/analysis_results && echo "PASS: analysis_results exists" || echo "FAIL"
+test -f repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/README.md && echo "PASS: README exists" || { echo "FAIL" >&2; exit 1; }
+test -f repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/PROMPTS.md && echo "PASS: PROMPTS exists" || { echo "FAIL" >&2; exit 1; }
+test -f repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/PROGRESS.md && echo "PASS: PROGRESS exists" || { echo "FAIL" >&2; exit 1; }
+test -d repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/analysis_results && echo "PASS: analysis_results exists" || { echo "FAIL" >&2; exit 1; }
 
 # Verify child plan uses target repo's conventions
-grep -q "{validation_command}" repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/README.md && echo "PASS: Uses repo validation" || echo "FAIL"
+grep -q "{validation_command}" repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/README.md && echo "PASS: Uses repo validation" || { echo "FAIL" >&2; exit 1; }
 
 # Verify parent plan updated
-grep -q "PLAN_{feature}_{repo_short}" .dwp/plans/PLAN_{parent_plan_name}/README.md && echo "PASS: Parent updated" || echo "FAIL"
+grep -q "{CHILD_PLAN_NAME}" .dwp/plans/{PARENT_PLAN_NAME}/README.md && echo "PASS: Parent updated" || { echo "FAIL" >&2; exit 1; }
 
 # Verify parent reference in child
-grep -q "PLAN_{parent_plan_name}" repositories/{repo_name}/.dwp/plans/PLAN_{feature}_{repo_short}/README.md && echo "PASS: Parent referenced" || echo "FAIL"
+grep -q "{PARENT_PLAN_NAME}" repositories/{repo_name}/.dwp/plans/{CHILD_PLAN_NAME}/README.md && echo "PASS: Parent referenced" || { echo "FAIL" >&2; exit 1; }
 ```
 
 ## 8. Execution Checklist
@@ -312,12 +325,12 @@ grep -q "PLAN_{parent_plan_name}" repositories/{repo_name}/.dwp/plans/PLAN_{feat
 - [ ] 5. Design child DWP task breakdown.
 - [ ] 6. Create child DWP plan with all required files.
 - [ ] 7. Verify child DWP uses repo-specific conventions.
-- [ ] 8. Return to Core Hub (`cd /workspace`).
+- [ ] 8. Return to the saved Core Hub root (`cd "$HUB_ROOT"`).
 - [ ] 9. Update orchestrator README (Child DWP Plans table).
 - [ ] 10. Run validation commands.
 - [ ] 11. Update the plan README to mark this task as `[x]`.
 - [ ] 12. Update PROGRESS.md with task summary.
-- [ ] 13. Commit: `git commit -m "docs(technical): create child DWP for {repo_name} - Task {N} of PLAN_{parent_plan_name}"`
+- [ ] 13. Commit: `git commit -m "docs(technical): create child DWP for {repo_name} - Task {N} of {PARENT_PLAN_NAME}"`
 - [ ] 14. Send Dailybot progress report (non-blocking).
 - [ ] 15. Update the Log section below.
 
