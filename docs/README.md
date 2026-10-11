@@ -9,6 +9,7 @@ ship with the installed skill — only `skills/dailybot/` does.
 | [INSTALLATION.md](INSTALLATION.md) | Six install methods, update, uninstall |
 | [DESIGN.md](DESIGN.md) | Design decisions / architecture rationale |
 | [SUB_SKILL_GUIDE.md](SUB_SKILL_GUIDE.md) | How to add a sub-skill |
+| [Orchestra reporting](../skills/dailybot/report/orchestra.md) | Shipped guide: per-lane identity, authorized overrides, lead milestone, and duplicate prevention |
 | [HOOKS_ARCHITECTURE.md](HOOKS_ARCHITECTURE.md) | Hook enforcement architecture |
 | [OPENCLAW.md](OPENCLAW.md) | OpenClaw-specific notes |
 | [../SECURITY.md](../SECURITY.md) | Security policy (repo root) |

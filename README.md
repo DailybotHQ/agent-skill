@@ -124,6 +124,15 @@ Or invoke directly: `/dailybot_report`. The messages, email, and health
 skills are agent-only — the agent uses them autonomously without a slash
 command.
 
+### Reporting from an orchestra
+
+Each repository lane sends its own progress updates with a distinct,
+lead-assigned agent name (`dailybot agent update --name "<repo> lane"`). The
+lead sends the single integrated completion milestone. An explicitly
+authorized lane-name override applies to that command only and never changes
+the repository profile. See the [orchestra reporting guide](skills/dailybot/report/orchestra.md)
+for identity, cadence, and duplicate prevention.
+
 ### Fully autonomous reporting (CLI >= 1.12.0)
 
 With `dailybot-cli >= 1.12.0`, the skill can additionally install

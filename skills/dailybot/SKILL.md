@@ -341,6 +341,12 @@ common use case.
 > profile (per the CLI's [auth resolution order](https://github.com/DailybotHQ/cli/blob/main/AGENTS.md#14-auth-resolution-order-do-not-break))
 > — that defeats the whole point of `.dailybot/profile.json`.
 >
+> **Narrow identity exception:** a developer-authorized orchestra lane may
+> pass its lead-assigned `--name` for reports even when `name` is pinned.
+> Never edit the repo profile or override its auth/metadata defaults for this.
+> See [`report/orchestra.md`](report/orchestra.md). The lead owns the overall
+> milestone; individual lane completions are regular reports.
+>
 > **Full procedure, detection one-liners, worked examples, and the
 > per-sub-skill contract:** [`shared/repo-profile.md`](shared/repo-profile.md).
 > Read it the first time you invoke any Dailybot sub-skill from a new

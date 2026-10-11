@@ -22,6 +22,17 @@ What "already provides" means concretely:
 
 Anything else the profile may contain (future-proofing — the schema may grow) is still **safe to ignore** for your command line; the CLI itself reads the full file.
 
+### Explicit orchestra lane-name override
+
+The pinned-name rule is the default. When the developer explicitly authorizes
+an orchestra with lead-assigned lane identities, a lane may pass its assigned
+`--name "<repo> lane"` for reports even when the repo profile sets `name`.
+Record that authorization in the plan. This narrow, per-command override
+never edits `.dailybot/profile.json`, changes the auth `profile`, or permits
+redundant metadata overrides. Without that authorization, omit `--name` as
+usual. See [orchestra reporting](../report/orchestra.md) for ownership and
+examples; the lead sends the overall milestone.
+
 ### The `report` policy block (hooks, not flags)
 
 The profile may also carry a `report` object. It is **not** a command-line concern — you never translate it into or out of a flag — but it is a committed team policy the Dailybot hooks honour, so it's documented here for completeness:
@@ -138,7 +149,7 @@ Ignoring it via a flag override defeats the whole point.
 Every sub-skill that invokes `dailybot agent <verb>` (or any `dailybot` subcommand that consumes the agent identity) **must**:
 
 1. Run this pre-flight on first use within a turn.
-2. Drop `--name`, `--profile`, and the relevant `--metadata` keys from the constructed command according to the table above.
+2. Drop `--name`, `--profile`, and the relevant `--metadata` keys from the constructed command according to the table above, except for the explicitly authorized orchestra lane-name override described above.
 3. If the sub-skill's example commands show those flags (for readability / pedagogical reasons), they must be accompanied by an explicit "omit these if a repo profile sets them — see [`shared/repo-profile.md`](./repo-profile.md)" note.
 
 This applies to: `dailybot-report`, `dailybot-chat`, `dailybot-kudos`, `dailybot-email`, `dailybot-forms`, `dailybot-checkin`, `dailybot-teams`, `dailybot-health`, `dailybot-messages`. (Everything in the pack.)
