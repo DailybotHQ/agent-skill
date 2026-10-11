@@ -255,9 +255,12 @@ that the skill is discovered.
 
 A quick way to verify in any agent: ask it *"what dailybot skills are
 available?"* — a properly installed pack will list `dailybot` and the
-nine sub-skills (`dailybot-report`, `dailybot-messages`,
+17 sub-skills (`dailybot-report`, `dailybot-messages`,
 `dailybot-email`, `dailybot-health`, `dailybot-checkin`,
-`dailybot-kudos`, `dailybot-teams`, `dailybot-forms`, `dailybot-chat`).
+`dailybot-kudos`, `dailybot-teams`, `dailybot-forms`, `dailybot-chat`,
+`dailybot-workflow`, `dailybot-ask`, `dailybot-labels`,
+`dailybot-featured`, `dailybot-tasks`, `dailybot-channels`,
+`dailybot-conversation`, `dailybot-env`).
 
 To verify the symlink filesystem state directly:
 

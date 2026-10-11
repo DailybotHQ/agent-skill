@@ -103,9 +103,11 @@ agent-skill/
     ├── kudos/SKILL.md
     ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
     ├── forms/SKILL.md
+    ├── ask/SKILL.md                        ← headless Dailybot AI questions (`dailybot ask`)
+    ├── conversation/SKILL.md               ← open/reuse a Slack group DM with the bot (Slack, org-admin)
     ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
     ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones
-    │                                          (CLI >= 3.14.2, recommended >= 3.19.0 collaboration);
+    │                                          (Plan needs CLI >= 3.25.0);
     │                                          untrusted content is Step 0
     ├── tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
     │                                          regenerated from dailybot-cli --help
@@ -286,7 +288,7 @@ hand. The `auto-release.yml` workflow runs on every merge to `main` and:
    - `feat(scope)!:` or `BREAKING CHANGE:` in body → **MAJOR**
    - `feat(scope):` → **MINOR**
    - everything else (`fix:`, `chore:`, no prefix, etc.) → **PATCH**
-4. Bumps the version in all 5 SKILL.md files, prepends a section to
+4. Bumps the version in every SKILL.md file, prepends a section to
    `CHANGELOG.md`, commits as `chore(release): X.Y.Z [skip ci]`, tags
    `vX.Y.Z`, and creates a GitHub Release.
 
@@ -468,7 +470,7 @@ at **v2.17.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/com
 | Step | Command | What it does |
 |------|---------|--------------|
 | 1. Plan | `/dwp-create` | Decompose the goal into numbered tasks with validation gates |
-| 2. Execute | `/dwp-execute` | Task-by-task execution; state in gitignored `.dwp/` |
+| 2. Execute | `/dwp-execute` | Task-by-task execution; state in gitignored `.dwp/` (only `.dwp/config.json`, the benchmark/learnings switch, is tracked) |
 | 3. Verify | `/dwp-verify` | Objective CONFORMANT / NOT CONFORMANT check |
 
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).

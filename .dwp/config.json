@@ -1,0 +1,6 @@
+{
+  "benchmark": {
+    "enabled": true,
+    "learnings": true
+  }
+}

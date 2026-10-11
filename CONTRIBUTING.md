@@ -219,7 +219,7 @@ Every merge to `main` triggers `auto-release.yml`, which:
    - `feat(scope)!:` or `BREAKING CHANGE:` in body → **MAJOR**
    - `feat(scope):` → **MINOR**
    - everything else (`fix:`, `chore:`, `docs:`, `ci:`, no prefix) → **PATCH**
-4. Updates the version in all 5 SKILL.md files.
+4. Updates the version in every SKILL.md file.
 5. Prepends a section to `CHANGELOG.md` listing the merged commits.
 6. Commits as `chore(release): X.Y.Z [skip ci]`, tags `vX.Y.Z`, creates a GitHub Release.
 
