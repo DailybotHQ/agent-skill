@@ -4,6 +4,16 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.23.4] — 2026-10-11
+
+### Changes
+
+- Merge pull request #67 from DailybotHQ/docs/ecosystem-audit-v7
+- fix(shared): emit compact JSON from the python3 fallback of context.sh
+- docs(skill): align counts, skill tables and tree with the 17 shipped sub-skills
+- chore(skill): enable DWP benchmark and learnings
+
+
 ## [3.23.3] — 2026-10-05
 
 ### Changes
