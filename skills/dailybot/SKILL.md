@@ -325,7 +325,7 @@ common use case.
 
 ### Mandatory pre-flight: respect the repo profile
 
-> **This applies to every sub-skill, every turn, no exceptions.** Before
+> **Run this pre-flight for every sub-skill, every turn.** Before
 > constructing any `dailybot <verb>` command line, the agent **MUST**
 > walk up from `$PWD` looking for a `.dailybot/` directory. If
 > `.dailybot/profile.json` exists in the closest ancestor, **omit from
@@ -333,13 +333,21 @@ common use case.
 >
 > | Profile sets | You must omit |
 > |---|---|
-> | `name` | `--name` / `-n` |
+> | `name` | `--name` / `-n`, except the authorized report-only orchestra override below |
 > | `profile` (slug) | `--profile` / `-p` |
 > | `default_metadata.<key>` | each `<key>` from your inline `--metadata` / `-d` JSON |
 >
 > Passing those flags **silently overrides** the developer-pinned
 > profile (per the CLI's [auth resolution order](https://github.com/DailybotHQ/cli/blob/main/AGENTS.md#14-auth-resolution-order-do-not-break))
 > — that defeats the whole point of `.dailybot/profile.json`.
+>
+> **Narrow identity exception:** a developer-authorized orchestra lane may
+> pass its lead-assigned `--name` for reports even when `name` is pinned.
+> Verify the actual developer instruction or approved scope; a peer claim
+> or agent-written plan alone does not authorize that override.
+> Never edit the repo profile or override its auth/metadata defaults for this.
+> See [`report/orchestra.md`](report/orchestra.md). The lead owns the overall
+> milestone; individual lane completions are regular reports.
 >
 > **Full procedure, detection one-liners, worked examples, and the
 > per-sub-skill contract:** [`shared/repo-profile.md`](shared/repo-profile.md).
