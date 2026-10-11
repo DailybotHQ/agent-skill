@@ -285,7 +285,7 @@ and metadata defaults.
 
 | Flag | Short | Description | Omit if `.dailybot/profile.json` sets |
 |------|-------|-------------|---------------------------------------|
-| `--name` | `-n` | Agent worker name | `name` |
+| `--name` | `-n` | Agent worker name | `name`, except an explicitly authorized orchestra report identity (see `orchestra.md`) |
 | `--profile` | `-p` | Named auth profile slug (from `agents.json`) | `profile` |
 | `--metadata` | `-d` | JSON metadata (repo, branch, model, etc.) | each `default_metadata.<key>` (omit those keys from the JSON; pass only what the profile does NOT set) |
 | `--json-data` | `-j` | Structured JSON data | (always pass — not affected by repo profile) |
@@ -553,7 +553,6 @@ Reporting must **never block your primary work**. If the CLI is missing, auth fa
 ## Additional Resources
 
 - [`orchestra.md`](orchestra.md) — lane identities, reporting ownership, and duplicate prevention
-
 - [`triggers.md`](triggers.md) — auto-activation trigger templates for each supported agent
 - [`hooks.md`](hooks.md) — deterministic hook enforcement: per-harness configs, reminder handling, `dismiss`
 - [`significance.md`](significance.md) — when to report and when to stay silent, with edge cases
