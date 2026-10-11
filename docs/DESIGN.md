@@ -206,3 +206,62 @@ This is more than a stylistic choice:
 If you contribute and your agent doesn't have the skill installed yet,
 do it now: `./setup.sh --host claude` (or your agent of choice) is
 two seconds.
+
+## Vendored contributor harness
+
+The contributor-only `.agents/skills/` snapshots are pinned in `skills-lock.json`: DeepWorkPlan v7.6.0 (DWP standard 7.0.0), AI Diff Reviewer v3.3.9, and Dailybot v3.23.12; vendored 2026-10-11. They are installed through exact tag URLs and checked against released source bytes. These trees are separate from the consumer-facing `skills/` source. The addon registry is `.dwp/config.json`; machine availability does not by itself enable an addon.
+
+## Project Structure
+
+```
+agent-skill/
+├── AGENTS.md, CLAUDE.md (symlink)         ← this file (NOT installed)
+├── CONTRIBUTING.md                        ← contributor guide (NOT installed)
+├── README.md                              ← public README on GitHub (NOT installed)
+├── LICENSE, SECURITY.md, CHANGELOG.md     ← repo metadata (NOT installed)
+├── setup.sh                               ← symlink installer for non-skills.sh users
+├── .agents/                               ← contributor kit (NOT installed): DWP + AI Diff Reviewer
+├── .claude → .agents, .cursor → .agents   ← agent-directory symlinks (NOT installed)
+├── .review/extension.md                   ← AI Diff Reviewer overrides (NOT installed)
+├── .github/
+│   ├── workflows/ci.yml                   ← shellcheck + bats + frontmatter validation
+│   ├── workflows/pr-review.yml            ← AI Diff Reviewer CI (Ready label)
+│   ├── ISSUE_TEMPLATE/                    ← bug + feature templates
+│   └── PULL_REQUEST_TEMPLATE.md
+├── tests/                                 ← bats-core tests (NOT installed)
+│   └── context-sh.bats
+├── scripts/                               ← repo-dev scripts (NOT installed)
+│   ├── verify-cdn.sh                      ← checks install.sh + .sha256 are published
+│   └── validate-frontmatter.py            ← schema check on every SKILL.md
+├── docs/                                  ← internal docs (NOT installed)
+│   ├── API_REFERENCE.md, INSTALLATION.md, DESIGN.md, …
+└── skills/dailybot/                       ← THE INSTALLED ARTIFACT — only this ships
+    ├── SKILL.md                           ← router (+ "Start here (first run)" self-contained setup)
+    ├── TRUST.md                           ← install-time trust & guarantees + self-audit (ships)
+    ├── shared/                            ← auth.md, context.sh, http-fallback.md, list-query-and-errors.md, …
+    ├── report/                            ← progress reporting + auto-activation
+    ├── messages/SKILL.md
+    ├── email/SKILL.md
+    ├── health/SKILL.md
+    ├── checkin/SKILL.md
+    ├── kudos/SKILL.md
+    ├── teams/SKILL.md                      ← team-name resolver (used by kudos + chat)
+    ├── forms/SKILL.md
+    ├── ask/SKILL.md                        ← headless Dailybot AI questions (`dailybot ask`)
+    ├── conversation/SKILL.md               ← open/reuse a Slack group DM with the bot (Slack, org-admin)
+    ├── workflow/SKILL.md                   ← list/get/trigger automations (CLI >= 3.9.0)
+    ├── tasks/SKILL.md                      ← boards / tasks / projects / goals / milestones
+    │                                          (Plan needs CLI >= 3.25.0);
+    │                                          untrusted content is Step 0
+    ├── tasks/commands.md                   ← every Tasks command (args, flags, API door, example)
+    │                                          regenerated from dailybot-cli --help
+    ├── labels/SKILL.md                     ← org Labels CRUD + assign/batch (CLI >= 3.9.0)
+    ├── featured/SKILL.md                   ← private Featured stars (CLI >= 3.9.0)
+    ├── env/SKILL.md                        ← .dailybot/env.json per-repo API keys
+    ├── channels/SKILL.md                   ← report-channel discovery (UUIDs for --report-channel on forms/check-ins)
+    └── chat/SKILL.md                       ← Slack/Teams/Discord/Google Chat bot messages (CLI >= 3.9.0; latest on PyPI)
+```
+
+The hard rule: **anything you put outside `skills/dailybot/` is invisible
+to the runtime agent**. Use that to keep this repo discoverable and
+auditable on GitHub without polluting the skill itself.

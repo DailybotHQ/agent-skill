@@ -7,11 +7,11 @@ End users install only `skills/dailybot/` — see the public [README.md](../../R
 
 | Slug | Path | Notes |
 |------|------|-------|
-| `dailybot` (+ sub-skills) | [`skills/dailybot/`](../../skills/dailybot/) | The installed artifact. Not duplicated under `.agents/`. |
+| `dailybot` (+ sub-skills) | [`skills/dailybot/`](../../skills/dailybot/) | The installed artifact. Contributor snapshot at `.agents/skills/dailybot/` is separate from the shipped source. |
 
 ## Deep Work Plan skill pack (vendored from [`DailybotHQ/deepworkplan-skill`](https://github.com/DailybotHQ/deepworkplan-skill))
 
-Vendored at **v2.17.0** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
+Vendored at **v7.6.0** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
 
 | Slug | Procedure | Use when |
 |------|-----------|----------|
@@ -21,6 +21,7 @@ Vendored at **v2.17.0** under [`.agents/skills/deepworkplan/`](../skills/deepwor
 | `deepworkplan-resume` (`/dwp-resume`) | [`skills/deepworkplan/resume/SKILL.md`](../skills/deepworkplan/resume/SKILL.md) | Picking up an interrupted plan |
 | `deepworkplan-status` (`/dwp-status`) | [`skills/deepworkplan/status/SKILL.md`](../skills/deepworkplan/status/SKILL.md) | Reporting plan progress without changes |
 | `deepworkplan-verify` (`/dwp-verify`) | [`skills/deepworkplan/verify/SKILL.md`](../skills/deepworkplan/verify/SKILL.md) | Objective DWP conformance check |
+| `deepworkplan-upgrade` (`/dwp-upgrade`) | [`skills/deepworkplan/upgrade/SKILL.md`](../skills/deepworkplan/upgrade/SKILL.md) | Upgrade the pinned contributor pack and reconcile the harness |
 | `deepworkplan-onboard` | [`skills/deepworkplan/onboard/SKILL.md`](../skills/deepworkplan/onboard/SKILL.md) | Re-running onboard as reconciliation |
 | `skill-create` / `agent-create` | [`skills/deepworkplan/author/SKILL.md`](../skills/deepworkplan/author/SKILL.md) | Growing this contributor kit |
 | `ai-diff-reviewer` (addon) | [`skills/deepworkplan/addons/ai-diff-reviewer/SKILL.md`](../skills/deepworkplan/addons/ai-diff-reviewer/SKILL.md) | DWP addon wiring Security Review ↔ AI Diff Reviewer |
@@ -28,7 +29,7 @@ Vendored at **v2.17.0** under [`.agents/skills/deepworkplan/`](../skills/deepwor
 
 ## AI Diff Reviewer (vendored from [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer))
 
-Vendored at **v3.1.1** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
+Vendored at **v3.3.9** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
 Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml). Provider: `grok`. Secret: `XAI_API_KEY`.
 
 | Slug | Procedure | Use when |
@@ -48,3 +49,5 @@ Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.gi
 | `docs-writer` | [`agents/docs-writer.md`](../agents/docs-writer.md) | Doc-only changes |
 | `test-engineer` | [`agents/test-engineer.md`](../agents/test-engineer.md) | bats / shellcheck / frontmatter tests |
 | `release-manager` | [`agents/release-manager.md`](../agents/release-manager.md) | Release / version coordination |
+
+Dailybot contributor snapshot: v3.23.12, vendored 2026-10-11; source and ref are in `skills-lock.json`.

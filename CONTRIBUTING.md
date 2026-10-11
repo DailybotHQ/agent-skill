@@ -423,3 +423,32 @@ Dailybot security team directly.
 Be kind. Assume good faith. We're a small repo trying to make agents
 useful for human teams — that goal is incompatible with bad-faith
 contributions.
+
+## Commit Message Format (MANDATORY)
+
+```
+<type>(<scope>): <short description>
+
+<body — Summary, motivation, what changed, risks>
+
+Co-Authored-By: <agent name + version> <noreply@anthropic.com>
+```
+
+**Types:** `feat` (new behavior), `fix` (bug fix), `docs` (docs only),
+`chore` (repo maintenance), `test` (adding tests), `ci` (CI config),
+`refactor` (no user-visible change).
+
+**Scopes:** `skill` (general pack), `report` / `messages` / `email` /
+`health` / `checkin` / `kudos` / `teams` / `forms` / `chat` (specific
+sub-skill), `shared` (auth.md, context.sh, http-fallback.md), `setup`
+(setup.sh), `ci` (.github/), `docs` (docs/), `release` (versioning,
+CHANGELOG).
+
+Examples (from this repo's history):
+
+```
+chore(skill): restructure to skills/dailybot/ layout and add open-source boilerplate
+feat(skill): require explicit consent for CLI install, auto-activation, and email sends
+feat(skill): bash hardening and per-repo telemetry opt-out
+fix(skill): restore curl|bash as universal install path and add DAILYBOT_AUTO_YES escape hatch
+```

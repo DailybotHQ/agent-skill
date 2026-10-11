@@ -13,6 +13,7 @@ in the matching skill under [`.agents/skills/`](../skills/).
 | `/dwp-resume` | `../skills/deepworkplan/resume/SKILL.md` | Continue an interrupted plan |
 | `/dwp-status` | `../skills/deepworkplan/status/SKILL.md` | Progress report without writes |
 | `/dwp-verify` | `../skills/deepworkplan/verify/SKILL.md` | CONFORMANT / NOT CONFORMANT check |
+| `/dwp-upgrade` | `../skills/deepworkplan/upgrade/SKILL.md` | Upgrade the pinned pack and reconcile the harness |
 | `/deepworkplan-onboard` | `../skills/deepworkplan/onboard/SKILL.md` | Reconcile onboard artifacts |
 | `/skill-create` | `../skills/deepworkplan/author/SKILL.md` | Create a contributor skill |
 | `/agent-create` | `../skills/deepworkplan/author/SKILL.md` | Create a contributor persona |
@@ -30,4 +31,4 @@ in the matching skill under [`.agents/skills/`](../skills/).
 
 CI trigger: apply the **`Ready`** label on a PR to `main`
 ([`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml);
-requires `XAI_API_KEY`; provider `grok`, Action pinned to `v3.1.1`).
+requires `XAI_API_KEY`; provider `grok`, Action pinned to `v3.3.9`).

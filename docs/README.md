@@ -18,3 +18,7 @@ ship with the installed skill — only `skills/dailybot/` does.
 | [../.agents/docs/skills_agents_catalog.md](../.agents/docs/skills_agents_catalog.md) | DWP + AI Diff Reviewer catalog |
 
 Deep Work Plan methodology: https://deepworkplan.com
+
+## Contributor harness validation
+
+[Testing guide](TESTING_GUIDE.md), [development commands](DEVELOPMENT_COMMANDS.md), and [security guide](SECURITY.md) cover hermetic checks and the vendored contributor harness.
