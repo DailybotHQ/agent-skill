@@ -2,18 +2,15 @@
   "addons": {
     "agentkit": {
       "enabled": true,
-      "note": "Existing interface-1 host kit used by authorized orchestra lanes; no machine changes",
-      "version": "v0.5.0"
+      "version": "v0.5.3"
     },
     "ai-diff-reviewer": {
       "enabled": true,
-      "note": "Dogfood upgrade: verified pinned skill",
-      "version": "v3.3.9"
+      "version": "v3.3.11"
     },
     "dailybot": {
       "enabled": true,
-      "note": "Dogfood upgrade: verified pinned skill",
-      "version": "v3.23.12"
+      "version": "v3.23.14"
     },
     "design-system": {
       "enabled": true,

@@ -11,7 +11,7 @@ End users install only `skills/dailybot/` — see the public [README.md](../../R
 
 ## Deep Work Plan skill pack (vendored from [`DailybotHQ/deepworkplan-skill`](https://github.com/DailybotHQ/deepworkplan-skill))
 
-Vendored at **v7.6.1** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
+Vendored at **v7.6.3** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
 
 | Slug | Procedure | Use when |
 |------|-----------|----------|
@@ -29,7 +29,7 @@ Vendored at **v7.6.1** under [`.agents/skills/deepworkplan/`](../skills/deepwork
 
 ## AI Diff Reviewer (vendored from [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer))
 
-Vendored at **v3.3.9** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
+Vendored at **v3.3.11** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
 Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml). Provider: `grok`. Secret: `XAI_API_KEY`.
 
 | Slug | Procedure | Use when |
@@ -50,4 +50,4 @@ Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.gi
 | `test-engineer` | [`agents/test-engineer.md`](../agents/test-engineer.md) | bats / shellcheck / frontmatter tests |
 | `release-manager` | [`agents/release-manager.md`](../agents/release-manager.md) | Release / version coordination |
 
-Dailybot contributor snapshot: v3.23.12, vendored 2026-10-11; source and ref are in `skills-lock.json`.
+Dailybot contributor snapshot: v3.23.14, vendored 2026-10-12; source and ref are in `skills-lock.json`.
