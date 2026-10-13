@@ -1,3 +1,11 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DailybotHQ/agent-skill/main/assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DailybotHQ/agent-skill/main/assets/logo-light.svg">
+    <img alt="Dailybot" src="https://raw.githubusercontent.com/DailybotHQ/agent-skill/main/assets/logo-light.svg" width="440">
+  </picture>
+</p>
+
 # Dailybot Agent Skill Pack
 
 The official Dailybot agent skill pack connects coding agents to team
