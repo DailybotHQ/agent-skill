@@ -26,6 +26,7 @@ Vendored at **v7.8.0** under [`.agents/skills/deepworkplan/`](../skills/deepwork
 | `skill-create` / `agent-create` | [`skills/deepworkplan/author/SKILL.md`](../skills/deepworkplan/author/SKILL.md) | Growing this contributor kit |
 | `ai-diff-reviewer` (addon) | [`skills/deepworkplan/addons/ai-diff-reviewer/SKILL.md`](../skills/deepworkplan/addons/ai-diff-reviewer/SKILL.md) | DWP addon wiring Security Review ↔ AI Diff Reviewer |
 | `dailybot` (addon) | [`skills/deepworkplan/addons/dailybot/SKILL.md`](../skills/deepworkplan/addons/dailybot/SKILL.md) | Optional DWP lifecycle reporting (uses companion CLI / in-repo report skill) |
+| `herdr` (addon) | [`skills/deepworkplan/addons/herdr/SKILL.md`](../skills/deepworkplan/addons/herdr/SKILL.md) | Optional interactive delegation to a peer pane via `herdr-peers` v1.0.0 (machine-level) |
 
 ## AI Diff Reviewer (vendored from [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer))
 
