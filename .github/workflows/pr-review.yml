@@ -201,7 +201,7 @@ jobs:
       # skill — the moving @v3 alias could change prompts/default.md while the
       # local skill stays behind, silently breaking the parity claim above.
       # Bump this pin and the vendored skill together, in one PR.
-      - uses: DailybotHQ/ai-diff-reviewer@v3.3.11
+      - uses: DailybotHQ/ai-diff-reviewer@v3.3.12
         with:
           # Grok, not Cursor. The Cursor CLI exposes no turn-count flag, so its
           # only bound is the action's 900 s invocation timeout — and under v3
