@@ -20,6 +20,10 @@
       "enabled": false,
       "note": "Pure tooling repository with no development container/editor layer; host tools left untouched"
     },
+    "herdr": {
+      "enabled": true,
+      "version": "v1.0.0"
+    },
     "vim": {
       "enabled": false,
       "note": "Pure tooling repository with no development container/editor layer; host tools left untouched"

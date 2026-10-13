@@ -400,6 +400,15 @@ Optional DWP lifecycle reporting uses the companion CLI / the in-repo
 `skills/dailybot/report` skill. Best-effort only — never blocks plan
 execution. Auth stays in the Dailybot skill's own consent flow.
 
+### Herdr addon (interactive delegation)
+
+Recorded in `.dwp/config.json` as `herdr` `v1.0.0`: a plan that grants
+`agent_delegation` may hand one task to an agent in another Herdr pane with
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.0.0,
+protocol 1, installed machine-level). Optional, never a gate; contributor
+tooling only — nothing of it ships under `skills/dailybot/`. See
+[`.agents/skills/deepworkplan/addons/herdr/SKILL.md`](.agents/skills/deepworkplan/addons/herdr/SKILL.md).
+
 ### AI Diff Reviewer (Flow B — dual-surface)
 
 [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.3.14` for both the vendored skill and the Action.
