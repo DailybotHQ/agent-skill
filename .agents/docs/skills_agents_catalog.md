@@ -11,7 +11,7 @@ End users install only `skills/dailybot/` — see the public [README.md](../../R
 
 ## Deep Work Plan skill pack (vendored from [`DailybotHQ/deepworkplan-skill`](https://github.com/DailybotHQ/deepworkplan-skill))
 
-Vendored at **v7.8.0** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
+Vendored at **v7.8.1** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
 
 | Slug | Procedure | Use when |
 |------|-----------|----------|
