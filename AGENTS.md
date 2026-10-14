@@ -411,7 +411,7 @@ tooling only — nothing of it ships under `skills/dailybot/`. See
 
 ### AI Diff Reviewer (Flow B — dual-surface)
 
-[`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.3.14` for both the vendored skill and the Action.
+[`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer) **v3**, pinned to `v3.3.16` for both the vendored skill and the Action.
 
 | Surface | What | How |
 |---------|------|-----|
