@@ -31,4 +31,4 @@ in the matching skill under [`.agents/skills/`](../skills/).
 
 CI trigger: apply the **`Ready`** label on a PR to `main`
 ([`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml);
-requires `XAI_API_KEY`; provider `grok`, Action pinned to `v3.3.14`).
+requires `XAI_API_KEY`; provider `grok`, Action pinned to `v3.3.16`).

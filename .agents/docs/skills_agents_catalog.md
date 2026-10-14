@@ -30,7 +30,7 @@ Vendored at **v7.8.1** under [`.agents/skills/deepworkplan/`](../skills/deepwork
 
 ## AI Diff Reviewer (vendored from [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer))
 
-Vendored at **v3.3.14** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
+Vendored at **v3.3.16** (the CI Action is pinned to the same tag). Flow B: local + CI gated on the **`Ready`** label.
 Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.github/workflows/pr-review.yml`](../../.github/workflows/pr-review.yml). Provider: `grok`. Secret: `XAI_API_KEY`.
 
 | Slug | Procedure | Use when |
@@ -51,4 +51,4 @@ Extension: [`.review/extension.md`](../../.review/extension.md). Workflow: [`.gi
 | `test-engineer` | [`agents/test-engineer.md`](../agents/test-engineer.md) | bats / shellcheck / frontmatter tests |
 | `release-manager` | [`agents/release-manager.md`](../agents/release-manager.md) | Release / version coordination |
 
-Dailybot contributor snapshot: v3.23.17, vendored 2026-10-13; source and ref are in `skills-lock.json`.
+Dailybot contributor snapshot: v3.23.18, vendored 2026-10-14; source and ref are in `skills-lock.json`.
