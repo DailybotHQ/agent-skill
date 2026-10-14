@@ -4,6 +4,18 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.23.18] — 2026-10-14
+
+### Changes
+
+- Merge pull request #83 from DailybotHQ/chore/dogfood-7.8.1
+- chore(skill): dogfood the verified DeepWorkPlan 7.8.1 pack
+- Merge pull request #82 from DailybotHQ/chore/ecosystem-1.0
+- chore(skill): enable the Herdr addon (herdr-peers 1.0.0) for contributors
+- Merge pull request #81 from DailybotHQ/chore/dogfood-7.8.0
+- chore(skill): dogfood the verified DeepWorkPlan 7.8.0 pack
+
+
 ## [3.23.17] — 2026-10-13
 
 ### Changes
