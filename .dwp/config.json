@@ -2,7 +2,7 @@
   "addons": {
     "agentkit": {
       "enabled": true,
-      "version": "v1.0.0"
+      "version": "v1.0.1"
     },
     "ai-diff-reviewer": {
       "enabled": true,

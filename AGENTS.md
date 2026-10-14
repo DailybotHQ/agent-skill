@@ -366,7 +366,7 @@ that's both validation and documentation.
 For non-trivial contributor work (multi-sub-skill changes, install-surface
 edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
 through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
-at **v7.8.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+at **v7.8.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
 
 | Step | Command | What it does |
 |------|---------|--------------|
@@ -377,7 +377,7 @@ at **v7.8.0** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/comm
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
 Symlinks: `.claude → .agents`, `.cursor → .agents`.
 
-DWP standard: 7.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12 and 2026-10-13; skill 7.8.0, vendored 2026-10-13). Existing plans retain their recorded generation.
+DWP standard: 7.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13 and 2026-10-14; skill 7.8.1, vendored 2026-10-14). Existing plans retain their recorded generation.
 
 **Flow routing.** Explicit planning requests use create; execute/resume requests
 use those flows. Status and verify stay read-only. Ordinary edits do not silently
