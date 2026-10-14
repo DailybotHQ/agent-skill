@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.23.19] — 2026-10-14
+
+### Changes
+
+- Merge pull request #84 from DailybotHQ/chore/ecosystem-1.0.1
+- chore: DeepWorkPlan 7.8.1, AI Diff Reviewer 3.3.16, Dailybot skill 3.23.18
+
+
 ## [3.23.18] — 2026-10-14
 
 ### Changes
