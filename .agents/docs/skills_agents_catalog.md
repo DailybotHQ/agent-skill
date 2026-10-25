@@ -11,7 +11,7 @@ End users install only `skills/dailybot/` — see the public [README.md](../../R
 
 ## Deep Work Plan skill pack (vendored from [`DailybotHQ/deepworkplan-skill`](https://github.com/DailybotHQ/deepworkplan-skill))
 
-Vendored at **v7.8.1** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
+Vendored at **v7.9.0** under [`.agents/skills/deepworkplan/`](../skills/deepworkplan/).
 
 | Slug | Procedure | Use when |
 |------|-----------|----------|
@@ -26,7 +26,7 @@ Vendored at **v7.8.1** under [`.agents/skills/deepworkplan/`](../skills/deepwork
 | `skill-create` / `agent-create` | [`skills/deepworkplan/author/SKILL.md`](../skills/deepworkplan/author/SKILL.md) | Growing this contributor kit |
 | `ai-diff-reviewer` (addon) | [`skills/deepworkplan/addons/ai-diff-reviewer/SKILL.md`](../skills/deepworkplan/addons/ai-diff-reviewer/SKILL.md) | DWP addon wiring Security Review ↔ AI Diff Reviewer |
 | `dailybot` (addon) | [`skills/deepworkplan/addons/dailybot/SKILL.md`](../skills/deepworkplan/addons/dailybot/SKILL.md) | Optional DWP lifecycle reporting (uses companion CLI / in-repo report skill) |
-| `herdr` (addon) | [`skills/deepworkplan/addons/herdr/SKILL.md`](../skills/deepworkplan/addons/herdr/SKILL.md) | Optional interactive delegation to a peer pane via `herdr-peers` v1.0.0 (machine-level) |
+| `herdr` (addon) | [`skills/deepworkplan/addons/herdr/SKILL.md`](../skills/deepworkplan/addons/herdr/SKILL.md) | Optional interactive delegation to a peer pane via `herdr-peers` v1.1.0 (machine-level) |
 
 ## AI Diff Reviewer (vendored from [`DailybotHQ/ai-diff-reviewer`](https://github.com/DailybotHQ/ai-diff-reviewer))
 
