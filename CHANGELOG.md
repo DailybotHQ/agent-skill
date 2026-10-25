@@ -4,6 +4,14 @@ All notable changes to the Dailybot agent skill pack are documented in this
 file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.23.20] — 2026-10-25
+
+### Changes
+
+- Merge pull request #85 from DailybotHQ/chore/dogfood-7.9.0
+- chore(skill): dogfood the verified DeepWorkPlan 7.9.0 pack
+
+
 ## [3.23.19] — 2026-10-14
 
 ### Changes
