@@ -407,7 +407,10 @@ Recorded in `.dwp/config.json` as `herdr` `v1.2.1`: a plan that grants
 `herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.2.1,
 protocol 1, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
-installed machine-level).
+installed machine-level). Pack 7.10.1 also adds decision debates
+(`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
+`off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
+addon, the plan's `agent_delegation` grant and the developer's approval.
 Optional, never a gate; contributor
 tooling only — nothing of it ships under `skills/dailybot/`. See
 [`.agents/skills/deepworkplan/addons/herdr/SKILL.md`](.agents/skills/deepworkplan/addons/herdr/SKILL.md).
