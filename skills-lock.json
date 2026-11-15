@@ -1,26 +1,26 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "ai-diff-reviewer": {
       "source": "DailybotHQ/ai-diff-reviewer",
       "ref": "v3.3.16",
       "sourceType": "github",
       "skillPath": "skills/ai-diff-reviewer/SKILL.md",
-      "computedHash": "bf441b47b88ff1250702da4d55bc49a0ddabf7078fa65b48eac1cca947f7dcb8"
+      "computedHash": "a76f75ef76c00ecba349d61e6eab5be1cbec84e324a8e7820cff2d9cce39f69a"
     },
     "dailybot": {
       "source": "DailybotHQ/agent-skill",
       "ref": "v3.23.18",
       "sourceType": "github",
       "skillPath": "skills/dailybot/SKILL.md",
-      "computedHash": "eff65f86ea5f5caf9f3479dd54abfeee89e323ccfbd2d98a92057792d701e2cd"
+      "computedHash": "6147e9bf25757f9cdcd73312a581a193966bf5754cad253b1fa15e212b600e20"
     },
     "deepworkplan": {
       "source": "DailybotHQ/deepworkplan-skill",
-      "ref": "v7.9.0",
+      "ref": "v7.10.1",
       "sourceType": "github",
       "skillPath": "skills/deepworkplan/SKILL.md",
-      "computedHash": "bbc42d1db71fc0355bc582b2aa51bed0956cbcfa10f425267b69640b06e9191d"
+      "computedHash": "c2cd2c726e9c2531f8b43e043b7058e4a134b759229d5b48f4b9b303ccc13763"
     }
   }
 }
