@@ -414,8 +414,10 @@ since v1.3.0, lead appointment (`--appoint`), the opt-in autopilot brain
 a brain that is never left blocked and the v8 blocker classes since v2.1.0,
 installed machine-level). Pack 8.0.0's execute/resume registers open plans with
 the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled
-— a purely local record; the pack alone writes `.dwp/queue.json`, and the
-daemon only reads it. Dailybot notifications happen only if a human starts
+— a purely local record. The pack's flows are the only automated writers of
+`.dwp/queue.json` (through `shared/queue.py`); the developer or the plan's
+lead may reorder it or rename a queued plan's lead, and the daemon only reads
+it. Dailybot notifications happen only if a human starts
 autopilot with `--notify`. The vendored herdr descriptor accepts protocol 1
 and 2, so a herdr-peers 2.x install reads `compatible: true`. The loop's
 normative contract is
