@@ -402,12 +402,13 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### Herdr addon (interactive delegation)
 
-Recorded in `.dwp/config.json` as `herdr` `v1.2.1`: a plan that grants
+Recorded in `.dwp/config.json` as `herdr` `v1.3.0`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.2.1,
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.3.0,
 protocol 1, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
-installed machine-level). Pack 7.10.1 also adds decision debates
+`--loop`, `--notify` and the read-only `plans`/`fleet` verbs and fleet UI since
+v1.3.0, installed machine-level). Pack 7.10.1 also adds decision debates
 (`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
 `off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
 addon, the plan's `agent_delegation` grant and the developer's approval.
