@@ -2,7 +2,7 @@
   "addons": {
     "agentkit": {
       "enabled": true,
-      "version": "v1.0.1"
+      "version": "v1.3.0"
     },
     "ai-diff-reviewer": {
       "enabled": true,
@@ -22,7 +22,7 @@
     },
     "herdr": {
       "enabled": true,
-      "version": "v1.3.0"
+      "version": "v1.3.1"
     },
     "vim": {
       "enabled": false,

@@ -366,7 +366,7 @@ that's both validation and documentation.
 For non-trivial contributor work (multi-sub-skill changes, install-surface
 edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
 through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
-at **v7.10.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+at **v7.12.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
 
 | Step | Command | What it does |
 |------|---------|--------------|
@@ -377,7 +377,7 @@ at **v7.10.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/com
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
 Symlinks: `.claude → .agents`, `.cursor → .agents`.
 
-DWP standard: 7.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25 and 2026-11-15; skill 7.10.1, vendored 2026-11-15). Existing plans retain their recorded generation.
+DWP standard: 7.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25 and 2026-11-15; skill 7.12.1, vendored 2026-11-15). Existing plans retain their recorded generation.
 
 **Flow routing.** Explicit planning requests use create; execute/resume requests
 use those flows. Status and verify stay read-only. Ordinary edits do not silently
@@ -402,13 +402,16 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### Herdr addon (interactive delegation)
 
-Recorded in `.dwp/config.json` as `herdr` `v1.3.0`: a plan that grants
+Recorded in `.dwp/config.json` as `herdr` `v1.3.1`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.3.0,
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.3.1,
 protocol 1, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
 `--loop`, `--notify` and the read-only `plans`/`fleet` verbs and fleet UI since
-v1.3.0, installed machine-level). Pack 7.10.1 also adds decision debates
+v1.3.0, installed machine-level; pack 7.12.1's execute/resume registers open
+plans with the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr
+is enabled — a purely local record; Dailybot notifications happen only if a
+human starts autopilot with `--notify`). Pack 7.10.1 introduced decision debates
 (`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
 `off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
 addon, the plan's `agent_delegation` grant and the developer's approval.
