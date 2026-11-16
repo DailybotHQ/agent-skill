@@ -402,16 +402,23 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### Herdr addon (interactive delegation)
 
-Recorded in `.dwp/config.json` as `herdr` `v1.3.1`: a plan that grants
+Recorded in `.dwp/config.json` as `herdr` `v2.0.0`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v1.3.1,
-protocol 1, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.0.0,
+protocol 2, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
-`--loop`, `--notify` and the read-only `plans`/`fleet` verbs and fleet UI since
-v1.3.0, installed machine-level; pack 7.12.1's execute/resume registers open
-plans with the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr
-is enabled — a purely local record; Dailybot notifications happen only if a
-human starts autopilot with `--notify`). Pack 7.10.1 introduced decision debates
+`--loop`, `--notify`, the read-only `plans`/`fleet` verbs and the fleet UI
+since v1.3.0, lead appointment (`--appoint`), the opt-in autopilot brain
+(`--brain`, fail-closed on an older ak) and the plan-queue consumer
+(`.dwp/queue.json`, `dwp-queue-v1`) since v2.0.0, installed machine-level;
+pack 7.12.1's execute/resume registers open plans with the loop via
+`herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled — a purely
+local record; Dailybot notifications happen only if a human starts autopilot
+with `--notify`). Until the pack 8.0.0 refresh, the vendored pack's herdr
+descriptor still pins interface 1, so a protocol 2 install reads
+`compatible: false` — herdr stays enabled but contributes no
+`subagents`/`cancel_children` abilities until the descriptor catches up.
+Pack 7.10.1 introduced decision debates
 (`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
 `off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
 addon, the plan's `agent_delegation` grant and the developer's approval.
