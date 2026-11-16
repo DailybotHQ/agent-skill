@@ -408,8 +408,10 @@ Recorded in `.dwp/config.json` as `herdr` `v1.3.1`: a plan that grants
 protocol 1, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
 `--loop`, `--notify` and the read-only `plans`/`fleet` verbs and fleet UI since
-v1.3.0, installed machine-level; pack 7.12.0 registers open plans with the
-loop through the Dailybot notifier). Pack 7.10.1 introduced decision debates
+v1.3.0, installed machine-level; pack 7.12.0's execute/resume registers open
+plans with the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr
+is enabled — a purely local record; Dailybot notifications happen only if a
+human starts autopilot with `--notify`). Pack 7.10.1 introduced decision debates
 (`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
 `off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
 addon, the plan's `agent_delegation` grant and the developer's approval.
