@@ -414,7 +414,11 @@ since v1.3.0, lead appointment (`--appoint`), the opt-in autopilot brain
 pack 7.12.1's execute/resume registers open plans with the loop via
 `herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled — a purely
 local record; Dailybot notifications happen only if a human starts autopilot
-with `--notify`). Pack 7.10.1 introduced decision debates
+with `--notify`). Until the pack 8.0.0 refresh, the vendored pack's herdr
+descriptor still pins interface 1, so a protocol 2 install reads
+`compatible: false` — herdr stays enabled but contributes no
+`subagents`/`cancel_children` abilities until the descriptor catches up.
+Pack 7.10.1 introduced decision debates
 (`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
 `off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
 addon, the plan's `agent_delegation` grant and the developer's approval.
