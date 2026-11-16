@@ -22,7 +22,7 @@
     },
     "herdr": {
       "enabled": true,
-      "version": "v1.2.1"
+      "version": "v1.3.0"
     },
     "vim": {
       "enabled": false,
