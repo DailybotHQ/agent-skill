@@ -404,7 +404,7 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 Recorded in `.dwp/config.json` as `herdr` `v2.2.1`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.2.1,
+`herdr-peers ask <machine>:<pane> "…"` (machine install `DailybotHQ/herdr-peers` v2.2.1, while the vendored pack descriptor still pins v2.2.0 until the next pack release;
 protocol 2, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
 `--loop`, `--notify`, the read-only `plans`/`fleet` verbs and the fleet UI
