@@ -402,9 +402,9 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### Herdr addon (interactive delegation)
 
-Recorded in `.dwp/config.json` as `herdr` `v2.2.0`: a plan that grants
+Recorded in `.dwp/config.json` as `herdr` `v2.2.1`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.2.0,
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.2.1,
 protocol 2, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
 `--loop`, `--notify`, the read-only `plans`/`fleet` verbs and the fleet UI
@@ -414,7 +414,7 @@ since v1.3.0, lead appointment (`--appoint`), the opt-in autopilot brain
 a brain that is never left blocked and the v8 blocker classes since v2.1.0,
 and revive since v2.2.0 — `autopilot --loop --revive`, human-started like every
 daemon flag, launches one fresh agent for a plan whose lead and successors are
-gone, capped per plan and fleet-wide; installed machine-level). Pack 8.0's execute/resume registers open plans with
+gone, capped per plan and fleet-wide, and since v2.2.1 fail-closed like `--brain` when ak is missing or older than 1.3.0; installed machine-level). Pack 8.0's execute/resume registers open plans with
 the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled
 — a purely local record. The pack's flows are the only automated writers of
 `.dwp/queue.json` (through `shared/queue.py`); the developer or the plan's
