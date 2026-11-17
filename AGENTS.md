@@ -366,7 +366,7 @@ that's both validation and documentation.
 For non-trivial contributor work (multi-sub-skill changes, install-surface
 edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
 through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
-at **v7.12.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+at **v8.0.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
 
 | Step | Command | What it does |
 |------|---------|--------------|
@@ -377,7 +377,7 @@ at **v7.12.1** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/com
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
 Symlinks: `.claude → .agents`, `.cursor → .agents`.
 
-DWP standard: 7.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25 and 2026-11-15; skill 7.12.1, vendored 2026-11-15). Existing plans retain their recorded generation.
+DWP standard: 8.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25, 2026-11-15 and 2026-11-16; skill 8.0.1, vendored 2026-11-16 from tag commit `82bc1fd`, all 188 files byte-identical to the release `SHA256SUMS`, digest `0a49c301…`). New plans use the v8 contract (`plan-contract/v8`, loop engineering) by default; existing v7/v6/v5 plans retain their recorded generation and migrate only on an explicit request.
 
 **Flow routing.** Explicit planning requests use create; execute/resume requests
 use those flows. Status and verify stay read-only. Ordinary edits do not silently
@@ -402,22 +402,26 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 ### Herdr addon (interactive delegation)
 
-Recorded in `.dwp/config.json` as `herdr` `v2.0.0`: a plan that grants
+Recorded in `.dwp/config.json` as `herdr` `v2.1.0`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.0.0,
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.1.0,
 protocol 2, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
 `--loop`, `--notify`, the read-only `plans`/`fleet` verbs and the fleet UI
 since v1.3.0, lead appointment (`--appoint`), the opt-in autopilot brain
 (`--brain`, fail-closed on an older ak) and the plan-queue consumer
-(`.dwp/queue.json`, `dwp-queue-v1`) since v2.0.0, installed machine-level;
-pack 7.12.1's execute/resume registers open plans with the loop via
-`herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled — a purely
-local record; Dailybot notifications happen only if a human starts autopilot
-with `--notify`). Until the pack 8.0.0 refresh, the vendored pack's herdr
-descriptor still pins interface 1, so a protocol 2 install reads
-`compatible: false` — herdr stays enabled but contributes no
-`subagents`/`cancel_children` abilities until the descriptor catches up.
+(`.dwp/queue.json`, `dwp-queue-v1`) since v2.0.0, and the fleet UI views,
+a brain that is never left blocked and the v8 blocker classes since v2.1.0,
+installed machine-level). Pack 8.0's execute/resume registers open plans with
+the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled
+— a purely local record. The pack's flows are the only automated writers of
+`.dwp/queue.json` (through `shared/queue.py`); the developer or the plan's
+lead may reorder it or rename a queued plan's lead, and the daemon only reads
+it. Dailybot notifications happen only if a human starts
+autopilot with `--notify`. The vendored herdr descriptor accepts protocol 1
+and 2, so a herdr-peers 2.x install reads `compatible: true`. The loop's
+normative contract is
+[`spec/LOOP_ENGINEERING.md`](.agents/skills/deepworkplan/spec/LOOP_ENGINEERING.md).
 Pack 7.10.1 introduced decision debates
 (`decisions.debate` in `.dwp/config.json`; absent is `auto`, malformed is
 `off`) — `auto` authorizes nothing by itself: a debate also needs the herdr
