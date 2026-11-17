@@ -209,7 +209,7 @@ two seconds.
 
 ## Vendored contributor harness
 
-The contributor-only `.agents/skills/` snapshots are pinned in `skills-lock.json`: DeepWorkPlan v8.0.1 (DWP standard 8.0.0; release `SHA256SUMS` digest `0a49c301…`), AI Diff Reviewer v3.3.16, and Dailybot v3.23.18; pack vendored 2026-11-16, the companions 2026-10-14. They are installed through exact tag URLs and checked against released source bytes. These trees are separate from the consumer-facing `skills/` source. The addon registry is `.dwp/config.json`; machine availability does not by itself enable an addon.
+The contributor-only `.agents/skills/` snapshots are pinned in `skills-lock.json`: DeepWorkPlan v8.0.2 (DWP standard 8.0.0; release `SHA256SUMS` digest `332e8f9a…`), AI Diff Reviewer v3.3.16, and Dailybot v3.23.20; the pack and the Dailybot snapshot vendored 2026-11-16, AI Diff Reviewer 2026-10-14. They are installed through exact tag URLs and checked against released source bytes. These trees are separate from the consumer-facing `skills/` source. The addon registry is `.dwp/config.json`; machine availability does not by itself enable an addon.
 
 ## Project Structure
 

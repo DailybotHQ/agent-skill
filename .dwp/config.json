@@ -10,7 +10,7 @@
     },
     "dailybot": {
       "enabled": true,
-      "version": "v3.23.18"
+      "version": "v3.23.20"
     },
     "design-system": {
       "enabled": true,
@@ -22,7 +22,7 @@
     },
     "herdr": {
       "enabled": true,
-      "version": "v2.1.0"
+      "version": "v2.2.0"
     },
     "vim": {
       "enabled": false,
