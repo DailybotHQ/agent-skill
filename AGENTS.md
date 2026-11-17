@@ -412,7 +412,9 @@ since v1.3.0, lead appointment (`--appoint`), the opt-in autopilot brain
 (`--brain`, fail-closed on an older ak) and the plan-queue consumer
 (`.dwp/queue.json`, `dwp-queue-v1`) since v2.0.0, and the fleet UI views,
 a brain that is never left blocked and the v8 blocker classes since v2.1.0,
-installed machine-level). Pack 8.0's execute/resume registers open plans with
+and revive since v2.2.0 — `autopilot --loop --revive`, human-started like every
+daemon flag, launches one fresh agent for a plan whose lead and successors are
+gone, capped per plan and fleet-wide; installed machine-level). Pack 8.0's execute/resume registers open plans with
 the loop via `herdr-peers lead claim` when `HERDR_ENV=1` and herdr is enabled
 — a purely local record. The pack's flows are the only automated writers of
 `.dwp/queue.json` (through `shared/queue.py`); the developer or the plan's
