@@ -366,7 +366,7 @@ that's both validation and documentation.
 For non-trivial contributor work (multi-sub-skill changes, install-surface
 edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
 through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
-at **v8.0.3** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+at **v8.0.4** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
 
 | Step | Command | What it does |
 |------|---------|--------------|
@@ -377,7 +377,7 @@ at **v8.0.3** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/comm
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
 Symlinks: `.claude → .agents`, `.cursor → .agents`.
 
-DWP standard: 8.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25, 2026-11-15, 2026-11-16 and 2026-11-17; skill 8.0.3, vendored 2026-11-17 from tag commit `1033558`, all 188 files byte-identical to the release `SHA256SUMS`, digest `f40ebde7…`). New plans use the v8 contract (`plan-contract/v8`, loop engineering) by default; existing v7/v6/v5 plans retain their recorded generation and migrate only on an explicit request.
+DWP standard: 8.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25, 2026-11-15, 2026-11-16, 2026-11-17 and 2026-11-18; skill 8.0.4, vendored 2026-11-18 from tag commit `cb4c92c`, all 188 files byte-identical to the release `SHA256SUMS`, digest `b5b5a4f7…`). New plans use the v8 contract (`plan-contract/v8`, loop engineering) by default; existing v7/v6/v5 plans retain their recorded generation and migrate only on an explicit request.
 
 **Flow routing.** Explicit planning requests use create; execute/resume requests
 use those flows. Status and verify stay read-only. Ordinary edits do not silently
@@ -404,7 +404,7 @@ execution. Auth stays in the Dailybot skill's own consent flow.
 
 Recorded in `.dwp/config.json` as `herdr` `v2.2.1`: a plan that grants
 `agent_delegation` may hand one task to an agent in another Herdr pane with
-`herdr-peers ask <machine>:<pane> "…"` (machine install `DailybotHQ/herdr-peers` v2.2.1, while the vendored pack descriptor still pins v2.2.0 until the next pack release;
+`herdr-peers ask <machine>:<pane> "…"` (pinned `DailybotHQ/herdr-peers` v2.2.1 by the vendored pack descriptor and the machine install,
 protocol 2, native debate sub-skill since v1.1.0, autopilot since v1.2.0 — a
 daemon only a human starts, never started by a message, peer or plan —
 `--loop`, `--notify`, the read-only `plans`/`fleet` verbs and the fleet UI
