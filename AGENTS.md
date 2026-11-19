@@ -366,7 +366,7 @@ that's both validation and documentation.
 For non-trivial contributor work (multi-sub-skill changes, install-surface
 edits, anything spanning `skills/dailybot/` + tests + docs), drive the work
 through a Deep Work Plan. This repo vendors the [DWP skill pack](.agents/skills/deepworkplan/)
-at **v8.0.5** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
+at **v8.0.6** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/commands/).
 
 | Step | Command | What it does |
 |------|---------|--------------|
@@ -377,7 +377,7 @@ at **v8.0.5** plus thin `dwp-*` aliases under [`.agents/commands/`](.agents/comm
 Catalog: [`.agents/docs/skills_agents_catalog.md`](.agents/docs/skills_agents_catalog.md).
 Symlinks: `.claude → .agents`, `.cursor → .agents`.
 
-DWP standard: 8.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25, 2026-11-15, 2026-11-16, 2026-11-17, 2026-11-18 and 2026-11-19; skill 8.0.5, vendored 2026-11-19 from tag commit `edf0896`, all 188 files byte-identical to the release `SHA256SUMS`, digest `5d22f6c5…`). New plans use the v8 contract (`plan-contract/v8`, loop engineering) by default; existing v7/v6/v5 plans retain their recorded generation and migrate only on an explicit request.
+DWP standard: 8.0.0 (legacy onboarding date not recorded; upgraded 2026-10-11, 2026-10-12, 2026-10-13, 2026-10-14, 2026-10-25, 2026-11-15, 2026-11-16, 2026-11-17, 2026-11-18 and 2026-11-19; skill 8.0.6, vendored 2026-11-19 from tag commit `8b348b9`, all 188 files byte-identical to the release `SHA256SUMS`, digest `1f807e4c…`). New plans use the v8 contract (`plan-contract/v8`, loop engineering) by default; existing v7/v6/v5 plans retain their recorded generation and migrate only on an explicit request.
 
 **Flow routing.** Explicit planning requests use create; execute/resume requests
 use those flows. Status and verify stay read-only. Ordinary edits do not silently
